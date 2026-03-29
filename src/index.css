@@ -1,0 +1,127 @@
+@import "tailwindcss";
+
+@theme {
+  /* Colores personalizados de Radio América */
+  --color-inverse-surface: #e5e2e3;
+  --color-on-tertiary-container: #ffe7c4;
+  --color-on-surface: #e5e2e3;
+  --color-error-container: #93000a;
+  --color-outline: #a88987;
+  --color-surface: #131314;
+  --color-on-primary-container: #ffe4e1;
+  --color-tertiary-container: #8b6200;
+  --color-primary-fixed-dim: #ffb3ad;
+  --color-surface-container-lowest: #0e0e0f;
+  --color-on-error: #690005;
+  --color-primary-fixed: #ffdad7;
+  --color-on-tertiary-fixed-variant: #5f4100;
+  --color-surface-container-low: #1c1b1c;
+  --color-on-secondary-fixed-variant: #703700;
+  --color-surface-bright: #39393a;
+  --color-secondary: #ffb783;
+  --color-tertiary-fixed-dim: #ffba29;
+  --color-surface-container-highest: #353436;
+  --color-secondary-fixed-dim: #ffb783;
+  --color-secondary-fixed: #ffdcc5;
+  --color-surface-variant: #353436;
+  --color-tertiary: #ffba29;
+  --color-secondary-container: #ef7c00;
+  --color-on-secondary-fixed: #301400;
+  --color-on-tertiary-fixed: #271900;
+  --color-on-background: #e5e2e3;
+  --color-on-tertiary: #422c00;
+  --color-error: #ffb4ab;
+  --color-on-error-container: #ffdad6;
+  --color-inverse-primary: #b22a2c;
+  --color-on-surface-variant: #e1bebb;
+  --color-on-primary-fixed: #410004;
+  --color-primary: #ffb3ad;
+  --color-outline-variant: #59413f;
+  --color-surface-dim: #131314;
+  --color-on-secondary-container: #532700;
+  --color-surface-tint: #ffb3ad;
+  --color-on-primary: #68000a;
+  --color-surface-container: #201f20;
+  --color-primary-container: #c13535;
+  --color-tertiary-fixed: #ffdea9;
+  --color-background: #131314;
+  --color-on-secondary: #4f2500;
+  --color-surface-container-high: #2a2a2b;
+  --color-inverse-on-surface: #313031;
+  --color-on-primary-fixed-variant: #900d17;
+
+  /* Fuentes */
+  --font-headline: "Montserrat", sans-serif;
+  --font-body: "Inter", sans-serif;
+  --font-label: "Inter", sans-serif;
+}
+
+@layer base {
+  body { 
+    font-family: 'Montserrat', sans-serif; 
+    background-color: #131314; 
+    color: #DDDADB;
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
+    overflow-x: hidden;
+  }
+  ::-webkit-scrollbar {
+      width: 6px;
+  }
+  ::-webkit-scrollbar-track {
+      background: #131314;
+  }
+  ::-webkit-scrollbar-thumb {
+      background: #353436;
+      border-radius: 10px;
+  }
+}
+
+/* Clases utilitarias personalizadas usando la nueva directiva @utility */
+@utility glass-panel {
+  background: rgba(28, 27, 28, 0.7);
+  backdrop-filter: blur(20px);
+}
+@utility glass-nav { 
+  background: rgba(19, 19, 20, 0.8); 
+  backdrop-filter: blur(20px); 
+}
+@utility glass-card { 
+  background: rgba(32, 31, 32, 0.8); 
+  backdrop-filter: blur(12px); 
+}
+@utility hero-gradient { 
+  background: linear-gradient(90deg, #131314 40%, transparent 100%); 
+}
+@utility video-gradient-overlay {
+  background: linear-gradient(to right, #131314 0%, transparent 100%);
+}
+@utility cinematic-shadow {
+  box-shadow: 0 20px 50px -12px rgba(193, 53, 53, 0.15);
+}
+@utility poster-hover {
+  &:hover {
+    transform: scale(1.05) translateY(-8px);
+    box-shadow: 0 10px 30px -5px rgba(0, 0, 0, 0.5);
+  }
+}
+@utility editorial-shadow {
+  box-shadow: 0 20px 40px -15px rgba(193, 53, 53, 0.15);
+}
+@utility text-shadow-editorial { 
+  text-shadow: 0 4px 12px rgba(0,0,0,0.5); 
+}
+@utility vertical-poster { 
+  aspect-ratio: 2/3; 
+}
+@utility material-symbols-outlined { 
+  font-variation-settings: 'FILL' 0, 'wght' 400, 'GRAD' 0, 'opsz' 24; 
+  vertical-align: middle;
+}
+@utility hide-scrollbar {
+  -ms-overflow-style: none;
+  scrollbar-width: none;
+  &::-webkit-scrollbar {
+    display: none;
+  }
+}
