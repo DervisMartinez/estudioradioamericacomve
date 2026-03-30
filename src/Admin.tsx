@@ -13,6 +13,13 @@ function Admin() {
   const [newProgram, setNewProgram] = useState({ name: '', category: 'Política', thumbnail: '' });
   const [profileForm, setProfileForm] = useState(userProfile);
 
+  useEffect(() => {
+    const isAuth = localStorage.getItem('admin_auth');
+    if (isAuth !== 'true') {
+      navigate('/login');
+    }
+  }, [navigate]);
+
   // Radio Player State
   const audioRef = useRef<HTMLAudioElement>(null);
   const [isPlaying, setIsPlaying] = useState(false);
@@ -89,6 +96,11 @@ function Admin() {
     setNewProgram({ name: '', category: 'Política', thumbnail: '' });
   };
 
+  const handleLogout = () => {
+    localStorage.removeItem('admin_auth');
+    navigate('/login');
+  };
+
   const openEditModal = (video: any) => {
     setNewVideo({ title: video.title, category: video.category, thumbnail: video.thumbnail, url: video.url, description: video.description, isFeatured: video.isFeatured, isShort: video.isShort || false, programId: video.programId || '' });
     setEditingId(video.id);
@@ -152,6 +164,9 @@ function Admin() {
               <span className="text-xs font-bold text-[#DDDADB]">{userProfile.firstName} {userProfile.lastName}</span>
               <span className="text-[10px] text-[#DDDADB]/40">Super Admin</span>
             </div>
+            <button onClick={handleLogout} className="ml-auto text-[#DDDADB]/40 hover:text-[#C13535] transition-colors" title="Cerrar Sesión">
+              <span className="material-symbols-outlined">logout</span>
+            </button>
           </div>
         </div>
       </aside>

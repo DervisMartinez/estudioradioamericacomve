@@ -5,6 +5,7 @@ import './index.css'
 import App from './App.tsx'
 import Admin from './Admin.tsx'
 import Watch from './Watch.tsx'
+import Login from './Login.tsx'
 import ProgramView from './Program.tsx'
 import { VideoProvider } from './VideoContext.tsx'
 
@@ -12,6 +13,10 @@ const router = createBrowserRouter([
   {
     path: "/",
     element: <App />,
+  },
+  {
+    path: "/login",
+    element: <Login />,
   },
   {
     path: "/admin",
