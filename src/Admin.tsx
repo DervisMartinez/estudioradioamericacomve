@@ -8,9 +8,10 @@ function Admin() {
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [isProgramModalOpen, setIsProgramModalOpen] = useState(false);
   const [activeTab, setActiveTab] = useState<'dashboard' | 'library' | 'programs' | 'analytics' | 'settings'>('dashboard');
+  const [selectedProgramDetails, setSelectedProgramDetails] = useState<string | null>(null);
   const [editingId, setEditingId] = useState<string | null>(null);
   const [editingProgramId, setEditingProgramId] = useState<string | null>(null);
-  const [newVideo, setNewVideo] = useState({ title: '', category: 'Historia', thumbnail: '', url: '', description: '', isFeatured: false, isShort: false, programId: '' });
+  const [newVideo, setNewVideo] = useState({ title: '', category: 'Historia', thumbnail: '', url: '', description: '', isFeatured: false, isShort: false, isAudio: false, programId: '' });
   const [newProgram, setNewProgram] = useState({ name: '', category: '', thumbnail: '', type: 'Programa' as 'Programa' | 'Podcast', description: '', schedule: '', host: '', coverImage: '' });
   const [profileForm, setProfileForm] = useState(userProfile);
 
@@ -60,6 +61,13 @@ function Admin() {
         img.src = event.target?.result as string;
       };
       reader.readAsDataURL(file);
+    } else if (file.type.startsWith('audio/')) {
+      // Archivo de audio
+      const reader = new FileReader();
+      reader.onloadend = () => {
+        if (field === 'url') setNewVideo({ ...newVideo, url: reader.result as string, isAudio: true });
+      };
+      reader.readAsDataURL(file);
     } else {
       // Archivo de video (ADVERTENCIA: Archivos pesados fallarán al guardar en LocalStorage)
       const reader = new FileReader();
@@ -74,7 +82,7 @@ function Admin() {
     e.preventDefault();
     const videoData = {
       title: newVideo.title, category: newVideo.category, description: newVideo.description,
-      isFeatured: newVideo.isFeatured, isShort: newVideo.isShort, thumbnail: newVideo.thumbnail, 
+      isFeatured: newVideo.isFeatured, isShort: newVideo.isShort, isAudio: newVideo.isAudio, thumbnail: newVideo.thumbnail, 
       url: newVideo.url, programId: newVideo.programId, duration: '10:00'
     };
 
@@ -106,7 +114,7 @@ function Admin() {
   };
 
   const openEditModal = (video: any) => {
-    setNewVideo({ title: video.title, category: video.category, thumbnail: video.thumbnail, url: video.url, description: video.description, isFeatured: video.isFeatured, isShort: video.isShort || false, programId: video.programId || '' });
+    setNewVideo({ title: video.title, category: video.category, thumbnail: video.thumbnail, url: video.url, description: video.description, isFeatured: video.isFeatured, isShort: video.isShort || false, isAudio: video.isAudio || false, programId: video.programId || '' });
     setEditingId(video.id);
     setIsModalOpen(true);
   };
@@ -121,6 +129,10 @@ function Admin() {
   const totalViews = videos.reduce((acc, video) => acc + (video.views || 0), 0);
   const sortedByViews = [...videos].sort((a, b) => b.views - a.views);
   const mostViewed = sortedByViews.slice(0, 4); // Top 4
+
+  // Detalles del programa seleccionado
+  const activeProgramData = selectedProgramDetails ? programs.find(p => p.id === selectedProgramDetails) : null;
+  const activeProgramEpisodes = selectedProgramDetails ? videos.filter(v => v.programId === selectedProgramDetails) : [];
 
   // Extraer todas las categorías existentes para sugerirlas
   const allCategories = Array.from(new Set([...programs.map(p => p.category), ...videos.map(v => v.category)]));
@@ -140,16 +152,16 @@ function Admin() {
           <p className="text-[10px] uppercase tracking-[0.2em] text-[#DDDADB]/40 font-bold mt-1">Admin Dashboard</p>
         </div>
         <nav className="flex-1 space-y-2">
-          <button onClick={() => setActiveTab('dashboard')} className={`w-full flex items-center gap-3 px-4 py-3 rounded-lg font-bold transition-all ${activeTab === 'dashboard' ? 'bg-[#C13535] text-[#DDDADB]' : 'text-[#DDDADB]/60 hover:text-[#DDDADB] hover:bg-[#1c1b1c]'}`}>
+          <button onClick={() => { setActiveTab('dashboard'); setSelectedProgramDetails(null); }} className={`w-full flex items-center gap-3 px-4 py-3 rounded-lg font-bold transition-all ${activeTab === 'dashboard' ? 'bg-[#C13535] text-[#DDDADB]' : 'text-[#DDDADB]/60 hover:text-[#DDDADB] hover:bg-[#1c1b1c]'}`}>
             <span className="material-symbols-outlined" data-icon="dashboard">dashboard</span>
             <span className="text-sm">Dashboard</span>
           </button>
-          <button onClick={() => setActiveTab('library')} className={`w-full flex items-center gap-3 px-4 py-3 rounded-lg font-bold transition-all ${activeTab === 'library' ? 'bg-[#C13535] text-[#DDDADB]' : 'text-[#DDDADB]/60 hover:text-[#DDDADB] hover:bg-[#1c1b1c]'}`}>
+          <button onClick={() => { setActiveTab('library'); setSelectedProgramDetails(null); }} className={`w-full flex items-center gap-3 px-4 py-3 rounded-lg font-bold transition-all ${activeTab === 'library' ? 'bg-[#C13535] text-[#DDDADB]' : 'text-[#DDDADB]/60 hover:text-[#DDDADB] hover:bg-[#1c1b1c]'}`}>
             <span className="material-symbols-outlined" data-icon="video_library">video_library</span>
             <span className="text-sm">Video Library</span>
           </button>
           
-          <button onClick={() => setActiveTab('programs')} className={`w-full flex items-center gap-3 px-4 py-3 rounded-lg font-bold transition-all ${activeTab === 'programs' ? 'bg-[#C13535] text-[#DDDADB]' : 'text-[#DDDADB]/60 hover:text-[#DDDADB] hover:bg-[#1c1b1c]'}`}>
+          <button onClick={() => { setActiveTab('programs'); setSelectedProgramDetails(null); }} className={`w-full flex items-center gap-3 px-4 py-3 rounded-lg font-bold transition-all ${activeTab === 'programs' ? 'bg-[#C13535] text-[#DDDADB]' : 'text-[#DDDADB]/60 hover:text-[#DDDADB] hover:bg-[#1c1b1c]'}`}>
             <span className="material-symbols-outlined" data-icon="podcasts">podcasts</span>
             <span className="text-sm">Programas</span>
           </button>
@@ -165,7 +177,7 @@ function Admin() {
           </button>
         </nav>
         <div className="mt-auto pt-6 border-t border-[#59413f]/15">
-          <button onClick={() => { setEditingId(null); setNewVideo({ title: '', category: 'Historia', thumbnail: '', url: '', description: '', isFeatured: false, isShort: false, programId: '' }); setIsModalOpen(true); }} className="w-full bg-[#C13535] text-white py-3 rounded-xl font-bold text-sm flex items-center justify-center gap-2 hover:opacity-90 transition-opacity editorial-shadow">
+          <button onClick={() => { setEditingId(null); setNewVideo({ title: '', category: 'Historia', thumbnail: '', url: '', description: '', isFeatured: false, isShort: false, isAudio: false, programId: '' }); setIsModalOpen(true); }} className="w-full bg-[#C13535] text-white py-3 rounded-xl font-bold text-sm flex items-center justify-center gap-2 hover:opacity-90 transition-opacity editorial-shadow">
             <span className="material-symbols-outlined text-sm" data-icon="upload">upload</span>
             Upload Video
           </button>
@@ -207,7 +219,7 @@ function Admin() {
                 <button className="hover:text-[#DDDADB] transition-colors">
                   <span className="material-symbols-outlined" data-icon="help_outline">help_outline</span>
                 </button>
-                <button onClick={() => { setEditingId(null); setNewVideo({ title: '', category: 'Historia', thumbnail: '', url: '', description: '', isFeatured: false, isShort: false, programId: '' }); setIsModalOpen(true); }} className="bg-[#C13535] text-white px-5 py-2 rounded-full text-sm font-bold hover:opacity-90 active:scale-95 transition-all">
+                <button onClick={() => { setEditingId(null); setNewVideo({ title: '', category: 'Historia', thumbnail: '', url: '', description: '', isFeatured: false, isShort: false, isAudio: false, programId: selectedProgramDetails || '' }); setIsModalOpen(true); }} className="bg-[#C13535] text-white px-5 py-2 rounded-full text-sm font-bold hover:opacity-90 active:scale-95 transition-all">
                   Add New Video
                 </button>
               </div>
@@ -284,6 +296,7 @@ function Admin() {
                     <div className="absolute top-3 left-3 flex gap-2">
                       {video.isFeatured && <span className="bg-[#F07D00] text-[10px] font-bold px-2 py-1 rounded text-white uppercase tracking-wider">Destacado</span>}
                       {video.isShort && <span className="bg-[#8b6200] text-[10px] font-bold px-2 py-1 rounded text-white uppercase tracking-wider">Short</span>}
+                      {video.isAudio && <span className="bg-[#C13535] text-[10px] font-bold px-2 py-1 rounded text-white uppercase tracking-wider flex items-center gap-1"><span className="material-symbols-outlined text-[10px]">headphones</span>Audio</span>}
                       <span className="bg-[#C13535] text-[10px] font-bold px-2 py-1 rounded text-white uppercase tracking-wider">Publicado</span>
                     </div>
                     <div className="absolute bottom-3 right-3 flex items-center gap-1 bg-black/60 backdrop-blur-md px-2 py-1 rounded">
@@ -319,7 +332,7 @@ function Admin() {
           )}
 
           {/* PROGRAMS TAB */}
-          {activeTab === 'programs' && (
+          {activeTab === 'programs' && !selectedProgramDetails && (
           <section className="bg-surface-container-low rounded-3xl p-8 border border-outline-variant/10">
             <div className="flex flex-col md:flex-row justify-between items-end gap-6 mb-10">
               <div>
@@ -333,7 +346,7 @@ function Admin() {
 
             <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-5 gap-6">
               {programs.map(program => (
-                <div key={program.id} className="group cursor-pointer">
+                <div key={program.id} onClick={() => setSelectedProgramDetails(program.id)} className="group cursor-pointer">
                   <div className="relative aspect-[2/3] rounded-xl overflow-hidden mb-3 border border-outline-variant/10 group-hover:scale-105 transition-transform duration-500">
                     <img className="w-full h-full object-cover" src={program.thumbnail} alt={program.name} />
                     <div className="absolute inset-0 bg-gradient-to-t from-black via-transparent to-transparent opacity-80 group-hover:opacity-100 transition-opacity"></div>
@@ -350,6 +363,57 @@ function Admin() {
               ))}
             </div>
           </section>
+          )}
+
+          {/* PROGRAM DETAILS TAB */}
+          {activeTab === 'programs' && selectedProgramDetails && activeProgramData && (
+            <section className="space-y-6">
+              <button onClick={() => setSelectedProgramDetails(null)} className="flex items-center gap-2 text-[#DDDADB]/60 hover:text-[#F07D00] font-bold text-sm transition-colors mb-4">
+                <span className="material-symbols-outlined text-sm">arrow_back</span> Volver a Programas
+              </button>
+              
+              <div className="bg-surface-container-low rounded-3xl p-8 border border-outline-variant/10 flex flex-col md:flex-row gap-8 items-start">
+                <img src={activeProgramData.thumbnail} alt={activeProgramData.name} className="w-32 h-32 md:w-48 md:h-48 object-cover rounded-2xl shadow-xl" />
+                <div className="flex-1 space-y-4">
+                  <span className="bg-[#F07D00]/20 text-[#F07D00] px-3 py-1 rounded text-xs font-bold uppercase tracking-widest">{activeProgramData.type}</span>
+                  <h2 className="text-4xl font-black text-[#DDDADB]">{activeProgramData.name}</h2>
+                  <p className="text-[#DDDADB]/60 text-sm max-w-2xl">{activeProgramData.description || 'Sin descripción.'}</p>
+                  <div className="flex items-center gap-4 text-xs font-bold text-[#DDDADB]/40">
+                    <span>Host: {activeProgramData.host || 'N/A'}</span> • <span>Horario: {activeProgramData.schedule || 'N/A'}</span>
+                  </div>
+                  <div className="pt-4 flex gap-4">
+                    <button onClick={() => { setEditingId(null); setNewVideo({ title: '', category: activeProgramData.category, thumbnail: '', url: '', description: '', isFeatured: false, isShort: false, isAudio: false, programId: activeProgramData.id }); setIsModalOpen(true); }} className="bg-[#C13535] text-white px-5 py-2 rounded-full text-sm font-bold hover:opacity-90 active:scale-95 transition-all">Añadir Episodio (Video)</button>
+                    <button onClick={() => { setEditingId(null); setNewVideo({ title: '', category: activeProgramData.category, thumbnail: '', url: '', description: '', isFeatured: false, isShort: false, isAudio: true, programId: activeProgramData.id }); setIsModalOpen(true); }} className="bg-[#F07D00] text-black px-5 py-2 rounded-full text-sm font-bold hover:opacity-90 active:scale-95 transition-all">Añadir Episodio (Audio)</button>
+                  </div>
+                </div>
+              </div>
+
+              <h3 className="text-xl font-bold text-[#DDDADB] pt-4">Episodios de {activeProgramData.name}</h3>
+              <div className="grid grid-cols-1 bg-surface-container-low rounded-xl border border-outline-variant/10 overflow-hidden">
+                {activeProgramEpisodes.length === 0 ? (
+                  <div className="p-8 text-center text-[#DDDADB]/40 text-sm">No hay episodios aún para este programa.</div>
+                ) : (
+                  activeProgramEpisodes.map(ep => (
+                    <div key={ep.id} className="flex items-center justify-between p-4 border-b border-outline-variant/10 hover:bg-surface-container-highest transition-colors">
+                      <div className="flex items-center gap-4">
+                        <div className="w-12 h-12 rounded bg-black flex items-center justify-center text-white relative overflow-hidden">
+                          <img src={ep.thumbnail} alt="thumb" className="absolute inset-0 w-full h-full object-cover opacity-40" />
+                          <span className="material-symbols-outlined relative z-10">{ep.isAudio ? 'headphones' : 'smart_display'}</span>
+                        </div>
+                        <div>
+                          <p className="font-bold text-sm text-[#DDDADB]">{ep.title}</p>
+                          <p className="text-[10px] text-[#DDDADB]/40 uppercase tracking-wider">{ep.isAudio ? 'Audio / Podcast' : 'Video'}</p>
+                        </div>
+                      </div>
+                      <div className="flex items-center gap-3 text-[#DDDADB]/40">
+                        <button onClick={() => openEditModal(ep)} className="hover:text-white transition-colors"><span className="material-symbols-outlined text-lg">edit</span></button>
+                        <button onClick={() => deleteVideo(ep.id)} className="hover:text-[#C13535] transition-colors"><span className="material-symbols-outlined text-lg">delete</span></button>
+                      </div>
+                    </div>
+                  ))
+                )}
+              </div>
+            </section>
           )}
 
           {/* ANALYTICS TAB */}
@@ -472,6 +536,13 @@ function Admin() {
             <h3 className="text-xl font-bold text-[#DDDADB] mb-4">{editingId ? 'Editar Video' : 'Añadir Nuevo Video'}</h3>
             <form onSubmit={handleSubmit} className="space-y-4">
               <div>
+                <label className="block text-xs font-bold text-[#DDDADB]/60 mb-1">Formato de Medio</label>
+                <select value={newVideo.isAudio ? 'audio' : 'video'} onChange={e => setNewVideo({...newVideo, isAudio: e.target.value === 'audio'})} className="w-full bg-surface-container-lowest border-none rounded-lg p-3 text-sm text-[#DDDADB]">
+                  <option value="video">🎥 Video (YouTube, MP4, Reel)</option>
+                  <option value="audio">🎧 Audio / Podcast (MP3, WAV, Enlace)</option>
+                </select>
+              </div>
+              <div>
                 <label className="block text-xs font-bold text-[#DDDADB]/60 mb-1">Título</label>
                 <input required value={newVideo.title} onChange={e => setNewVideo({...newVideo, title: e.target.value})} className="w-full bg-surface-container-lowest border-none rounded-lg p-3 text-sm text-[#DDDADB]" type="text" placeholder="Ej: Entrevista Exclusiva" />
               </div>
@@ -511,12 +582,12 @@ function Admin() {
                 </div>
               </div>
               <div>
-                <label className="block text-xs font-bold text-[#DDDADB]/60 mb-1">Video (URL de YouTube/Reels o subir archivo mp4)</label>
+                <label className="block text-xs font-bold text-[#DDDADB]/60 mb-1">{newVideo.isAudio ? 'Audio (URL o subir archivo MP3)' : 'Video (URL de YouTube/Reels o subir archivo MP4)'}</label>
                 <div className="flex gap-2">
-                  <input required value={newVideo.url} onChange={e => setNewVideo({...newVideo, url: e.target.value})} className="flex-1 bg-surface-container-lowest border-none rounded-lg p-3 text-sm text-[#DDDADB]" type="text" placeholder="Enlace de YouTube o carga local 👉" />
+                  <input required value={newVideo.url} onChange={e => setNewVideo({...newVideo, url: e.target.value})} className="flex-1 bg-surface-container-lowest border-none rounded-lg p-3 text-sm text-[#DDDADB]" type="text" placeholder={newVideo.isAudio ? 'Enlace de audio o carga local 👉' : 'Enlace de YouTube o carga local 👉'} />
                   <label className="bg-surface-container-high hover:bg-surface-bright cursor-pointer px-4 py-3 rounded-lg flex items-center justify-center transition-colors shadow-sm">
                     <span className="material-symbols-outlined text-[#DDDADB]">upload_file</span>
-                    <input type="file" accept="video/*" className="hidden" onChange={(e) => handleFileUpload(e, 'url')} />
+                    <input type="file" accept={newVideo.isAudio ? "audio/*" : "video/*"} className="hidden" onChange={(e) => handleFileUpload(e, 'url')} />
                   </label>
                 </div>
               </div>

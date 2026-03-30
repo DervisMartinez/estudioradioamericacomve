@@ -49,27 +49,27 @@ export default function Watch() {
   const relatedVideos = videos.filter(v => v.id !== id).slice(0, 6);
 
   return (
-    <div className="selection:bg-tertiary selection:text-surface bg-surface text-on-surface antialiased">
+    <div className="bg-white dark:bg-[#131314] text-zinc-800 dark:text-[#e5e2e3] font-['Inter'] selection:bg-[#c13535] selection:text-white min-h-screen antialiased transition-colors duration-300">
       <audio ref={audioRef} id="radio" src="https://transmision.radioamerica.com.ve:8087/RA909FM" type="audio/mpeg" className="hidden" />
 
       {/* TopAppBar */}
-      <nav className="fixed top-0 w-full z-50 flex justify-between items-center px-8 h-20 bg-[#131314]/80 backdrop-blur-xl border-none bg-gradient-to-b from-[#131314] to-transparent">
+      <nav className="fixed top-0 w-full z-50 flex justify-between items-center px-8 h-20 bg-white/80 dark:bg-[#131314]/80 backdrop-blur-xl border-b border-zinc-200 dark:border-transparent transition-all duration-300">
         <div className="flex items-center gap-10 cursor-pointer" onClick={() => navigate('/')}>
           <div className="flex items-center gap-3 hover:scale-105 transition-transform">
             <img src="/logo_colors.png" alt="Logo" className="w-8 h-8 object-contain dark:hidden" onError={(e) => { e.currentTarget.src = 'https://ui-avatars.com/api/?name=RA&background=C13535&color=fff&rounded=true'; }} />
             <img src="/logo_blanco.png" alt="Logo" className="w-8 h-8 object-contain hidden dark:block" onError={(e) => { e.currentTarget.src = 'https://ui-avatars.com/api/?name=RA&background=C13535&color=fff&rounded=true'; }} />
-            <span className="text-2xl font-black text-[#C13535] tracking-tighter">Estudio Radio América</span>
+            <span className="text-2xl font-black text-[#C13535] dark:text-[#DDDADB] tracking-tighter font-['Montserrat']">Estudio Radio América</span>
           </div>
           <div className="hidden md:flex gap-8">
-            <button onClick={(e) => { e.stopPropagation(); navigate('/'); }} className="text-[#DDDADB] hover:text-[#F07D00] transition-colors font-medium">Inicio</button>
+            <button onClick={(e) => { e.stopPropagation(); navigate('/'); }} className="text-[#C13535] dark:text-[#DDDADB] hover:text-[#F07D00] transition-colors font-medium">Inicio</button>
             <button className="text-[#F07D00] border-b-2 border-[#F07D00] pb-1 font-medium">Reproductor</button>
           </div>
         </div>
         <div className="flex items-center gap-6">
-          <button className="hover:scale-105 transition-transform duration-200 text-[#DDDADB]">
+          <button className="hover:scale-105 transition-transform duration-200 text-[#C13535] dark:text-[#DDDADB]">
             <span className="material-symbols-outlined" data-icon="search">search</span>
           </button>
-          <button onClick={() => navigate('/admin')} className="hover:scale-105 transition-transform duration-200 text-[#DDDADB]">
+          <button onClick={() => navigate('/admin')} className="hover:scale-105 transition-transform duration-200 text-[#C13535] dark:text-[#DDDADB]">
             <span className="material-symbols-outlined" data-icon="account_circle">account_circle</span>
           </button>
         </div>
@@ -80,22 +80,22 @@ export default function Watch() {
         <section className="relative h-auto md:h-[65vh] lg:h-[75vh] min-h-[500px] flex flex-col md:flex-row items-stretch overflow-hidden border-b border-outline-variant/10">
           
           {/* Left Side: Detailed Synopsis */}
-          <div className="relative z-10 w-full md:w-[35%] p-8 md:pl-12 lg:pl-16 flex flex-col justify-center bg-gradient-to-r from-[#131314] via-[#131314] to-transparent shrink-0">
+          <div className="relative z-10 w-full md:w-[35%] p-8 md:pl-12 lg:pl-16 flex flex-col justify-center bg-gradient-to-r from-white dark:from-[#131314] via-white dark:via-[#131314] to-transparent shrink-0">
             <div className="mb-4 flex items-center gap-3">
               <span className="px-2 py-0.5 bg-primary-container text-on-primary-container text-[10px] font-bold tracking-widest uppercase rounded-sm">Premium Archive</span>
               <span className="text-tertiary text-sm font-semibold tracking-wide">● {new Date(video.createdAt).getFullYear()} Remastered</span>
             </div>
-            <h1 className="text-4xl md:text-5xl font-black leading-tight mb-6 tracking-tight text-on-background">
+            <h1 className="text-4xl md:text-5xl font-black leading-tight mb-6 tracking-tight text-[#C13535] dark:text-white font-['Montserrat']">
               {video.title}
             </h1>
-            <div className="flex items-center gap-4 text-xs font-bold text-[#DDDADB]/60 uppercase tracking-widest mb-6">
+            <div className="flex items-center gap-4 text-xs font-bold text-[#C13535]/80 dark:text-[#DDDADB]/60 uppercase tracking-widest mb-6">
               <span>{video.duration || '--:--'}</span>
-              <span className="w-1 h-1 bg-[#DDDADB]/30 rounded-full"></span>
+              <span className="w-1 h-1 bg-[#C13535]/30 dark:bg-[#DDDADB]/30 rounded-full"></span>
               <span>{new Date(video.createdAt).toLocaleDateString()}</span>
-              <span className="w-1 h-1 bg-[#DDDADB]/30 rounded-full"></span>
+              <span className="w-1 h-1 bg-[#C13535]/30 dark:bg-[#DDDADB]/30 rounded-full"></span>
               <span className="text-tertiary">{video.category}</span>
             </div>
-            <p className="text-lg text-[#DDDADB]/80 leading-relaxed mb-8 font-light max-w-md">
+            <p className="text-lg text-zinc-600 dark:text-[#DDDADB]/80 leading-relaxed mb-8 font-light max-w-md">
               {video.description || "Sin descripción disponible para este archivo."}
             </p>
             <div className="flex flex-wrap gap-4">
@@ -103,7 +103,7 @@ export default function Watch() {
                 <span className="material-symbols-outlined" style={{ fontVariationSettings: "'FILL' 1" }}>play_arrow</span>
                 Reproducir
               </button>
-              <button className="flex items-center gap-2 px-6 py-4 border border-[#DDDADB]/15 text-[#DDDADB] rounded-full font-bold hover:bg-[#DDDADB]/5 transition-all">
+              <button className="flex items-center gap-2 px-6 py-4 border border-zinc-300 dark:border-[#DDDADB]/15 text-[#C13535] dark:text-[#DDDADB] rounded-full font-bold hover:bg-zinc-100 dark:hover:bg-[#DDDADB]/5 transition-all">
                 <span className="material-symbols-outlined">add</span>
                 Mi Lista
               </button>
@@ -111,8 +111,8 @@ export default function Watch() {
           </div>
 
           {/* Right Side: Video Reproductor */}
-          <div className="relative w-full md:w-[65%] min-h-[400px] md:min-h-full bg-surface-container-lowest">
-            <div className="absolute inset-0 z-10 video-gradient-overlay hidden md:block pointer-events-none"></div>
+          <div className="relative w-full md:w-[65%] min-h-[400px] md:min-h-full bg-zinc-200 dark:bg-surface-container-lowest">
+            <div className="absolute inset-0 z-10 bg-gradient-to-r from-white dark:from-[#131314] to-transparent hidden md:block pointer-events-none"></div>
             
             {isVideoPlaying ? (
               <div className="absolute inset-0 z-20 bg-black flex items-center justify-center group/player">
@@ -169,7 +169,7 @@ export default function Watch() {
         {/* Related Content Section */}
         <section className="px-8 md:px-16 py-20">
           <div className="flex flex-col gap-2 mb-10">
-            <h2 className="text-2xl font-bold tracking-tight">Sugerencias de Temas Similares</h2>
+            <h2 className="text-2xl font-bold tracking-tight text-[#C13535] dark:text-[#DDDADB] font-['Montserrat']">Sugerencias de Temas Similares</h2>
             <div className="h-1 w-20 bg-[#F07D00]"></div>
           </div>
           <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-6 gap-6">
@@ -180,8 +180,8 @@ export default function Watch() {
                   <div className="absolute top-2 right-2 px-1.5 py-0.5 bg-black/60 backdrop-blur-md rounded text-[10px] font-bold text-white uppercase">{relVideo.category}</div>
                 </div>
                 <div>
-                  <h3 className="text-sm font-bold truncate group-hover:text-tertiary transition-colors">{relVideo.title}</h3>
-                  <p className="text-[10px] text-[#DDDADB]/50 uppercase tracking-widest">{relVideo.duration || '00:00'}</p>
+                  <h3 className="text-sm font-bold truncate text-zinc-800 dark:text-white group-hover:text-[#F07D00] transition-colors">{relVideo.title}</h3>
+                  <p className="text-[10px] text-zinc-500 dark:text-[#DDDADB]/50 uppercase tracking-widest">{relVideo.duration || '00:00'}</p>
                 </div>
               </div>
             ))}
@@ -190,7 +190,7 @@ export default function Watch() {
       </main>
 
       {/* Floating Live Player Indicator (Desktop Only) */}
-      <div className="hidden lg:flex fixed bottom-8 right-8 z-40 items-center gap-4 p-4 bg-surface-container/80 backdrop-blur-xl rounded-xl border-t-[2px] border-[#F07D00]/30 cinematic-shadow">
+      <div className="hidden lg:flex fixed bottom-8 right-8 z-40 items-center gap-4 p-4 bg-white/90 dark:bg-surface-container/80 backdrop-blur-xl rounded-xl border-t-[2px] border-[#F07D00]/30 shadow-2xl dark:cinematic-shadow">
         <div className="relative w-12 h-12 rounded-lg overflow-hidden bg-black">
           <div className="absolute inset-0 bg-primary/20 animate-pulse"></div>
         </div>
@@ -198,7 +198,7 @@ export default function Watch() {
           <span className="text-[10px] font-bold text-secondary uppercase tracking-widest flex items-center gap-1">
             <span className="w-1.5 h-1.5 bg-secondary rounded-full animate-pulse"></span> En Vivo
           </span>
-          <span className="text-sm font-bold">Estudio Radio América</span>
+          <span className="text-sm font-bold text-[#C13535] dark:text-white">Estudio Radio América</span>
         </div>
         <button onClick={toggleRadio} className="w-10 h-10 bg-[#C13535] rounded-full flex items-center justify-center text-white hover:scale-110 transition-transform">
           <span className="material-symbols-outlined text-sm" style={{ fontVariationSettings: "'FILL' 1" }}>{isRadioPlaying ? 'pause' : 'play_arrow'}</span>

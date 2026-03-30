@@ -8,6 +8,7 @@ export interface Video {
   description: string;
   isFeatured: boolean;
   isShort?: boolean;
+  isAudio?: boolean;
   url: string;
   duration: string;
   views: number;
@@ -69,6 +70,7 @@ const defaultVideos: Video[] = [
   { id: '3', title: 'Entrevista: Luis Beltrán Prieto', category: 'Personajes', description: 'Conversación exclusiva.', isFeatured: false, thumbnail: 'https://lh3.googleusercontent.com/aida-public/AB6AXuA1NXW9D5Mr4dnvF2Ig-TDmojvPKCwpMbJCJJXew2R2beArg1Q4TVmqL2Piy4m0AEFOkl_bRNtHFcKatCDrIu-DFv5L6aZ3LdoFSsC4yyzGJzSqEYvNRVZ6jjSFlbFKv-OdAtgkfUYrd0dwyAzJoU3zlwVx2CNZjzIFeaNsVX4ZUHXEvPBNwinyWL5SV6Hec019udBYtTuFuS0zxKig_p0-bG9w9uQp8Zud2HutuLw_8dB91fYFJGBhliA0HBnyxQV2ZqtNZM_LlK5i', url: 'https://youtube.com', duration: '08:22', views: 42000, createdAt: new Date(Date.now() - 432000000).toISOString(), programId: 'p3' },
   { id: '4', title: 'Estudio Radio América: 70 Años de Voz', category: 'Archivo', description: 'Aniversario de la radio.', isFeatured: false, thumbnail: 'https://lh3.googleusercontent.com/aida-public/AB6AXuCLiyfiLmE87FLSy-U_spzw2HExgvD8GzIR4kNen9tNd9f9ns8iKzhPop-SkgslKrFG_c-_O0DwXo_f1iJsnHG0--WfX8OdB_MJrNb5hr1WwejtHQF8hqxweHPNss-8eWoT3kUT8MAsaHozqsjcFrpn-QSaNOXu8hLQeqxRLZuOh4mZ-kMbvJjSPIZ2nLxeuAKWzbsozhpfuq5KmYosfmCFyFHaX2Jqn_VWmL5KppTIk9lXTDSexrpcyjTw9AcZ55rbOrnw9jylYFzn', url: 'https://youtube.com', duration: '22:00', views: 21500, createdAt: new Date(Date.now() - 864000000).toISOString(), programId: 'p4' },
   { id: '5', title: 'Resumen de Noticias en 1 minuto', category: 'Política', description: 'Lo más destacado de la semana.', isFeatured: false, isShort: true, thumbnail: 'https://images.unsplash.com/photo-1611162617474-5b21e879e113?q=80&w=400&auto=format&fit=crop', url: 'https://www.youtube.com/shorts/12345678901', duration: '0:59', views: 15400, createdAt: new Date().toISOString(), programId: 'p1' },
+  { id: '6', title: 'Episodio 42: Geopolítica Actual', category: 'Debate', description: 'Un análisis profundo sobre los cambios geopolíticos en América Latina.', isFeatured: false, isAudio: true, thumbnail: 'https://lh3.googleusercontent.com/aida-public/AB6AXuDSQ42pp_ZAh7pJurOuhWRX9wZvkt4ijE8OV6IlcvnwfUIBJ9tXuG484M_PLU6etxOhscdf495_Vo4m0kbx1ozYD_CO32Q7vtkZ0UV6KbbZOPmuvzJ1MVtSSWj29coMtsmlLnXcLB2opThYBQiJVCc4s9coU7lXpDNo65F0ic_w6oNylBz1dTbKzNBoMdDipEMisaF-QsVsqEk90bTuGS3u1MclImSH9vjHRjYRGbB5uwoRybx-YWHZvnfzrmehqzC8kDuDEpQ3tf2h', url: 'https://www.soundhelix.com/examples/mp3/SoundHelix-Song-1.mp3', duration: '45:00', views: 5600, createdAt: new Date().toISOString(), programId: 'p3' },
 ];
 
 const defaultPrograms: Program[] = [
