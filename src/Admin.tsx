@@ -15,6 +15,7 @@ function Admin() {
   const [newVideo, setNewVideo] = useState({ title: '', category: 'Historia', thumbnail: '', url: '', description: '', isFeatured: false, isShort: false, isAudio: false, programId: '' });
   const [newProgram, setNewProgram] = useState({ name: '', category: '', thumbnail: '', type: 'Programa' as 'Programa' | 'Podcast', description: '', schedule: '', host: '', coverImage: '' });
   const [profileForm, setProfileForm] = useState(userProfile);
+  const [isUploading, setIsUploading] = useState(false);
 
   useEffect(() => {
     const isAuth = localStorage.getItem('admin_auth');
@@ -62,20 +63,30 @@ function Admin() {
         img.src = event.target?.result as string;
       };
       reader.readAsDataURL(file);
-    } else if (file.type.startsWith('audio/')) {
-      // Archivo de audio
-      const reader = new FileReader();
-      reader.onloadend = () => {
-        if (field === 'url') setNewVideo({ ...newVideo, url: reader.result as string, isAudio: true });
-      };
-      reader.readAsDataURL(file);
     } else {
-      // Archivo de video (ADVERTENCIA: Archivos pesados fallarán al guardar en LocalStorage)
-      const reader = new FileReader();
-      reader.onloadend = () => {
-        if (field === 'url') setNewVideo({ ...newVideo, url: reader.result as string });
-      };
-      reader.readAsDataURL(file);
+      // Subida de video o audio en formato real hacia el backend (Soporta > 100GB)
+      if (field === 'url') {
+        const uploadMedia = async () => {
+          setIsUploading(true);
+          const formData = new FormData();
+          formData.append('file', file);
+          try {
+            const response = await fetch('/api/upload', {
+              method: 'POST',
+              body: formData // Fetch calcula el multipart/form-data automáticamente
+            });
+            if (!response.ok) throw new Error('Error de subida');
+            const data = await response.json();
+            setNewVideo({ ...newVideo, url: data.url, isAudio: file.type.startsWith('audio/') });
+            alert("✅ Archivo multimedia procesado y listo para guardar.");
+          } catch (error) {
+            alert("❌ Ocurrió un error en la carga del archivo. Intenta de nuevo.");
+          } finally {
+            setIsUploading(false);
+          }
+        };
+        uploadMedia();
+      }
     }
   };
 
@@ -602,7 +613,7 @@ function Admin() {
               </div>
               <div className="flex justify-end gap-3 mt-6">
                 <button type="button" onClick={() => setIsModalOpen(false)} className="px-4 py-2 rounded-lg text-sm font-bold text-[#DDDADB]/60 hover:text-[#DDDADB]">Cancelar</button>
-                <button type="submit" className="bg-[#C13535] text-white px-6 py-2 rounded-lg text-sm font-bold">Guardar Video</button>
+                <button type="submit" disabled={isUploading} className={`bg-[#C13535] text-white px-6 py-2 rounded-lg text-sm font-bold ${isUploading ? 'opacity-50 cursor-not-allowed' : 'hover:opacity-90 transition-all'}`}>{isUploading ? 'Subiendo...' : 'Guardar Video'}</button>
               </div>
             </form>
           </div>
