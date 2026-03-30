@@ -95,7 +95,7 @@ export default function ProgramView() {
         {/* Hero Section */}
         <section className="relative min-h-[600px] md:min-h-[870px] flex items-center overflow-hidden bg-zinc-100 dark:bg-transparent">
           <div className="absolute inset-0 z-0">
-            <img alt={program.name} className="w-full h-full object-cover object-center" style={{ maskImage: 'linear-gradient(to bottom, black 80%, transparent 100%)', WebkitMaskImage: 'linear-gradient(to bottom, black 80%, transparent 100%)' }} src={program.coverImage || program.thumbnail} />
+            <img alt={program.name} className="w-full h-full object-cover object-center" style={{ maskImage: 'linear-gradient(to bottom, black 80%, transparent 100%)', WebkitMaskImage: 'linear-gradient(to bottom, black 80%, transparent 100%)' }} src={program.coverImage || program.thumbnail || '/logo_blanco.png'} onError={(e) => { e.currentTarget.src = '/logo_blanco.png'; }} />
             <div className="absolute inset-0 bg-gradient-to-r from-white dark:from-[#131314] via-white/80 dark:via-[#131314]/80 to-transparent"></div>
             <div className="absolute inset-0 bg-gradient-to-t from-white dark:from-[#131314] via-transparent to-transparent"></div>
           </div>
@@ -209,7 +209,7 @@ export default function ProgramView() {
                   <div className="relative z-10 flex flex-col items-center">
                     
                     <div className="relative w-full aspect-square max-w-md mx-auto group">
-                      <img className={`w-full h-full object-cover rounded-2xl shadow-[0_20px_50px_rgba(0,0,0,0.5)] transition-transform duration-700 ${isPodcastPlaying ? 'scale-[1.02]' : ''}`} src={activePodcast.thumbnail} alt={activePodcast.title} />
+                      <img className={`w-full h-full object-cover rounded-2xl shadow-[0_20px_50px_rgba(0,0,0,0.5)] transition-transform duration-700 ${isPodcastPlaying ? 'scale-[1.02]' : ''}`} src={activePodcast.thumbnail || '/logo_blanco.png'} alt={activePodcast.title} onError={(e) => { e.currentTarget.src = '/logo_blanco.png'; }} />
                       <div className="absolute bottom-6 left-6 bg-black/40 backdrop-blur-md p-3 rounded-xl border border-white/10 hidden dark:block">
                         <img alt="RA Logo" className="w-10 h-10 object-contain" src="/logo_blanco.png" />
                       </div>
@@ -246,7 +246,7 @@ export default function ProgramView() {
             <div className="mt-8 grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
               {audioEpisodes.map(audio => (
                 <div key={audio.id} onClick={() => { setActivePodcastId(audio.id); setIsPodcastPlaying(true); }} className={`flex items-center gap-4 p-4 rounded-xl cursor-pointer transition-all border ${activePodcastId === audio.id ? 'bg-[#C13535]/10 border-[#C13535]/30' : 'bg-zinc-100 dark:bg-surface-container-low border-transparent hover:border-[#F07D00]/30'}`}>
-                  <img src={audio.thumbnail} alt={audio.title} className="w-12 h-12 rounded object-cover" />
+                  <img src={audio.thumbnail || '/logo_blanco.png'} alt={audio.title} className="w-12 h-12 rounded object-cover" onError={(e) => { e.currentTarget.src = '/logo_blanco.png'; }} />
                   <div className="flex-1 overflow-hidden">
                     <p className={`font-bold text-sm truncate ${activePodcastId === audio.id ? 'text-[#C13535]' : 'text-[#C13535] dark:text-[#DDDADB]'}`}>{audio.title}</p>
                     <p className="text-[10px] text-zinc-500 dark:text-[#DDDADB]/40 uppercase">{audio.duration || '00:00'}</p>
@@ -278,7 +278,7 @@ export default function ProgramView() {
               {videoEpisodes.map(video => (
                 <div key={video.id} onClick={() => navigate(`/watch/${video.id}`)} className="group relative bg-zinc-100 dark:bg-[#201f20] rounded-xl overflow-hidden transition-all duration-500 hover:scale-[1.02] hover:shadow-[0_20px_40px_rgba(193,53,53,0.15)] cursor-pointer border border-zinc-200 dark:border-transparent">
                   <div className="aspect-[16/9] relative overflow-hidden">
-                    <img alt={video.title} className="w-full h-full object-cover transition-transform duration-700 group-hover:scale-110" src={video.thumbnail} />
+                    <img alt={video.title} className="w-full h-full object-cover transition-transform duration-700 group-hover:scale-110" src={video.thumbnail || '/logo_blanco.png'} onError={(e) => { e.currentTarget.src = '/logo_blanco.png'; }} />
                     <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-transparent to-transparent opacity-60"></div>
                     <div className="absolute inset-0 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity">
                       <span className="material-symbols-outlined text-5xl text-white">play_circle</span>

@@ -30,19 +30,17 @@ export default function SearchResults({ query, onClose }: SearchResultsProps) {
       <div className="max-h-96 overflow-y-auto">
         {filteredVideos.map(video => (
           <div key={`v-${video.id}`} onClick={() => handleVideoClick(video.id)} className="flex items-center gap-4 p-4 rounded-lg hover:bg-surface-container-lowest cursor-pointer">
-            <img src={video.thumbnail} alt={video.title} className="w-20 h-12 object-cover rounded" />
+            <img src={video.thumbnail || '/logo_blanco.png'} alt={video.title} className="w-20 h-12 object-cover rounded" onError={(e) => { e.currentTarget.src = '/logo_blanco.png'; }} />
             <div>
               <p className="font-bold text-sm line-clamp-1">{video.title}</p>
-              <p className="text-xs text-[#DDDADB]/60">{video.category}</p>
             </div>
           </div>
         ))}
         {filteredPrograms.map(program => (
           <div key={`p-${program.id}`} onClick={() => handleProgramClick(program.id)} className="flex items-center gap-4 p-4 rounded-lg hover:bg-surface-container-lowest cursor-pointer">
-            <img src={program.thumbnail} alt={program.name} className="w-20 h-12 object-cover rounded" />
+            <img src={program.thumbnail || '/logo_blanco.png'} alt={program.name} className="w-20 h-12 object-cover rounded" onError={(e) => { e.currentTarget.src = '/logo_blanco.png'; }} />
             <div>
               <p className="font-bold text-sm line-clamp-1">{program.name}</p>
-              <p className="text-xs text-[#DDDADB]/60">Programa</p>
             </div>
           </div>
         ))}

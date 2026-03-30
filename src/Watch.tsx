@@ -142,7 +142,7 @@ export default function Watch() {
               </div>
             ) : (
               <div className="absolute inset-0 flex items-center justify-center">
-                <img className="w-full h-full object-cover opacity-60" alt={video.title} src={video.thumbnail} />
+                <img className="w-full h-full object-cover opacity-60" alt={video.title} src={video.thumbnail || '/logo_blanco.png'} onError={(e) => { e.currentTarget.src = '/logo_blanco.png'; }} />
                 <div className="absolute inset-0 flex items-center justify-center z-20">
                   <div className="group cursor-pointer relative" onClick={() => setIsVideoPlaying(true)}>
                     <div className="absolute -inset-8 bg-[#C13535]/20 blur-3xl rounded-full opacity-0 group-hover:opacity-100 transition-opacity duration-500"></div>
@@ -176,7 +176,7 @@ export default function Watch() {
             {relatedVideos.map(relVideo => (
               <div key={relVideo.id} onClick={() => { setIsVideoPlaying(false); navigate(`/watch/${relVideo.id}`); window.scrollTo(0,0); }} className="flex flex-col gap-3 group cursor-pointer">
                 <div className="relative aspect-[2/3] rounded-lg overflow-hidden poster-hover transition-all duration-300 border border-outline-variant/10">
-                  <img className="w-full h-full object-cover" alt={relVideo.title} src={relVideo.thumbnail} />
+                  <img className="w-full h-full object-cover" alt={relVideo.title} src={relVideo.thumbnail || '/logo_blanco.png'} onError={(e) => { e.currentTarget.src = '/logo_blanco.png'; }} />
                   <div className="absolute top-2 right-2 px-1.5 py-0.5 bg-black/60 backdrop-blur-md rounded text-[10px] font-bold text-white uppercase">{relVideo.category}</div>
                 </div>
                 <div>

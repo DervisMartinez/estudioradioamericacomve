@@ -157,7 +157,7 @@ function App() {
         {/* Hero Section: Cinematic Style */}
         <section className="relative h-[870px] w-full flex items-center overflow-hidden bg-white dark:bg-transparent">
           <div className="absolute inset-0 z-0">
-            <img alt="Radio Interview" className={`w-full h-full object-cover transition-opacity duration-1000 ${fadeClass}`} src={featuredVideo ? featuredVideo.thumbnail : "media/enconexion_pureba.webp"} />
+            <img alt="Radio Interview" className={`w-full h-full object-cover transition-opacity duration-1000 ${fadeClass}`} src={featuredVideo ? (featuredVideo.thumbnail || '/logo_blanco.png') : "media/enconexion_pureba.webp"} onError={(e) => { e.currentTarget.src = '/logo_blanco.png'; }} />
             <div className="absolute inset-0 bg-gradient-to-r from-white dark:from-surface via-white/80 dark:via-surface/80 to-transparent"></div>
             <div className="absolute inset-0 bg-gradient-to-t from-white dark:from-surface via-transparent to-transparent"></div>
           </div>
@@ -196,7 +196,7 @@ function App() {
 
             <div className="hidden md:block relative group cursor-pointer" onClick={() => featuredVideo && navigate(`/watch/${featuredVideo.id}`)}>
               <div className="aspect-video rounded-xl overflow-hidden border border-outline-variant/20 shadow-2xl relative">
-                <img alt="Video Preview" className="w-full h-full object-cover transition-transform duration-700 group-hover:scale-110" src={featuredVideo ? featuredVideo.thumbnail : "https://lh3.googleusercontent.com/aida-public/AB6AXuDEbbLF32OUk4LOEOHKzXMH2gf4_xY2yc7y1h5I3odeYcFdEpe24aAN77JaKY60XVpqqQxVNy4j5iNiRcwDxyDy5XlZViVEUEmZMt9UQayx9MXeAyRF_r9rqKlbU6HNPbrcfdk0kvbQZ9U6piQuuSA6JRG_Nfwnisb6JoCMz12QKkmIMQgZTFFoW39tQPFB_GsYmY_97TYVt3eFnXjhdRTzYEcsTEDZmcIoJVTWf2RpQ5xgW8cJB5bYchXzpH3p13fWdgB8ulz5mVvZ"} />
+                <img alt="Video Preview" className="w-full h-full object-cover transition-transform duration-700 group-hover:scale-110" src={featuredVideo ? (featuredVideo.thumbnail || '/logo_blanco.png') : "https://lh3.googleusercontent.com/aida-public/AB6AXuDEbbLF32OUk4LOEOHKzXMH2gf4_xY2yc7y1h5I3odeYcFdEpe24aAN77JaKY60XVpqqQxVNy4j5iNiRcwDxyDy5XlZViVEUEmZMt9UQayx9MXeAyRF_r9rqKlbU6HNPbrcfdk0kvbQZ9U6piQuuSA6JRG_Nfwnisb6JoCMz12QKkmIMQgZTFFoW39tQPFB_GsYmY_97TYVt3eFnXjhdRTzYEcsTEDZmcIoJVTWf2RpQ5xgW8cJB5bYchXzpH3p13fWdgB8ulz5mVvZ"} onError={(e) => { e.currentTarget.src = '/logo_blanco.png'; }} />
                 <div className="absolute inset-0 bg-black/40 flex items-center justify-center group-hover:bg-black/20 transition-colors">
                   <div className="w-20 h-20 rounded-full bg-white/10 backdrop-blur-md border border-white/30 flex items-center justify-center transform group-hover:scale-110 transition-transform">
                     <span className="material-symbols-outlined text-4xl text-white" style={{ fontVariationSettings: "'FILL' 1" }}>play_circle</span>
@@ -228,7 +228,7 @@ function App() {
               {programs.map(program => (
                 <div key={program.id} onClick={() => navigate(`/program/${program.id}`)} className="group cursor-pointer flex-none w-40 md:w-56 snap-start">
                   <div className="vertical-poster rounded-xl overflow-hidden relative border border-outline-variant/10 shadow-lg group-hover:scale-105 transition-transform duration-500">
-                    <img alt={program.name} className="w-full h-full object-cover" src={program.thumbnail} />
+                    <img alt={program.name} className="w-full h-full object-cover" src={program.thumbnail || '/logo_blanco.png'} onError={(e) => { e.currentTarget.src = '/logo_blanco.png'; }} />
                     <div className="absolute inset-0 bg-gradient-to-t from-black via-transparent to-transparent opacity-80 group-hover:opacity-100 transition-opacity"></div>
                     <div className="absolute bottom-4 left-4 right-4">
                       <p className="text-xs font-bold text-[#FFB91F] uppercase tracking-wider mb-1">{program.category}</p>
@@ -303,7 +303,7 @@ function App() {
                           </div>
                         ) : (
                           <div onClick={() => setPlayingShortId(short.id)} className="aspect-[9/16] relative rounded-xl overflow-hidden group cursor-pointer border border-zinc-200 dark:border-outline-variant/10 shadow-lg group-hover:scale-105 transition-transform">
-                            <img src={short.thumbnail} alt={short.title} className="w-full h-full object-cover opacity-80 group-hover:opacity-100 transition-opacity" />
+                            <img src={short.thumbnail || '/logo_blanco.png'} alt={short.title} className="w-full h-full object-cover opacity-80 group-hover:opacity-100 transition-opacity" onError={(e) => { e.currentTarget.src = '/logo_blanco.png'; }} />
                             <div className="absolute inset-0 bg-black/30 flex items-center justify-center group-hover:bg-black/10 transition-colors">
                               <div className="w-12 h-12 rounded-full bg-white/20 backdrop-blur-md flex items-center justify-center">
                                 <span className="material-symbols-outlined text-3xl text-white" style={{ fontVariationSettings: "'FILL' 1" }}>play_arrow</span>
@@ -327,7 +327,7 @@ function App() {
                 {categoryFeaturedVideo && (
                   <div onClick={() => navigate(`/watch/${categoryFeaturedVideo.id}`)} className="w-full bg-white/80 dark:bg-surface-container/80 backdrop-blur-md rounded-2xl overflow-hidden relative border border-zinc-200 dark:border-outline-variant/10 group cursor-pointer mb-4">
                     <div className="aspect-video relative">
-                      <img alt={categoryFeaturedVideo.title} className="w-full h-full object-cover transition-transform duration-700 group-hover:scale-105" src={categoryFeaturedVideo.thumbnail} />
+                      <img alt={categoryFeaturedVideo.title} className="w-full h-full object-cover transition-transform duration-700 group-hover:scale-105" src={categoryFeaturedVideo.thumbnail || '/logo_blanco.png'} onError={(e) => { e.currentTarget.src = '/logo_blanco.png'; }} />
                       <div className="absolute inset-0 bg-black/40 flex items-center justify-center group-hover:bg-black/20 transition-colors">
                         <span className="material-symbols-outlined text-4xl text-white drop-shadow-xl" style={{ fontVariationSettings: "'FILL' 1" }}>play_circle</span>
                       </div>

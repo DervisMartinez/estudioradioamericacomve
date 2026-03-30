@@ -183,7 +183,7 @@ function Admin() {
           </button>
           <div className="mt-6 flex items-center gap-3 px-2">
             <div className="w-10 h-10 rounded-full bg-surface-container-highest overflow-hidden border border-outline-variant/20">
-              <img className="w-full h-full object-cover" alt="Profile" src={userProfile.avatar} />
+              <img className="w-full h-full object-cover" alt="Profile" src={userProfile.avatar || '/logo_blanco.png'} onError={(e) => { e.currentTarget.src = '/logo_blanco.png'; }} />
             </div>
             <div className="flex flex-col">
               <span className="text-xs font-bold text-[#DDDADB]">{userProfile.firstName} {userProfile.lastName}</span>
@@ -291,7 +291,7 @@ function Admin() {
               {(activeTab === 'dashboard' ? mostViewed : videos).map(video => (
                 <div key={video.id} className="group cursor-pointer">
                   <div className="relative aspect-video rounded-xl overflow-hidden mb-4 bg-surface-container-highest">
-                    <img className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500" src={video.thumbnail} alt={video.title} />
+                    <img className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500" src={video.thumbnail || '/logo_blanco.png'} alt={video.title} onError={(e) => { e.currentTarget.src = '/logo_blanco.png'; }} />
                     <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-transparent to-transparent opacity-60"></div>
                     <div className="absolute top-3 left-3 flex gap-2">
                       {video.isFeatured && <span className="bg-[#F07D00] text-[10px] font-bold px-2 py-1 rounded text-white uppercase tracking-wider">Destacado</span>}
@@ -348,7 +348,7 @@ function Admin() {
               {programs.map(program => (
                 <div key={program.id} onClick={() => setSelectedProgramDetails(program.id)} className="group cursor-pointer">
                   <div className="relative aspect-[2/3] rounded-xl overflow-hidden mb-3 border border-outline-variant/10 group-hover:scale-105 transition-transform duration-500">
-                    <img className="w-full h-full object-cover" src={program.thumbnail} alt={program.name} />
+                    <img className="w-full h-full object-cover" src={program.thumbnail || '/logo_blanco.png'} alt={program.name} onError={(e) => { e.currentTarget.src = '/logo_blanco.png'; }} />
                     <div className="absolute inset-0 bg-gradient-to-t from-black via-transparent to-transparent opacity-80 group-hover:opacity-100 transition-opacity"></div>
                     <div className="absolute top-2 right-2 flex gap-2">
                       <button onClick={(e) => { e.stopPropagation(); openEditProgramModal(program); }} className="w-8 h-8 rounded-full bg-black/60 backdrop-blur-sm text-white flex items-center justify-center hover:bg-[#F07D00] transition-colors shadow-lg"><span className="material-symbols-outlined text-sm">edit</span></button>
@@ -373,7 +373,7 @@ function Admin() {
               </button>
               
               <div className="bg-surface-container-low rounded-3xl p-8 border border-outline-variant/10 flex flex-col md:flex-row gap-8 items-start">
-                <img src={activeProgramData.thumbnail} alt={activeProgramData.name} className="w-32 h-32 md:w-48 md:h-48 object-cover rounded-2xl shadow-xl" />
+                <img src={activeProgramData.thumbnail || '/logo_blanco.png'} alt={activeProgramData.name} className="w-32 h-32 md:w-48 md:h-48 object-cover rounded-2xl shadow-xl" onError={(e) => { e.currentTarget.src = '/logo_blanco.png'; }} />
                 <div className="flex-1 space-y-4">
                   <span className="bg-[#F07D00]/20 text-[#F07D00] px-3 py-1 rounded text-xs font-bold uppercase tracking-widest">{activeProgramData.type}</span>
                   <h2 className="text-4xl font-black text-[#DDDADB]">{activeProgramData.name}</h2>
@@ -397,7 +397,7 @@ function Admin() {
                     <div key={ep.id} className="flex items-center justify-between p-4 border-b border-outline-variant/10 hover:bg-surface-container-highest transition-colors">
                       <div className="flex items-center gap-4">
                         <div className="w-12 h-12 rounded bg-black flex items-center justify-center text-white relative overflow-hidden">
-                          <img src={ep.thumbnail} alt="thumb" className="absolute inset-0 w-full h-full object-cover opacity-40" />
+                          <img src={ep.thumbnail || '/logo_blanco.png'} alt="thumb" className="absolute inset-0 w-full h-full object-cover opacity-40" onError={(e) => { e.currentTarget.src = '/logo_blanco.png'; }} />
                           <span className="material-symbols-outlined relative z-10">{ep.isAudio ? 'headphones' : 'smart_display'}</span>
                         </div>
                         <div>
@@ -465,7 +465,7 @@ function Admin() {
               <h3 className="text-2xl font-bold text-[#DDDADB] mb-6">Editar Perfil</h3>
               <form onSubmit={(e) => { e.preventDefault(); updateUserProfile(profileForm); alert("Perfil actualizado"); }} className="space-y-6">
                 <div className="flex items-center gap-6 mb-8">
-                  <img src={profileForm.avatar} alt="Avatar" className="w-24 h-24 rounded-full border border-outline-variant/20 object-cover" />
+                  <img src={profileForm.avatar || '/logo_blanco.png'} alt="Avatar" className="w-24 h-24 rounded-full border border-outline-variant/20 object-cover" onError={(e) => { e.currentTarget.src = '/logo_blanco.png'; }} />
                   <div className="flex-1 space-y-2">
                     <label className="block text-xs font-bold text-[#DDDADB]/60 mb-1">Foto de Perfil (URL o subir archivo)</label>
                     <div className="flex gap-2">

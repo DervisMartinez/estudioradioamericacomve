@@ -71,7 +71,8 @@ export default function AllPrograms() {
             {programList.map(program => (
               <div key={program.id} onClick={() => navigate(`/program/${program.id}`)} className="group cursor-pointer">
                 <div className="vertical-poster rounded-xl overflow-hidden relative border border-zinc-200 dark:border-outline-variant/10 shadow-lg group-hover:scale-105 transition-transform duration-500">
-                  <img alt={program.name} className="w-full h-full object-cover" src={program.thumbnail} />
+                  <img alt={program.name} className="w-full h-full object-cover" src={program.thumbnail || '/logo_blanco.png'} onError={(e) => { e.currentTarget.src = '/logo_blanco.png'; }} />
+                  <img alt={program.name} className="w-full h-full object-cover" src={program.thumbnail || '/logo_blanco.png'} onError={(e) => { e.currentTarget.src = '/logo_blanco.png'; }} />
                   <div className="absolute inset-0 bg-gradient-to-t from-black via-transparent to-transparent opacity-80 group-hover:opacity-100 transition-opacity"></div>
                   <div className="absolute bottom-4 left-4 right-4">
                     <p className="text-[10px] font-bold text-[#FFB91F] uppercase tracking-wider mb-1">{program.category}</p>
