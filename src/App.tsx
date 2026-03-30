@@ -1,5 +1,6 @@
-import React, { useContext, useState, useRef, useEffect } from 'react'
+import { useContext, useState, useRef, useEffect } from 'react'
 import { useNavigate } from 'react-router-dom'
+import type { FormEvent, ChangeEvent } from 'react'
 import './App.css'
 import { VideoContext } from './VideoContext'
 import SearchResults from './SearchResults';
@@ -29,7 +30,7 @@ function App() {
     }
   };
 
-  const handleVolumeChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+  const handleVolumeChange = (e: ChangeEvent<HTMLInputElement>) => {
     const newVolume = parseFloat(e.target.value);
     setVolume(newVolume);
     if (audioRef.current) {
@@ -66,7 +67,7 @@ function App() {
   };
 
   // Manejador del Newsletter
-  const handleSubscribe = (e: React.FormEvent<HTMLFormElement>) => {
+  const handleSubscribe = (e: FormEvent<HTMLFormElement>) => {
     e.preventDefault();
     alert("¡Gracias por suscribirte!\n\nTe enviaremos una notificación vía correo cada vez que se suban o actualicen tus programas favoritos en el momento.");
     (e.target as HTMLFormElement).reset();
