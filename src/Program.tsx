@@ -12,6 +12,9 @@ export default function ProgramView() {
   // Filtramos solo los videos que pertenecen a este programa
   const programVideos = videos.filter(v => v.programId === id);
 
+  // Encontramos el video más reciente del programa
+  const latestVideo = programVideos.length > 0 ? programVideos[0] : null;
+
   // Lógica del reproductor de radio en vivo
   const audioRef = useRef<HTMLAudioElement>(null);
   const [isPlaying, setIsPlaying] = useState(false);
@@ -95,7 +98,7 @@ export default function ProgramView() {
               </div>
               
               <div className="flex flex-wrap gap-4">
-                <button className="bg-[#C13535] text-white px-8 py-4 rounded-full font-bold flex items-center gap-3 hover:scale-105 transition-all active:scale-95 shadow-[0_0_20px_rgba(193,53,53,0.3)]">
+                <button onClick={() => latestVideo && navigate(`/watch/${latestVideo.id}`)} className="bg-[#C13535] text-white px-8 py-4 rounded-full font-bold flex items-center gap-3 hover:scale-105 transition-all active:scale-95 shadow-[0_0_20px_rgba(193,53,53,0.3)]" disabled={!latestVideo}>
                   <span className="material-symbols-outlined" style={{ fontVariationSettings: "'FILL' 1" }}>play_arrow</span>
                   REPRODUCIR ÚLTIMO
                 </button>
