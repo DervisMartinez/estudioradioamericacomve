@@ -2,6 +2,7 @@ import { useContext, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { VideoContext } from './VideoContext';
 import SearchResults from './SearchResults';
+import { Helmet } from 'react-helmet-async';
 
 export default function AllPrograms() {
   const { programs } = useContext(VideoContext);
@@ -27,6 +28,15 @@ export default function AllPrograms() {
 
   return (
     <div className="bg-white dark:bg-[#131314] text-zinc-800 dark:text-[#DDDADB] min-h-screen transition-colors duration-300 font-['Inter'] selection:bg-[#ef7c00] selection:text-[#532700]">
+      <Helmet>
+        <title>Catálogo de Programas | Estudio Radio América</title>
+        <meta name="description" content="Explora toda nuestra parrilla, desde programas de información general hasta podcasts de nicho en Estudio Radio América." />
+        <meta property="og:title" content="Catálogo de Programas | Estudio Radio América" />
+        <meta property="og:description" content="Explora toda nuestra parrilla, desde programas de información general hasta podcasts de nicho en Estudio Radio América." />
+        <meta property="og:image" content="/logo_colors.png" />
+        <meta property="og:url" content={typeof window !== 'undefined' ? window.location.href : ''} />
+      </Helmet>
+
       {/* TopNavBar */}
       <nav className="fixed top-0 w-full z-50 bg-white/80 dark:bg-[#131314]/80 backdrop-blur-xl flex justify-between items-center px-8 h-20 shadow-sm dark:shadow-none border-b border-zinc-200 dark:border-transparent">
         <div className="flex items-center gap-12">

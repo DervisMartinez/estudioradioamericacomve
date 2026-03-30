@@ -1,6 +1,7 @@
 import { useContext, useState, useRef } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import { VideoContext } from './VideoContext';
+import { Helmet } from 'react-helmet-async';
 
 export default function ProgramView() {
   const { id } = useParams();
@@ -47,15 +48,30 @@ export default function ProgramView() {
 
   if (!program) {
     return (
-      <div className="min-h-screen bg-surface flex flex-col items-center justify-center text-[#DDDADB]">
-        <h2 className="text-2xl font-bold mb-4">Programa no encontrado</h2>
-        <button onClick={() => navigate('/')} className="bg-[#C13535] px-6 py-2 rounded-full font-bold">Volver al inicio</button>
-      </div>
+      <>
+        <Helmet>
+          <title>Programa no encontrado | Estudio Radio América</title>
+        </Helmet>
+        <div className="min-h-screen bg-surface flex flex-col items-center justify-center text-[#DDDADB]">
+          <h2 className="text-2xl font-bold mb-4">Programa no encontrado</h2>
+          <button onClick={() => navigate('/')} className="bg-[#C13535] px-6 py-2 rounded-full font-bold">Volver al inicio</button>
+        </div>
+      </>
     );
   }
 
   return (
     <div className="bg-white dark:bg-[#131314] text-zinc-800 dark:text-[#e5e2e3] font-['Inter'] selection:bg-[#c13535] selection:text-white min-h-screen flex flex-col relative overflow-x-hidden transition-colors duration-300">
+      <Helmet>
+        <title>{program.name} | Estudio Radio América</title>
+        <meta name="description" content={program.description || `Episodios y contenido exclusivo de ${program.name}`} />
+        <meta property="og:title" content={`${program.name} | Estudio Radio América`} />
+        <meta property="og:description" content={program.description || `Episodios y contenido exclusivo de ${program.name}`} />
+        <meta property="og:image" content={program.coverImage || program.thumbnail || '/logo_colors.png'} />
+        <meta property="og:url" content={typeof window !== 'undefined' ? window.location.href : ''} />
+        <meta name="twitter:card" content="summary_large_image" />
+      </Helmet>
+
       {activePodcast && <audio ref={podcastAudioRef} src={activePodcast.url} onEnded={() => setIsPodcastPlaying(false)} className="hidden" />}
 
       {/* TopAppBar */}

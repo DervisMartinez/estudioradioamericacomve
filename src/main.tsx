@@ -9,6 +9,7 @@ import Login from './Login.tsx'
 import AllPrograms from './AllPrograms.tsx'
 import ProgramView from './Program.tsx'
 import { VideoProvider } from './VideoContext.tsx'
+import { HelmetProvider } from 'react-helmet-async'
 
 const router = createBrowserRouter([
   {
@@ -39,8 +40,10 @@ const router = createBrowserRouter([
 
 createRoot(document.getElementById('root')!).render(
   <StrictMode>
-    <VideoProvider>
-      <RouterProvider router={router} />
-    </VideoProvider>
+    <HelmetProvider>
+      <VideoProvider>
+        <RouterProvider router={router} />
+      </VideoProvider>
+    </HelmetProvider>
   </StrictMode>,
 )
