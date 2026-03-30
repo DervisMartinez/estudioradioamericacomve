@@ -49,6 +49,7 @@ interface VideoContextType {
   deleteProgram: (id: string) => void;
   userProfile: UserProfile;
   updateUserProfile: (profile: UserProfile) => void;
+  incrementView: (id: string) => void;
 }
 
 export const VideoContext = createContext<VideoContextType>({
@@ -62,6 +63,7 @@ export const VideoContext = createContext<VideoContextType>({
   deleteProgram: () => {},
   userProfile: { firstName: '', lastName: '', avatar: '', bio: '', twitter: '', instagram: '' },
   updateUserProfile: () => {},
+  incrementView: () => {},
 });
 
 const API_URL = '/api';
@@ -208,8 +210,15 @@ export const VideoProvider = ({ children }: { children: ReactNode }) => {
     }
   };
 
+  const incrementView = async (id: string) => {
+    try {
+      // No necesitamos esperar la respuesta, es una acción de "dispara y olvida"
+      fetch(`${API_URL}/videos/${id}/view`, { method: 'POST' });
+    } catch (error) { console.error(error); }
+  };
+
   return (
-    <VideoContext.Provider value={{ videos, addVideo, updateVideo, deleteVideo, programs, addProgram, updateProgram, deleteProgram, userProfile, updateUserProfile }}>
+    <VideoContext.Provider value={{ videos, addVideo, updateVideo, deleteVideo, programs, addProgram, updateProgram, deleteProgram, userProfile, updateUserProfile, incrementView }}>
       {children}
     </VideoContext.Provider>
   );

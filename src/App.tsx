@@ -67,10 +67,22 @@ function App() {
   };
 
   // Manejador del Newsletter
-  const handleSubscribe = (e: FormEvent<HTMLFormElement>) => {
+  const handleSubscribe = async (e: FormEvent<HTMLFormElement>) => {
     e.preventDefault();
-    alert("¡Gracias por suscribirte!\n\nTe enviaremos una notificación vía correo cada vez que se suban o actualicen tus programas favoritos en el momento.");
-    (e.target as HTMLFormElement).reset();
+    const form = e.target as HTMLFormElement;
+    const emailInput = form.elements.namedItem('email') as HTMLInputElement;
+    try {
+      const res = await fetch('/api/subscribe', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ email: emailInput.value })
+      });
+      if (res.ok) alert("✅ ¡Gracias por suscribirte! Estás en la lista.");
+      else alert("❌ Hubo un error al procesar tu suscripción.");
+    } catch (error) {
+      alert("❌ Fallo de conexión con el servidor.");
+    }
+    form.reset();
   };
 
   // Carrusel dinámico de videos destacados
@@ -354,7 +366,7 @@ function App() {
             <h2 className="text-4xl md:text-5xl font-black tracking-tighter text-[#C13535] dark:text-on-surface">ÚNETE A LA <span className="text-[#C13535] dark:text-[#DDDADB]">COMUNIDAD</span></h2>
             <p className="text-xl text-[#C13535] dark:text-[#DDDADB]/60 max-w-2xl mx-auto">Recibe todas las últimas novedades de tus programas favoritos directamente en tu correo. Entérate al instante cuando subamos nuevo contenido.</p>
             <form onSubmit={handleSubscribe} className="flex flex-col sm:flex-row gap-4 max-w-md mx-auto">
-              <input required type="email" className="flex-1 bg-white dark:bg-surface-container-lowest border border-zinc-300 dark:border-outline-variant/20 focus:ring-2 focus:ring-[#F07D00] rounded-full px-6 py-4 text-[#C13535] dark:text-[#DDDADB] placeholder:text-[#C13535]/50 dark:placeholder:text-[#DDDADB]/30" placeholder="Tu correo electrónico" />
+              <input name="email" required type="email" className="flex-1 bg-white dark:bg-surface-container-lowest border border-zinc-300 dark:border-outline-variant/20 focus:ring-2 focus:ring-[#F07D00] rounded-full px-6 py-4 text-[#C13535] dark:text-[#DDDADB] placeholder:text-[#C13535]/50 dark:placeholder:text-[#DDDADB]/30" placeholder="Tu correo electrónico" />
               <button type="submit" className="bg-[#C13535] text-white px-8 py-4 rounded-full font-bold hover:scale-105 transition-transform active:scale-95">SUSCRIBIRME</button>
             </form>
             <p className="text-[10px] text-[#C13535]/80 dark:text-[#DDDADB]/40 uppercase tracking-widest">Al suscribirte aceptas nuestros términos y condiciones.</p>
