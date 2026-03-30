@@ -75,12 +75,15 @@ function Admin() {
               method: 'POST',
               body: formData // Fetch calcula el multipart/form-data automáticamente
             });
-            if (!response.ok) throw new Error('Error de subida');
+            if (!response.ok) {
+              const errText = await response.text();
+              throw new Error(`Código ${response.status}: ${errText.substring(0, 50)}`);
+            }
             const data = await response.json();
             setNewVideo({ ...newVideo, url: data.url, isAudio: file.type.startsWith('audio/') });
             alert("✅ Archivo multimedia procesado y listo para guardar.");
-          } catch (error) {
-            alert("❌ Ocurrió un error en la carga del archivo. Intenta de nuevo.");
+          } catch (error: any) {
+            alert(`❌ Falló la carga del archivo. Detalle: ${error.message}`);
           } finally {
             setIsUploading(false);
           }
