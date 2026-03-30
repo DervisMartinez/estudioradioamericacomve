@@ -64,7 +64,7 @@ export const VideoContext = createContext<VideoContextType>({
   updateUserProfile: () => {},
 });
 
-const API_URL = 'http://estudio.radioamerica.com.ve:3000/api';
+const API_URL = '/api';
 
 export const VideoProvider = ({ children }: { children: ReactNode }) => {
   const [videos, setVideos] = useState<Video[]>([]);
