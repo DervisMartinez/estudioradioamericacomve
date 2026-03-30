@@ -1,11 +1,11 @@
-import { useContext, useState, useRef } from 'react';
+import { useContext, useState, useRef, useEffect } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import { VideoContext } from './VideoContext';
 
 export default function Watch() {
   const { id } = useParams();
   const navigate = useNavigate();
-  const { videos } = useContext(VideoContext);
+  const { videos, incrementView } = useContext(VideoContext);
   
   const video = videos.find(v => v.id === id);
   const [isVideoPlaying, setIsVideoPlaying] = useState(false);
@@ -21,6 +21,13 @@ export default function Watch() {
       setIsRadioPlaying(!isRadioPlaying);
     }
   };
+
+  useEffect(() => {
+    // Cuando el componente se carga, incrementa la vista del video
+    if (id) {
+      incrementView(id);
+    }
+  }, [id, incrementView]);
 
   if (!video) {
     return (

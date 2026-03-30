@@ -1,6 +1,5 @@
-import { useContext } from 'react';
+import { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { VideoContext } from './VideoContext';
 
 interface SearchResultsProps {
   query: string;
@@ -8,11 +7,31 @@ interface SearchResultsProps {
 }
 
 export default function SearchResults({ query, onClose }: SearchResultsProps) {
-  const { videos, programs } = useContext(VideoContext);
   const navigate = useNavigate();
+  const [results, setResults] = useState<{ videos: any[], programs: any[] }>({ videos: [], programs: [] });
+  const [loading, setLoading] = useState(true);
 
-  const filteredVideos = videos.filter(v => v.title.toLowerCase().includes(query.toLowerCase()));
-  const filteredPrograms = programs.filter(p => p.name.toLowerCase().includes(query.toLowerCase()));
+  useEffect(() => {
+    if (query.trim().length < 3) {
+      setResults({ videos: [], programs: [] });
+      setLoading(false);
+      return;
+    }
+
+    const fetchResults = async () => {
+      setLoading(true);
+      try {
+        const res = await fetch(`/api/search?query=${encodeURIComponent(query)}`);
+        if (res.ok) setResults(await res.json());
+      } catch (error) {
+        console.error("Error en la búsqueda:", error);
+      }
+      setLoading(false);
+    };
+
+    const debounce = setTimeout(fetchResults, 300); // Espera 300ms antes de buscar
+    return () => clearTimeout(debounce);
+  }, [query]);
 
   const handleVideoClick = (id: string) => {
     navigate(`/watch/${id}`);
