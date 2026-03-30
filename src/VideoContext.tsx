@@ -24,6 +24,7 @@ export interface Program {
   description?: string;
   schedule?: string;
   host?: string;
+  coverImage?: string;
 }
 
 export interface UserProfile {

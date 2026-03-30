@@ -74,7 +74,7 @@ export default function ProgramView() {
         {/* Hero Section */}
         <section className="relative min-h-[600px] md:min-h-[870px] flex items-center overflow-hidden bg-zinc-100 dark:bg-transparent">
           <div className="absolute inset-0 z-0">
-            <img alt={program.name} className="w-full h-full object-cover object-center" style={{ maskImage: 'linear-gradient(to bottom, black 80%, transparent 100%)', WebkitMaskImage: 'linear-gradient(to bottom, black 80%, transparent 100%)' }} src={program.thumbnail} />
+            <img alt={program.name} className="w-full h-full object-cover object-center" style={{ maskImage: 'linear-gradient(to bottom, black 80%, transparent 100%)', WebkitMaskImage: 'linear-gradient(to bottom, black 80%, transparent 100%)' }} src={program.coverImage || program.thumbnail} />
             <div className="absolute inset-0 bg-gradient-to-r from-white dark:from-[#131314] via-white/80 dark:via-[#131314]/80 to-transparent"></div>
             <div className="absolute inset-0 bg-gradient-to-t from-white dark:from-[#131314] via-transparent to-transparent"></div>
           </div>

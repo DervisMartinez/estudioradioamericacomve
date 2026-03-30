@@ -11,7 +11,7 @@ function Admin() {
   const [editingId, setEditingId] = useState<string | null>(null);
   const [editingProgramId, setEditingProgramId] = useState<string | null>(null);
   const [newVideo, setNewVideo] = useState({ title: '', category: 'Historia', thumbnail: '', url: '', description: '', isFeatured: false, isShort: false, programId: '' });
-  const [newProgram, setNewProgram] = useState({ name: '', category: '', thumbnail: '', type: 'Programa' as 'Programa' | 'Podcast', description: '', schedule: '', host: '' });
+  const [newProgram, setNewProgram] = useState({ name: '', category: '', thumbnail: '', type: 'Programa' as 'Programa' | 'Podcast', description: '', schedule: '', host: '', coverImage: '' });
   const [profileForm, setProfileForm] = useState(userProfile);
 
   useEffect(() => {
@@ -33,7 +33,7 @@ function Admin() {
     }
   };
 
-  const handleFileUpload = (e: React.ChangeEvent<HTMLInputElement>, field: 'thumbnail' | 'avatar' | 'url' | 'program_thumbnail') => {
+  const handleFileUpload = (e: React.ChangeEvent<HTMLInputElement>, field: 'thumbnail' | 'avatar' | 'url' | 'program_thumbnail' | 'program_cover') => {
     const file = e.target.files?.[0];
     if (!file) return;
 
@@ -55,6 +55,7 @@ function Admin() {
           if (field === 'thumbnail') setNewVideo({ ...newVideo, thumbnail: compressedDataUrl });
           else if (field === 'avatar') setProfileForm({ ...profileForm, avatar: compressedDataUrl });
           else if (field === 'program_thumbnail') setNewProgram({ ...newProgram, thumbnail: compressedDataUrl });
+          else if (field === 'program_cover') setNewProgram({ ...newProgram, coverImage: compressedDataUrl });
         };
         img.src = event.target?.result as string;
       };
@@ -96,7 +97,7 @@ function Admin() {
       addProgram({ id: Date.now().toString(), ...newProgram });
     }
     setIsProgramModalOpen(false);
-    setNewProgram({ name: '', category: '', thumbnail: '', type: 'Programa', description: '', schedule: '', host: '' });
+    setNewProgram({ name: '', category: '', thumbnail: '', type: 'Programa', description: '', schedule: '', host: '', coverImage: '' });
   };
 
   const handleLogout = () => {
@@ -111,7 +112,7 @@ function Admin() {
   };
 
   const openEditProgramModal = (prog: any) => {
-    setNewProgram({ name: prog.name, category: prog.category, thumbnail: prog.thumbnail, type: prog.type, description: prog.description || '', schedule: prog.schedule || '', host: prog.host || '' });
+    setNewProgram({ name: prog.name, category: prog.category, thumbnail: prog.thumbnail, type: prog.type, description: prog.description || '', schedule: prog.schedule || '', host: prog.host || '', coverImage: prog.coverImage || '' });
     setEditingProgramId(prog.id);
     setIsProgramModalOpen(true);
   };
@@ -325,7 +326,7 @@ function Admin() {
                 <h3 className="text-2xl font-bold text-[#DDDADB] mb-2">Programas y Podcasts</h3>
                 <p className="text-[#DDDADB]/50 text-sm max-w-md">Administra los programas en los que se agrupan los videos.</p>
               </div>
-              <button onClick={() => { setEditingProgramId(null); setNewProgram({ name: '', category: '', thumbnail: '', type: 'Programa', description: '', schedule: '', host: '' }); setIsProgramModalOpen(true); }} className="bg-[#F07D00] text-black px-5 py-2 rounded-full text-sm font-bold hover:opacity-90 active:scale-95 transition-all">
+              <button onClick={() => { setEditingProgramId(null); setNewProgram({ name: '', category: '', thumbnail: '', type: 'Programa', description: '', schedule: '', host: '', coverImage: '' }); setIsProgramModalOpen(true); }} className="bg-[#F07D00] text-black px-5 py-2 rounded-full text-sm font-bold hover:opacity-90 active:scale-95 transition-all">
                 Añadir Programa
               </button>
             </div>
@@ -572,6 +573,16 @@ function Admin() {
                 </div>
               </div>
                   </div>
+            <div>
+              <label className="block text-xs font-bold text-[#DDDADB]/60 mb-1">Imagen de Portada Amplia (Opcional, si se omite usará el póster)</label>
+              <div className="flex gap-2">
+                <input value={newProgram.coverImage || ''} onChange={e => setNewProgram({...newProgram, coverImage: e.target.value})} className="flex-1 bg-surface-container-lowest border-none rounded-lg p-3 text-sm text-[#DDDADB]" type="text" placeholder="URL o subir imagen ancha 👉" />
+                <label className="bg-surface-container-high hover:bg-surface-bright cursor-pointer px-4 py-3 rounded-lg flex items-center justify-center transition-colors shadow-sm">
+                  <span className="material-symbols-outlined text-[#DDDADB]">upload_file</span>
+                  <input type="file" accept="image/*" className="hidden" onChange={(e) => handleFileUpload(e, 'program_cover')} />
+                </label>
+              </div>
+            </div>
                   <div>
                     <label className="block text-xs font-bold text-[#DDDADB]/60 mb-1">Sinopsis / Descripción</label>
                     <textarea required value={newProgram.description || ''} onChange={e => setNewProgram({...newProgram, description: e.target.value})} className="w-full bg-surface-container-lowest border-none rounded-lg p-3 text-sm text-[#DDDADB]" placeholder="Sinopsis del programa..."></textarea>
