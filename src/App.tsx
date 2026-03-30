@@ -4,6 +4,7 @@ import type { FormEvent, ChangeEvent } from 'react'
 import './App.css'
 import { VideoContext } from './VideoContext'
 import SearchResults from './SearchResults';
+import { Helmet } from 'react-helmet-async';
 
 function App() {
   const { videos, programs } = useContext(VideoContext);
@@ -130,6 +131,16 @@ function App() {
 
   return (
     <>
+      <Helmet>
+        <title>Estudio Radio América | Inicio</title>
+        <meta name="description" content="Descubre las historias que nunca se contaron detrás de los micrófonos de Estudio Radio América. Podcasts, entrevistas y más." />
+        <meta property="og:title" content="Estudio Radio América" />
+        <meta property="og:description" content="Descubre las historias que nunca se contaron detrás de los micrófonos de Estudio Radio América. Podcasts, entrevistas y más." />
+        <meta property="og:image" content="/logo_colors.png" />
+        <meta property="og:url" content={typeof window !== 'undefined' ? window.location.href : ''} />
+        <meta name="twitter:card" content="summary_large_image" />
+      </Helmet>
+
       <audio ref={audioRef} id="radio" src="https://transmision.radioamerica.com.ve:8087/RA909FM" className="hidden" />
 
       {/* TopNavBar */}

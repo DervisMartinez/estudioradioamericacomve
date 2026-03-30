@@ -1,6 +1,7 @@
 import { useContext, useState, useRef, useEffect } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import { VideoContext } from './VideoContext';
+import { Helmet } from 'react-helmet-async';
 
 export default function Watch() {
   const { id } = useParams();
@@ -31,10 +32,15 @@ export default function Watch() {
 
   if (!video) {
     return (
-      <div className="min-h-screen bg-surface flex flex-col items-center justify-center text-[#DDDADB]">
-        <h2 className="text-2xl font-bold mb-4">Video no encontrado</h2>
-        <button onClick={() => navigate('/')} className="bg-[#C13535] px-6 py-2 rounded-full font-bold">Volver al inicio</button>
-      </div>
+      <>
+        <Helmet>
+          <title>Video no encontrado | Estudio Radio América</title>
+        </Helmet>
+        <div className="min-h-screen bg-surface flex flex-col items-center justify-center text-[#DDDADB]">
+          <h2 className="text-2xl font-bold mb-4">Video no encontrado</h2>
+          <button onClick={() => navigate('/')} className="bg-[#C13535] px-6 py-2 rounded-full font-bold">Volver al inicio</button>
+        </div>
+      </>
     );
   }
 
@@ -57,6 +63,17 @@ export default function Watch() {
 
   return (
     <div className="bg-white dark:bg-[#131314] text-zinc-800 dark:text-[#e5e2e3] font-['Inter'] selection:bg-[#c13535] selection:text-white min-h-screen antialiased transition-colors duration-300">
+      <Helmet>
+        <title>{video.title} | Estudio Radio América</title>
+        <meta name="description" content={video.description || `Disfruta de ${video.title} en Estudio Radio América`} />
+        <meta property="og:title" content={`${video.title} | Estudio Radio América`} />
+        <meta property="og:description" content={video.description || `Disfruta de ${video.title} en Estudio Radio América`} />
+        <meta property="og:image" content={video.thumbnail || '/logo_colors.png'} />
+        <meta property="og:url" content={typeof window !== 'undefined' ? window.location.href : ''} />
+        <meta property="og:type" content="video.other" />
+        <meta name="twitter:card" content="summary_large_image" />
+      </Helmet>
+
       <audio ref={audioRef} id="radio" src="https://transmision.radioamerica.com.ve:8087/RA909FM" className="hidden" />
 
       {/* TopAppBar */}
