@@ -1,5 +1,6 @@
-import React, { useState, useContext, useRef, useEffect } from 'react';
+import { useState, useContext, useRef, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
+import type { ChangeEvent, FormEvent } from 'react';
 import { VideoContext } from './VideoContext';
 
 function Admin() {
@@ -34,7 +35,7 @@ function Admin() {
     }
   };
 
-  const handleFileUpload = (e: React.ChangeEvent<HTMLInputElement>, field: 'thumbnail' | 'avatar' | 'url' | 'program_thumbnail' | 'program_cover') => {
+  const handleFileUpload = (e: ChangeEvent<HTMLInputElement>, field: 'thumbnail' | 'avatar' | 'url' | 'program_thumbnail' | 'program_cover') => {
     const file = e.target.files?.[0];
     if (!file) return;
 
@@ -78,7 +79,7 @@ function Admin() {
     }
   };
 
-  const handleSubmit = (e: React.FormEvent) => {
+  const handleSubmit = (e: FormEvent) => {
     e.preventDefault();
     const videoData = {
       title: newVideo.title, category: newVideo.category, description: newVideo.description,
@@ -96,7 +97,7 @@ function Admin() {
     setIsModalOpen(false);
   };
 
-  const handleProgramSubmit = (e: React.FormEvent) => {
+  const handleProgramSubmit = (e: FormEvent) => {
     e.preventDefault();
     if (editingProgramId) {
       const existing = programs.find(p => p.id === editingProgramId);
