@@ -95,13 +95,33 @@ export const VideoProvider = ({ children }: { children: ReactNode }) => {
     fetchData();
   }, []);
 
+  // Función auxiliar para manejar respuestas y notificar al usuario
+  const handleResponse = async (res: Response, successMsg: string) => {
+    if (res.ok) {
+      alert(`✅ ${successMsg}`);
+      return true;
+    }
+    if (res.status === 413) {
+      alert("❌ Error: El archivo es demasiado pesado. Pídele al administrador del servidor que aumente el 'client_max_body_size' en Nginx.");
+    } else {
+      const errData = await res.json().catch(() => ({}));
+      alert(`❌ Error al guardar: ${errData.error || res.statusText}`);
+    }
+    return false;
+  };
+
   const addVideo = async (video: Video) => {
     try {
       const res = await fetch(`${API_URL}/videos`, {
         method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(video)
       });
-      if (res.ok) setVideos([video, ...videos]);
-    } catch (error) { console.error(error); }
+      if (await handleResponse(res, 'Episodio guardado exitosamente')) {
+        setVideos([video, ...videos]);
+      }
+    } catch (error) { 
+      console.error(error); 
+      alert("❌ Fallo de conexión con el servidor.");
+    }
   };
 
   const updateVideo = async (updatedVideo: Video) => {
@@ -109,16 +129,26 @@ export const VideoProvider = ({ children }: { children: ReactNode }) => {
       const res = await fetch(`${API_URL}/videos/${updatedVideo.id}`, {
         method: 'PUT', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(updatedVideo)
       });
-      if (res.ok) setVideos(videos.map(v => v.id === updatedVideo.id ? updatedVideo : v));
-    } catch (error) { console.error(error); }
+      if (await handleResponse(res, 'Episodio actualizado exitosamente')) {
+        setVideos(videos.map(v => v.id === updatedVideo.id ? updatedVideo : v));
+      }
+    } catch (error) { 
+      console.error(error); 
+      alert("❌ Fallo de conexión con el servidor.");
+    }
   };
 
   const deleteVideo = async (id: string) => {
     if(window.confirm("¿Estás seguro de que deseas eliminar este video?")) {
       try {
         const res = await fetch(`${API_URL}/videos/${id}`, { method: 'DELETE' });
-        if (res.ok) setVideos(videos.filter(v => v.id !== id));
-      } catch (error) { console.error(error); }
+        if (await handleResponse(res, 'Episodio eliminado')) {
+          setVideos(videos.filter(v => v.id !== id));
+        }
+      } catch (error) { 
+        console.error(error); 
+        alert("❌ Fallo de conexión con el servidor.");
+      }
     }
   };
 
@@ -127,8 +157,13 @@ export const VideoProvider = ({ children }: { children: ReactNode }) => {
       const res = await fetch(`${API_URL}/programs`, {
         method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(program)
       });
-      if (res.ok) setPrograms([program, ...programs]);
-    } catch (error) { console.error(error); }
+      if (await handleResponse(res, 'Programa creado exitosamente')) {
+        setPrograms([program, ...programs]);
+      }
+    } catch (error) { 
+      console.error(error); 
+      alert("❌ Fallo de conexión con el servidor.");
+    }
   };
 
   const updateProgram = async (updatedProgram: Program) => {
@@ -136,16 +171,26 @@ export const VideoProvider = ({ children }: { children: ReactNode }) => {
       const res = await fetch(`${API_URL}/programs/${updatedProgram.id}`, {
         method: 'PUT', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(updatedProgram)
       });
-      if (res.ok) setPrograms(programs.map(p => p.id === updatedProgram.id ? updatedProgram : p));
-    } catch (error) { console.error(error); }
+      if (await handleResponse(res, 'Programa actualizado')) {
+        setPrograms(programs.map(p => p.id === updatedProgram.id ? updatedProgram : p));
+      }
+    } catch (error) { 
+      console.error(error); 
+      alert("❌ Fallo de conexión con el servidor.");
+    }
   };
 
   const deleteProgram = async (id: string) => {
     if(window.confirm("¿Estás seguro de que deseas eliminar este programa?")) {
       try {
         const res = await fetch(`${API_URL}/programs/${id}`, { method: 'DELETE' });
-        if (res.ok) setPrograms(programs.filter(p => p.id !== id));
-      } catch (error) { console.error(error); }
+        if (await handleResponse(res, 'Programa eliminado')) {
+          setPrograms(programs.filter(p => p.id !== id));
+        }
+      } catch (error) { 
+        console.error(error); 
+        alert("❌ Fallo de conexión con el servidor.");
+      }
     }
   };
 
@@ -154,8 +199,13 @@ export const VideoProvider = ({ children }: { children: ReactNode }) => {
       const res = await fetch(`${API_URL}/profile`, {
         method: 'PUT', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(profile)
       });
-      if (res.ok) setUserProfile(profile);
-    } catch (error) { console.error(error); }
+      if (await handleResponse(res, 'Perfil guardado con éxito')) {
+        setUserProfile(profile);
+      }
+    } catch (error) { 
+      console.error(error); 
+      alert("❌ Fallo de conexión con el servidor.");
+    }
   };
 
   return (
