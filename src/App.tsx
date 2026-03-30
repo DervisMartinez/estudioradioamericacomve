@@ -118,6 +118,33 @@ function App() {
     nextVideo = programVideos.length > 0 ? programVideos[0] : (categoryVideos.length > 0 ? categoryVideos[0] : similarVideos[0]);
   }
 
+  // --- Lógica del Carrusel de Programas ---
+  const carouselRef = useRef<HTMLDivElement>(null);
+  const [isCarouselHovered, setIsCarouselHovered] = useState(false);
+  const PROGRAM_LIMIT = 5; // Si hay 5 o menos, se queda estático
+
+  useEffect(() => {
+    // No hacer auto-scroll si no superamos el límite o si el usuario tiene el mouse encima
+    if (programs.length <= PROGRAM_LIMIT || isCarouselHovered) return;
+
+    const scrollInterval = setInterval(() => {
+      if (carouselRef.current) {
+        const { scrollLeft, scrollWidth, clientWidth } = carouselRef.current;
+        const cardWidth = 250; // Ancho aproximado de la tarjeta + su gap (espacio)
+
+        // Si estamos en el final, volvemos al inicio suavemente
+        if (scrollLeft + clientWidth >= scrollWidth - 10) {
+          carouselRef.current.scrollTo({ left: 0, behavior: 'smooth' });
+        } else {
+          // Avanzamos una tarjeta
+          carouselRef.current.scrollBy({ left: cardWidth, behavior: 'smooth' });
+        }
+      }
+    }, 2500); // 2.5s entre cada movimiento (La velocidad de la animación nativa es de aprox 0.5s)
+
+    return () => clearInterval(scrollInterval);
+  }, [programs.length, isCarouselHovered]);
+
   // Filtra los videos que NO son destacados para la sección de abajo
   const nonFeaturedVideos = videos.filter(v => !v.isFeatured && !v.isShort);
   
@@ -248,7 +275,14 @@ function App() {
               </div>
             </div>
             
-            <div className="flex overflow-x-auto gap-6 pb-8 snap-x snap-mandatory hide-scrollbar">
+            <div 
+              ref={carouselRef}
+              onMouseEnter={() => setIsCarouselHovered(true)}
+              onMouseLeave={() => setIsCarouselHovered(false)}
+              onTouchStart={() => setIsCarouselHovered(true)}
+              onTouchEnd={() => setIsCarouselHovered(false)}
+              className="flex overflow-x-auto gap-6 pb-8 snap-x snap-mandatory hide-scrollbar scroll-smooth"
+            >
               {programs.map(program => (
                 <div key={program.id} onClick={() => navigate(`/program/${program.id}`)} className="group cursor-pointer flex-none w-40 md:w-56 snap-start">
                   <div className="vertical-poster rounded-xl overflow-hidden relative border border-outline-variant/10 shadow-lg group-hover:scale-105 transition-transform duration-500">
