@@ -67,7 +67,7 @@ export const VideoContext = createContext<VideoContextType>({
 });
 
 // Detecta si estamos en producción o local para asignar la URL correcta de la API
-const API_URL = window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1'
+const API_URL = window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1' || window.location.hostname.endsWith('.test')
   ? 'http://localhost:3000/api' // URL para tu entorno local (Asegúrate que tu backend local corra en el 3000)
   : 'http://estudio.radioamerica.com.ve/api'; // URL para tu entorno de producción
 
