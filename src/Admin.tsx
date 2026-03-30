@@ -140,7 +140,7 @@ function Admin() {
 
   return (
     <div className="text-on-surface antialiased overflow-x-hidden">
-      <audio ref={audioRef} id="radio" src="https://transmision.radioamerica.com.ve:8087/RA909FM" type="audio/mpeg" className="hidden" />
+      <audio ref={audioRef} id="radio" src="https://transmision.radioamerica.com.ve:8087/RA909FM" className="hidden" />
       
       {/* Side Navigation Shell */}
       <aside className="h-screen w-64 fixed left-0 top-0 overflow-y-auto bg-[#131314] flex flex-col p-4 border-r border-[#59413f]/15 shadow-2xl shadow-red-900/5 z-50">

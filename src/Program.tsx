@@ -1,4 +1,4 @@
-import React, { useContext, useState, useRef } from 'react';
+import { useContext, useState, useRef } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import { VideoContext } from './VideoContext';
 
@@ -18,18 +18,7 @@ export default function ProgramView() {
   const latestVideo = videoEpisodes.length > 0 ? videoEpisodes[0] : null;
   const latestAudio = audioEpisodes.length > 0 ? audioEpisodes[0] : null;
 
-  // Lógica del reproductor de radio en vivo
-  const audioRef = useRef<HTMLAudioElement>(null);
-  const [isPlaying, setIsPlaying] = useState(false);
   const [isDarkMode, setIsDarkMode] = useState(() => document.documentElement.classList.contains('dark'));
-
-  const toggleRadio = () => {
-    if (audioRef.current) {
-      if (isPlaying) audioRef.current.pause(); 
-      else audioRef.current.play();
-      setIsPlaying(!isPlaying);
-    }
-  };
 
   // Lógica del reproductor de Podcast
   const podcastAudioRef = useRef<HTMLAudioElement>(null);
@@ -67,7 +56,6 @@ export default function ProgramView() {
 
   return (
     <div className="bg-white dark:bg-[#131314] text-zinc-800 dark:text-[#e5e2e3] font-['Inter'] selection:bg-[#c13535] selection:text-white min-h-screen flex flex-col relative overflow-x-hidden transition-colors duration-300">
-      <audio ref={audioRef} id="radio" src="https://transmision.radioamerica.com.ve:8087/RA909FM" type="audio/mpeg" className="hidden" />
       {activePodcast && <audio ref={podcastAudioRef} src={activePodcast.url} onEnded={() => setIsPodcastPlaying(false)} className="hidden" />}
 
       {/* TopAppBar */}
