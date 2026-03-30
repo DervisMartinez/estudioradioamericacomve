@@ -348,7 +348,7 @@ function App() {
                             {getYoutubeId(short.url) ? (
                               <iframe className="w-full h-full relative z-10" src={`https://www.youtube.com/embed/${getYoutubeId(short.url)}?autoplay=1&rel=0`} frameBorder="0" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share" allowFullScreen></iframe>
                             ) : isDirectVideo(short.url) ? (
-                              <video className="w-full h-full object-cover relative z-10 bg-black" src={short.url} controls autoPlay playsInline></video>
+                              <video className="w-full h-full object-cover relative z-10 bg-black" src={short.url} poster={short.thumbnail || '/logo_blanco.png'} controls autoPlay playsInline preload="metadata"></video>
                             ) : (
                               <div className="w-full h-full relative z-10 flex flex-col items-center justify-center bg-zinc-200 dark:bg-surface-container-highest p-4 text-center">
                                 <span className="material-symbols-outlined text-4xl text-[#F07D00] mb-2">link</span>

@@ -149,7 +149,7 @@ export default function Watch() {
                 {ytId ? (
                   <iframe className="w-full aspect-video max-h-full relative z-10" src={`https://www.youtube.com/embed/${ytId}?autoplay=1&rel=0`} title={video.title} frameBorder="0" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share" allowFullScreen></iframe>
                 ) : isDirectVideo(video.url) ? (
-                  <video className="w-full aspect-video max-h-full relative z-10 bg-black" src={video.url} controls autoPlay playsInline></video>
+                  <video className="w-full aspect-video max-h-full relative z-10 bg-black" src={video.url} poster={video.thumbnail || '/logo_blanco.png'} controls autoPlay playsInline preload="metadata"></video>
                 ) : (
                   <div className="w-full h-full relative z-10 flex flex-col items-center justify-center bg-surface-container-highest p-8 text-center">
                      <span className="material-symbols-outlined text-6xl text-[#F07D00] mb-4">dynamic_feed</span>
