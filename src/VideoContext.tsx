@@ -21,6 +21,9 @@ export interface Program {
   category: string;
   thumbnail: string;
   type: 'Programa' | 'Podcast';
+  description?: string;
+  schedule?: string;
+  host?: string;
 }
 
 export interface UserProfile {
@@ -39,6 +42,7 @@ interface VideoContextType {
   deleteVideo: (id: string) => void;
   programs: Program[];
   addProgram: (program: Program) => void;
+  updateProgram: (program: Program) => void;
   deleteProgram: (id: string) => void;
   userProfile: UserProfile;
   updateUserProfile: (profile: UserProfile) => void;
@@ -51,6 +55,7 @@ export const VideoContext = createContext<VideoContextType>({
   deleteVideo: () => {},
   programs: [],
   addProgram: () => {},
+  updateProgram: () => {},
   deleteProgram: () => {},
   userProfile: { firstName: '', lastName: '', avatar: '', bio: '', twitter: '', instagram: '' },
   updateUserProfile: () => {},
@@ -66,10 +71,10 @@ const defaultVideos: Video[] = [
 ];
 
 const defaultPrograms: Program[] = [
-  { id: 'p1', name: 'Debate Político', category: 'Política', type: 'Programa', thumbnail: 'https://lh3.googleusercontent.com/aida-public/AB6AXuCoc1Qg5LVpdo2zL0b_cp3r14h5XkLWtxqA0JHe5UojWyBM1Fh7thbtqWkJ9Ro9gb5xZvbDCKPP0QNNFAT6Avy6nkWlm_LeI--MUfI1iLK6jORcTjlG2Xvc1BMfRk0SdT_YOaApBEVntZL-AE5MlQebs7X3z_dteoYZ0oGLIx6sVfZBYxKwKhU1jZ1SpIF93FSBHfsVo6R-LVk6IsRPERmOEILpAtJF5-beMKhPW0JYPOFRRn8Ph1ajiYPjy_CWVEDEN4BN2ctSBNHy' },
-  { id: 'p2', name: 'Visión Deportiva', category: 'Deportes', type: 'Programa', thumbnail: 'https://lh3.googleusercontent.com/aida-public/AB6AXuCSFHBkOHXCW-yTt36ZX7cWK7yAkQkLoW-QL9z3PqkSQh3auFgRzdjjImM3V2TYGi93wbm-Q5gZ3npdb9BoKXby2it5-ZPUqRGqK7VXo-u4xrMi4TB_bJdkEQ-ULERpuSr5GhXzJYBqO-YGbbAVOL3AIwWgRQwH1_XFiexnhKgTxNBUdVlk9h_BYaL-_fVJ-cwLU8DwqiLhZhNxaKcgvkbyoLXWqSCEzxyM87qTTWBy9XVbFRQzyQUYZmN5ZF5iUVo2ZvTnczUclhId' },
-  { id: 'p3', name: 'Perfiles de Éxito', category: 'Personajes', type: 'Podcast', thumbnail: 'https://lh3.googleusercontent.com/aida-public/AB6AXuClntysuUAxBYXccJnomizpFynhCyXBskKa_ZYi44oCJnKloNXdN1MhrKKu2I61Z-kA8a-FEJXdMfr3CGH7p8mPQv4S8VknfSJZ3h3L05adnate9any3ODZrJ2aGMqfWFPfBmBKQ-YQiXzjP56CcfA0_0T3-KkwekD0gCl0Oi8qMKtJi53BgawDPTcoihzkEg0Iz6BJGS7aK8OMsonBLUQmKDfe0J2E1i9xSm3ACOhNaJU4ISl3hrpRK2fcecuYGunn5OJowK1cFiBh' },
-  { id: 'p4', name: 'Cultura en la Ciudad', category: 'Cultura', type: 'Podcast', thumbnail: 'https://lh3.googleusercontent.com/aida-public/AB6AXuDQ1UK5IaQ4wkydyELExB3MHYc4uebNizWWS8JGcsV1Xk0gyXqtzBwJ40mi0XXhqHJct898q8qcgSP_ppP4lUuzxrP39f4q4HE-enHV94K_ExRnhiLtcC8KRF98UInzRHDllmAyVtSao0aEq_0XfSnCoKOgpoobFHB1cUXpYCN4-rvTXznfUhNar86Id3KXNKOD183k_9LnqMWlWftYGbAc4g1UIzMxe5JPk7AtiQPvWN-6fiHtCNZFn0Wqp9yAXhTv8_ZwIylcWB3u' },
+  { id: 'p1', name: 'Debate Político', category: 'Política', type: 'Programa', description: 'El resumen informativo más completo de la mañana.', schedule: 'Lun - Vie, 8:00 AM', host: 'Carlos Arvelo', thumbnail: 'https://lh3.googleusercontent.com/aida-public/AB6AXuCoc1Qg5LVpdo2zL0b_cp3r14h5XkLWtxqA0JHe5UojWyBM1Fh7thbtqWkJ9Ro9gb5xZvbDCKPP0QNNFAT6Avy6nkWlm_LeI--MUfI1iLK6jORcTjlG2Xvc1BMfRk0SdT_YOaApBEVntZL-AE5MlQebs7X3z_dteoYZ0oGLIx6sVfZBYxKwKhU1jZ1SpIF93FSBHfsVo6R-LVk6IsRPERmOEILpAtJF5-beMKhPW0JYPOFRRn8Ph1ajiYPjy_CWVEDEN4BN2ctSBNHy' },
+  { id: 'p2', name: 'Visión Deportiva', category: 'Deportes', type: 'Programa', description: 'Toda la pasión del deporte carabobeño.', schedule: 'Sábados, 10:00 AM', host: 'Luis Pérez', thumbnail: 'https://lh3.googleusercontent.com/aida-public/AB6AXuCSFHBkOHXCW-yTt36ZX7cWK7yAkQkLoW-QL9z3PqkSQh3auFgRzdjjImM3V2TYGi93wbm-Q5gZ3npdb9BoKXby2it5-ZPUqRGqK7VXo-u4xrMi4TB_bJdkEQ-ULERpuSr5GhXzJYBqO-YGbbAVOL3AIwWgRQwH1_XFiexnhKgTxNBUdVlk9h_BYaL-_fVJ-cwLU8DwqiLhZhNxaKcgvkbyoLXWqSCEzxyM87qTTWBy9XVbFRQzyQUYZmN5ZF5iUVo2ZvTnczUclhId' },
+  { id: 'p3', name: 'Perfiles de Éxito', category: 'Personajes', type: 'Podcast', description: 'Entrevistas que desafían el pensamiento.', schedule: 'Bajo Demanda', host: 'María Gómez', thumbnail: 'https://lh3.googleusercontent.com/aida-public/AB6AXuClntysuUAxBYXccJnomizpFynhCyXBskKa_ZYi44oCJnKloNXdN1MhrKKu2I61Z-kA8a-FEJXdMfr3CGH7p8mPQv4S8VknfSJZ3h3L05adnate9any3ODZrJ2aGMqfWFPfBmBKQ-YQiXzjP56CcfA0_0T3-KkwekD0gCl0Oi8qMKtJi53BgawDPTcoihzkEg0Iz6BJGS7aK8OMsonBLUQmKDfe0J2E1i9xSm3ACOhNaJU4ISl3hrpRK2fcecuYGunn5OJowK1cFiBh' },
+  { id: 'p4', name: 'Cultura en la Ciudad', category: 'Cultura', type: 'Podcast', description: 'Un recorrido por los ritmos de nuestra región.', schedule: 'Bajo Demanda', host: 'Ana Torres', thumbnail: 'https://lh3.googleusercontent.com/aida-public/AB6AXuDQ1UK5IaQ4wkydyELExB3MHYc4uebNizWWS8JGcsV1Xk0gyXqtzBwJ40mi0XXhqHJct898q8qcgSP_ppP4lUuzxrP39f4q4HE-enHV94K_ExRnhiLtcC8KRF98UInzRHDllmAyVtSao0aEq_0XfSnCoKOgpoobFHB1cUXpYCN4-rvTXznfUhNar86Id3KXNKOD183k_9LnqMWlWftYGbAc4g1UIzMxe5JPk7AtiQPvWN-6fiHtCNZFn0Wqp9yAXhTv8_ZwIylcWB3u' },
 ];
 
 // Lector a prueba de fallos (Evita pantallas blancas)
@@ -138,6 +143,12 @@ export const VideoProvider = ({ children }: { children: ReactNode }) => {
     safeStorageSet('radio_programs', newPrograms);
   };
 
+  const updateProgram = (updatedProgram: Program) => {
+    const newPrograms = programs.map(p => p.id === updatedProgram.id ? updatedProgram : p);
+    setPrograms(newPrograms);
+    safeStorageSet('radio_programs', newPrograms);
+  };
+
   const deleteProgram = (id: string) => {
     if(window.confirm("¿Estás seguro de que deseas eliminar este programa?")) {
       const newPrograms = programs.filter(p => p.id !== id);
@@ -152,7 +163,7 @@ export const VideoProvider = ({ children }: { children: ReactNode }) => {
   };
 
   return (
-    <VideoContext.Provider value={{ videos, addVideo, updateVideo, deleteVideo, programs, addProgram, deleteProgram, userProfile, updateUserProfile }}>
+    <VideoContext.Provider value={{ videos, addVideo, updateVideo, deleteVideo, programs, addProgram, updateProgram, deleteProgram, userProfile, updateUserProfile }}>
       {children}
     </VideoContext.Provider>
   );

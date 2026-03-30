@@ -3,14 +3,15 @@ import { useNavigate } from 'react-router-dom';
 import { VideoContext } from './VideoContext';
 
 function Admin() {
-  const { videos, addVideo, updateVideo, deleteVideo, programs, addProgram, deleteProgram, userProfile, updateUserProfile } = useContext(VideoContext);
+  const { videos, addVideo, updateVideo, deleteVideo, programs, addProgram, updateProgram, deleteProgram, userProfile, updateUserProfile } = useContext(VideoContext);
   const navigate = useNavigate();
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [isProgramModalOpen, setIsProgramModalOpen] = useState(false);
   const [activeTab, setActiveTab] = useState<'dashboard' | 'library' | 'programs' | 'analytics' | 'settings'>('dashboard');
   const [editingId, setEditingId] = useState<string | null>(null);
+  const [editingProgramId, setEditingProgramId] = useState<string | null>(null);
   const [newVideo, setNewVideo] = useState({ title: '', category: 'Historia', thumbnail: '', url: '', description: '', isFeatured: false, isShort: false, programId: '' });
-  const [newProgram, setNewProgram] = useState({ name: '', category: '', thumbnail: '', type: 'Programa' as 'Programa' | 'Podcast' });
+  const [newProgram, setNewProgram] = useState({ name: '', category: '', thumbnail: '', type: 'Programa' as 'Programa' | 'Podcast', description: '', schedule: '', host: '' });
   const [profileForm, setProfileForm] = useState(userProfile);
 
   useEffect(() => {
@@ -88,12 +89,14 @@ function Admin() {
 
   const handleProgramSubmit = (e: React.FormEvent) => {
     e.preventDefault();
-    addProgram({
-      id: Date.now().toString(),
-      ...newProgram
-    });
+    if (editingProgramId) {
+      const existing = programs.find(p => p.id === editingProgramId);
+      updateProgram({ ...existing!, ...newProgram });
+    } else {
+      addProgram({ id: Date.now().toString(), ...newProgram });
+    }
     setIsProgramModalOpen(false);
-    setNewProgram({ name: '', category: '', thumbnail: '', type: 'Programa' });
+    setNewProgram({ name: '', category: '', thumbnail: '', type: 'Programa', description: '', schedule: '', host: '' });
   };
 
   const handleLogout = () => {
@@ -105,6 +108,12 @@ function Admin() {
     setNewVideo({ title: video.title, category: video.category, thumbnail: video.thumbnail, url: video.url, description: video.description, isFeatured: video.isFeatured, isShort: video.isShort || false, programId: video.programId || '' });
     setEditingId(video.id);
     setIsModalOpen(true);
+  };
+
+  const openEditProgramModal = (prog: any) => {
+    setNewProgram({ name: prog.name, category: prog.category, thumbnail: prog.thumbnail, type: prog.type, description: prog.description || '', schedule: prog.schedule || '', host: prog.host || '' });
+    setEditingProgramId(prog.id);
+    setIsProgramModalOpen(true);
   };
 
   // Métricas calculadas en tiempo real basadas en el contexto
@@ -316,7 +325,7 @@ function Admin() {
                 <h3 className="text-2xl font-bold text-[#DDDADB] mb-2">Programas y Podcasts</h3>
                 <p className="text-[#DDDADB]/50 text-sm max-w-md">Administra los programas en los que se agrupan los videos.</p>
               </div>
-              <button onClick={() => setIsProgramModalOpen(true)} className="bg-[#F07D00] text-black px-5 py-2 rounded-full text-sm font-bold hover:opacity-90 active:scale-95 transition-all">
+              <button onClick={() => { setEditingProgramId(null); setNewProgram({ name: '', category: '', thumbnail: '', type: 'Programa', description: '', schedule: '', host: '' }); setIsProgramModalOpen(true); }} className="bg-[#F07D00] text-black px-5 py-2 rounded-full text-sm font-bold hover:opacity-90 active:scale-95 transition-all">
                 Añadir Programa
               </button>
             </div>
@@ -327,8 +336,9 @@ function Admin() {
                   <div className="relative aspect-[2/3] rounded-xl overflow-hidden mb-3 border border-outline-variant/10 group-hover:scale-105 transition-transform duration-500">
                     <img className="w-full h-full object-cover" src={program.thumbnail} alt={program.name} />
                     <div className="absolute inset-0 bg-gradient-to-t from-black via-transparent to-transparent opacity-80 group-hover:opacity-100 transition-opacity"></div>
-                    <div className="absolute top-2 right-2 text-white/50 hover:text-[#C13535] transition-colors" onClick={(e) => { e.stopPropagation(); deleteProgram(program.id); }}>
-                      <span className="material-symbols-outlined text-sm">delete</span>
+                    <div className="absolute top-2 right-2 flex gap-2">
+                      <button onClick={(e) => { e.stopPropagation(); openEditProgramModal(program); }} className="w-8 h-8 rounded-full bg-black/60 backdrop-blur-sm text-white flex items-center justify-center hover:bg-[#F07D00] transition-colors shadow-lg"><span className="material-symbols-outlined text-sm">edit</span></button>
+                      <button onClick={(e) => { e.stopPropagation(); deleteProgram(program.id); }} className="w-8 h-8 rounded-full bg-black/60 backdrop-blur-sm text-white flex items-center justify-center hover:bg-[#C13535] transition-colors shadow-lg"><span className="material-symbols-outlined text-sm">delete</span></button>
                     </div>
                     <div className="absolute bottom-4 left-4 right-4">
                       <p className="text-[10px] font-bold text-[#FFB91F] uppercase tracking-wider mb-1">{program.category}</p>
@@ -529,9 +539,10 @@ function Admin() {
       {/* Modal para Añadir Programa */}
       {isProgramModalOpen && (
         <div className="fixed inset-0 z-[100] bg-black/80 backdrop-blur-sm flex items-center justify-center p-4">
-          <div className="bg-surface-container rounded-2xl p-6 w-full max-w-md border border-outline-variant/20 shadow-2xl">
-            <h3 className="text-xl font-bold text-[#DDDADB] mb-4">Añadir Programa o Podcast</h3>
+          <div className="bg-surface-container rounded-2xl p-6 w-full max-w-2xl border border-outline-variant/20 shadow-2xl">
+            <h3 className="text-xl font-bold text-[#DDDADB] mb-4">{editingProgramId ? 'Editar Programa' : 'Añadir Programa o Podcast'}</h3>
             <form onSubmit={handleProgramSubmit} className="space-y-4">
+             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
               <div>
                 <label className="block text-xs font-bold text-[#DDDADB]/60 mb-1">Nombre del Programa</label>
                 <input required value={newProgram.name} onChange={e => setNewProgram({...newProgram, name: e.target.value})} className="w-full bg-surface-container-lowest border-none rounded-lg p-3 text-sm text-[#DDDADB]" type="text" placeholder="Ej: Visión Deportiva" />
@@ -560,6 +571,21 @@ function Admin() {
                   </label>
                 </div>
               </div>
+                  </div>
+                  <div>
+                    <label className="block text-xs font-bold text-[#DDDADB]/60 mb-1">Sinopsis / Descripción</label>
+                    <textarea required value={newProgram.description || ''} onChange={e => setNewProgram({...newProgram, description: e.target.value})} className="w-full bg-surface-container-lowest border-none rounded-lg p-3 text-sm text-[#DDDADB]" placeholder="Sinopsis del programa..."></textarea>
+                  </div>
+                  <div className="grid grid-cols-2 gap-4">
+                    <div>
+                      <label className="block text-xs font-bold text-[#DDDADB]/60 mb-1">Host / Presentador</label>
+                      <input required value={newProgram.host || ''} onChange={e => setNewProgram({...newProgram, host: e.target.value})} className="w-full bg-surface-container-lowest border-none rounded-lg p-3 text-sm text-[#DDDADB]" type="text" placeholder="Ej: Carlos Arvelo" />
+                    </div>
+                    <div>
+                      <label className="block text-xs font-bold text-[#DDDADB]/60 mb-1">Horario</label>
+                      <input required value={newProgram.schedule || ''} onChange={e => setNewProgram({...newProgram, schedule: e.target.value})} className="w-full bg-surface-container-lowest border-none rounded-lg p-3 text-sm text-[#DDDADB]" type="text" placeholder="Ej: Lun - Vie, 8:00 AM" />
+                    </div>
+                  </div>
               <div className="flex justify-end gap-3 mt-6">
                 <button type="button" onClick={() => setIsProgramModalOpen(false)} className="px-4 py-2 rounded-lg text-sm font-bold text-[#DDDADB]/60 hover:text-[#DDDADB]">Cancelar</button>
                 <button type="submit" className="bg-[#F07D00] text-black px-6 py-2 rounded-lg text-sm font-bold">Guardar Programa</button>

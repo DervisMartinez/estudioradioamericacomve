@@ -15,12 +15,24 @@ export default function ProgramView() {
   // Lógica del reproductor de radio en vivo
   const audioRef = useRef<HTMLAudioElement>(null);
   const [isPlaying, setIsPlaying] = useState(false);
+  const [isDarkMode, setIsDarkMode] = useState(() => document.documentElement.classList.contains('dark'));
 
   const toggleRadio = () => {
     if (audioRef.current) {
       if (isPlaying) audioRef.current.pause(); 
       else audioRef.current.play();
       setIsPlaying(!isPlaying);
+    }
+  };
+
+  const toggleTheme = () => {
+    const html = document.documentElement;
+    if (isDarkMode) {
+      html.classList.remove('dark');
+      setIsDarkMode(false);
+    } else {
+      html.classList.add('dark');
+      setIsDarkMode(true);
     }
   };
 
@@ -34,84 +46,153 @@ export default function ProgramView() {
   }
 
   return (
-    <div className="selection:bg-tertiary selection:text-surface bg-surface text-on-surface antialiased min-h-screen flex flex-col">
+    <div className="bg-white dark:bg-[#131314] text-zinc-800 dark:text-[#e5e2e3] font-['Inter'] selection:bg-[#c13535] selection:text-white min-h-screen flex flex-col relative overflow-x-hidden transition-colors duration-300">
       <audio ref={audioRef} id="radio" src="https://transmision.radioamerica.com.ve:8087/RA909FM" type="audio/mpeg" className="hidden" />
 
-      {/* Navegación superior */}
-      <nav className="fixed top-0 w-full z-50 flex justify-between items-center px-8 h-20 bg-[#131314]/80 backdrop-blur-xl border-none bg-gradient-to-b from-[#131314] to-transparent">
-        <div className="flex items-center gap-10 cursor-pointer" onClick={() => navigate('/')}>
-          <div className="flex items-center gap-3 hover:scale-105 transition-transform">
-            <img src="/logo_colors.png" alt="Logo" className="w-8 h-8 object-contain dark:hidden" onError={(e) => { e.currentTarget.src = 'https://ui-avatars.com/api/?name=RA&background=C13535&color=fff&rounded=true'; }} />
-            <img src="/logo_blanco.png" alt="Logo" className="w-8 h-8 object-contain hidden dark:block" onError={(e) => { e.currentTarget.src = 'https://ui-avatars.com/api/?name=RA&background=C13535&color=fff&rounded=true'; }} />
-            <span className="text-2xl font-black text-[#C13535] tracking-tighter">Estudio Radio América</span>
+      {/* TopAppBar */}
+      <header className="fixed top-0 w-full z-50 bg-white/80 dark:bg-[#131314]/80 backdrop-blur-xl border-b border-zinc-200 dark:border-transparent transition-all duration-300">
+        <div className="flex justify-between items-center px-6 py-4 w-full max-w-screen-2xl mx-auto">
+          <div className="flex items-center gap-8">
+            <div className="flex items-center gap-3 cursor-pointer" onClick={() => navigate('/')}>
+              <img src="/logo_colors.png" alt="Logo" className="w-8 h-8 object-contain dark:hidden" onError={(e) => { e.currentTarget.src = 'https://ui-avatars.com/api/?name=RA&background=C13535&color=fff&rounded=true'; }} />
+              <img src="/logo_blanco.png" alt="Logo" className="w-8 h-8 object-contain hidden dark:block" onError={(e) => { e.currentTarget.src = 'https://ui-avatars.com/api/?name=RA&background=C13535&color=fff&rounded=true'; }} />
+              <span className="text-2xl font-black text-[#C13535] dark:text-[#DDDADB] tracking-tighter font-['Montserrat']">Estudio Radio América</span>
+            </div>
+            <nav className="hidden md:flex items-center gap-6">
+              <button onClick={() => navigate('/')} className="text-[#C13535] dark:text-[#DDDADB] hover:text-[#F07D00] transition-colors font-['Montserrat'] font-bold tracking-tight">Inicio</button>
+              <button onClick={() => window.open('/programas', '_blank')} className="text-[#C13535] dark:text-[#DDDADB] hover:text-[#F07D00] transition-colors font-['Montserrat'] font-bold tracking-tight">Programas</button>
+            </nav>
+          </div>
+          <div className="flex items-center gap-4">
+            <button onClick={toggleTheme} className="material-symbols-outlined text-[#C13535] dark:text-[#DDDADB] hover:scale-105 transition-transform">{isDarkMode ? 'light_mode' : 'dark_mode'}</button>
+            <button onClick={() => navigate('/admin')} className="material-symbols-outlined text-[#C13535] dark:text-[#DDDADB] hover:scale-105 transition-transform">account_circle</button>
           </div>
         </div>
-        <button onClick={() => navigate('/')} className="text-[#DDDADB] font-bold text-sm hover:text-[#F07D00] transition-colors">
-          Volver al Inicio
-        </button>
-      </nav>
+      </header>
 
-      <main className="pt-24 px-8 md:px-16 flex-1 max-w-7xl mx-auto w-full pb-32">
-        {/* Encabezado del Programa */}
-        <div className="flex flex-col md:flex-row items-start gap-12 border-b border-outline-variant/15 pb-16 pt-8">
-          <div className="w-48 md:w-64 flex-none aspect-[2/3] rounded-2xl overflow-hidden shadow-2xl cinematic-shadow border border-outline-variant/20">
-            <img src={program.thumbnail} alt={program.name} className="w-full h-full object-cover" />
+      <main className="relative pt-16 flex-1">
+        {/* Hero Section */}
+        <section className="relative min-h-[600px] md:min-h-[870px] flex items-center overflow-hidden bg-zinc-100 dark:bg-transparent">
+          <div className="absolute inset-0 z-0">
+            <img alt={program.name} className="w-full h-full object-cover object-center" style={{ maskImage: 'linear-gradient(to bottom, black 80%, transparent 100%)', WebkitMaskImage: 'linear-gradient(to bottom, black 80%, transparent 100%)' }} src={program.thumbnail} />
+            <div className="absolute inset-0 bg-gradient-to-r from-white dark:from-[#131314] via-white/80 dark:via-[#131314]/80 to-transparent"></div>
+            <div className="absolute inset-0 bg-gradient-to-t from-white dark:from-[#131314] via-transparent to-transparent"></div>
           </div>
-          <div className="flex flex-col pt-4">
-            <span className="bg-[#F07D00]/20 text-[#F07D00] px-3 py-1 rounded text-xs font-bold uppercase tracking-widest w-max mb-4 border border-[#F07D00]/30">
-              {program.category}
-            </span>
-            <h1 className="text-5xl md:text-6xl font-black tracking-tighter text-[#DDDADB] leading-tight mb-4">
-              {program.name}
-            </h1>
-            <p className="text-lg text-[#DDDADB]/60 max-w-2xl mb-8 leading-relaxed">
-              Explora todos los episodios, entrevistas y contenido exclusivo perteneciente a este programa. Sumérgete en el archivo de Estudio Radio América.
-            </p>
-            <div className="flex items-center gap-6 text-sm font-bold text-[#DDDADB]/40 uppercase tracking-widest">
-              <span>{programVideos.length} Episodios disponibles</span>
+          
+          <div className="relative z-10 w-full max-w-screen-2xl mx-auto px-6 grid grid-cols-1 lg:grid-cols-2 gap-12 items-center mt-12 md:mt-0">
+            <div className="space-y-8 max-w-2xl">
+              <div className="inline-flex items-center gap-2 bg-[#C13535] text-white px-3 py-1 rounded-full text-xs font-bold tracking-widest uppercase">
+                <span className="w-2 h-2 bg-white rounded-full animate-pulse"></span>
+                {program.category}
+              </div>
+              <div className="space-y-4">
+                <h1 className="text-6xl md:text-8xl font-black font-['Montserrat'] tracking-tighter text-[#C13535] dark:text-white leading-none">
+                  {program.name}
+                </h1>
+                <p className="text-lg md:text-xl text-[#C13535]/80 dark:text-[#e1bebb] font-medium leading-relaxed max-w-xl">
+                  {program.description || 'Sumérgete en este espacio dedicado al análisis, entretenimiento y cultura. Disfruta de todos los episodios disponibles de nuestro catálogo.'}
+                </p>
+              </div>
+              
+              <div className="flex flex-wrap gap-4">
+                <button className="bg-[#C13535] text-white px-8 py-4 rounded-full font-bold flex items-center gap-3 hover:scale-105 transition-all active:scale-95 shadow-[0_0_20px_rgba(193,53,53,0.3)]">
+                  <span className="material-symbols-outlined" style={{ fontVariationSettings: "'FILL' 1" }}>play_arrow</span>
+                  REPRODUCIR ÚLTIMO
+                </button>
+                <button className="bg-zinc-200/50 dark:bg-[#2a2a2b]/40 backdrop-blur-md border border-zinc-300 dark:border-[#59413f]/50 text-[#C13535] dark:text-[#DDDADB] px-8 py-4 rounded-full font-bold flex items-center gap-3 hover:bg-zinc-300 dark:hover:bg-[#2a2a2b]/60 transition-all">
+                  <span className="material-symbols-outlined">add</span>
+                  MI LISTA
+                </button>
+              </div>
+              
+              <div className="flex items-center gap-12 pt-4">
+                <div className="flex flex-col">
+                  <span className="text-xs uppercase tracking-widest text-[#F07D00] font-bold">Horario</span>
+                  <span className="text-xl font-bold font-['Montserrat'] text-[#C13535] dark:text-white">{program.schedule || 'Bajo Demanda'}</span>
+                </div>
+                <div className="flex flex-col">
+                  <span className="text-xs uppercase tracking-widest text-[#FFB91F] font-bold">Host</span>
+                  <span className="text-xl font-bold font-['Montserrat'] text-[#C13535] dark:text-white">{program.host || 'Estudio Radio América'}</span>
+                </div>
+              </div>
             </div>
           </div>
-        </div>
+        </section>
 
-        {/* Lista de Episodios */}
-        <div className="pt-16">
-          <h2 className="text-2xl font-bold tracking-tight mb-10 flex items-center gap-4">
-            Episodios Recientes <span className="h-px bg-outline-variant/30 flex-1"></span>
-          </h2>
-          
+        {/* Episodes/Stats Section */}
+        <section className="max-w-screen-2xl mx-auto px-6 -mt-12 relative z-20">
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+            <div className="bg-white/90 dark:bg-[#1c1b1c]/80 backdrop-blur-xl p-8 rounded-2xl flex items-center gap-6 group hover:bg-zinc-50 dark:hover:bg-[#2a2a2b] transition-all border-l-4 border-[#C13535] shadow-lg dark:shadow-none">
+              <span className="material-symbols-outlined text-4xl text-[#C13535]">mic_external_on</span>
+              <div>
+                <h4 className="font-bold text-xl font-['Montserrat'] text-[#C13535] dark:text-white">Formato</h4>
+                <p className="text-[#C13535]/70 dark:text-[#e1bebb] text-sm">{program.type}</p>
+              </div>
+            </div>
+            <div className="bg-white/90 dark:bg-[#1c1b1c]/80 backdrop-blur-xl p-8 rounded-2xl flex items-center gap-6 group hover:bg-zinc-50 dark:hover:bg-[#2a2a2b] transition-all border-l-4 border-[#F07D00] shadow-lg dark:shadow-none">
+              <span className="material-symbols-outlined text-4xl text-[#F07D00]">history</span>
+              <div>
+                <h4 className="font-bold text-xl font-['Montserrat'] text-[#C13535] dark:text-white">Episodios</h4>
+                <p className="text-[#C13535]/70 dark:text-[#e1bebb] text-sm">{programVideos.length} disponibles</p>
+              </div>
+            </div>
+            <div className="bg-white/90 dark:bg-[#1c1b1c]/80 backdrop-blur-xl p-8 rounded-2xl flex items-center gap-6 group hover:bg-zinc-50 dark:hover:bg-[#2a2a2b] transition-all border-l-4 border-[#FFB91F] shadow-lg dark:shadow-none">
+              <span className="material-symbols-outlined text-4xl text-[#FFB91F]">graphic_eq</span>
+              <div>
+                <h4 className="font-bold text-xl font-['Montserrat'] text-[#C13535] dark:text-white">Categoría</h4>
+                <p className="text-[#C13535]/70 dark:text-[#e1bebb] text-sm">{program.category}</p>
+              </div>
+            </div>
+          </div>
+        </section>
+
+        {/* Episodes Grid */}
+        <section className="max-w-screen-2xl mx-auto px-6 py-24 space-y-12">
+          <div className="flex justify-between items-end border-b border-zinc-200 dark:border-white/10 pb-4">
+            <div className="space-y-2">
+              <h2 className="text-4xl font-black font-['Montserrat'] tracking-tighter uppercase text-[#C13535] dark:text-white">Explorar <span className="text-[#F07D00]">Episodios</span></h2>
+              <p className="text-[#C13535]/80 dark:text-[#e1bebb] font-medium">Contenido premium original de {program.name}</p>
+            </div>
+          </div>
+
           {programVideos.length === 0 ? (
-            <div className="text-center py-20 bg-surface-container-lowest rounded-3xl border border-outline-variant/10">
-              <span className="material-symbols-outlined text-6xl text-[#DDDADB]/10 mb-4">videocam_off</span>
-              <h3 className="text-xl font-bold text-[#DDDADB]/40">Aún no hay episodios</h3>
-              <p className="text-sm text-[#DDDADB]/30 mt-2">Los videos vinculados a este programa aparecerán aquí.</p>
+            <div className="text-center py-20 bg-zinc-100 dark:bg-[#0e0e0f] rounded-3xl border border-zinc-200 dark:border-white/5">
+              <span className="material-symbols-outlined text-6xl text-[#C13535]/30 dark:text-white/10 mb-4">videocam_off</span>
+              <h3 className="text-xl font-bold text-[#C13535]/60 dark:text-white/40">Aún no hay episodios</h3>
+              <p className="text-sm text-[#C13535]/40 dark:text-white/30 mt-2">Los videos vinculados a este programa aparecerán aquí.</p>
             </div>
           ) : (
-            <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-8">
+            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-8">
               {programVideos.map(video => (
-                <div key={video.id} onClick={() => navigate(`/watch/${video.id}`)} className="flex flex-col gap-3 group cursor-pointer">
-                  <div className="relative aspect-video rounded-xl overflow-hidden border border-outline-variant/10 group-hover:border-[#C13535]/50 transition-colors duration-300">
-                    <img className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500" alt={video.title} src={video.thumbnail} />
-                    <div className="absolute inset-0 bg-black/40 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity">
-                      <span className="material-symbols-outlined text-4xl text-white" style={{ fontVariationSettings: "'FILL' 1" }}>play_circle</span>
+                <div key={video.id} onClick={() => navigate(`/watch/${video.id}`)} className="group relative bg-zinc-100 dark:bg-[#201f20] rounded-xl overflow-hidden transition-all duration-500 hover:scale-[1.02] hover:shadow-[0_20px_40px_rgba(193,53,53,0.15)] cursor-pointer border border-zinc-200 dark:border-transparent">
+                  <div className="aspect-[16/9] relative overflow-hidden">
+                    <img alt={video.title} className="w-full h-full object-cover transition-transform duration-700 group-hover:scale-110" src={video.thumbnail} />
+                    <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-transparent to-transparent opacity-60"></div>
+                    <div className="absolute inset-0 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity">
+                      <span className="material-symbols-outlined text-5xl text-white">play_circle</span>
+                    </div>
+                    <div className="absolute bottom-4 left-4">
+                      <span className="bg-[#C13535] text-white text-[10px] font-bold px-2 py-1 rounded uppercase">{video.category}</span>
                     </div>
                   </div>
-                  <div>
-                    <p className="text-[10px] text-[#FFB91F] uppercase tracking-widest font-bold mb-1">{new Date(video.createdAt).toLocaleDateString()}</p>
-                    <h3 className="text-sm font-bold leading-snug group-hover:text-primary transition-colors line-clamp-2">{video.title}</h3>
+                  <div className="p-6 space-y-2">
+                    <h3 className="text-xl font-bold font-['Montserrat'] text-[#C13535] dark:text-white group-hover:text-[#F07D00] transition-colors line-clamp-2">{video.title}</h3>
+                    <p className="text-sm text-[#C13535]/70 dark:text-[#e1bebb] line-clamp-2">{video.description}</p>
+                    <p className="text-[10px] text-[#F07D00] font-bold mt-2">{new Date(video.createdAt).toLocaleDateString()}</p>
                   </div>
                 </div>
               ))}
             </div>
           )}
-        </div>
+        </section>
       </main>
 
-      {/* Botón flotante de Radio */}
-      <div className="fixed bottom-6 right-6 z-50">
-        <button onClick={toggleRadio} className="w-14 h-14 bg-[#C13535] rounded-full flex items-center justify-center text-white shadow-2xl hover:scale-110 transition-transform cinematic-shadow">
-          <span className="material-symbols-outlined text-2xl" style={{ fontVariationSettings: "'FILL' 1" }}>{isPlaying ? 'pause' : 'play_arrow'}</span>
-        </button>
-      </div>
+      {/* Footer Shell */}
+      <footer className="relative z-20 w-full flex flex-col md:flex-row justify-between px-10 py-8 items-center gap-4 bg-zinc-100 dark:bg-[#131314] border-t border-zinc-200 dark:border-[#59413f]/15 mt-auto">
+        <div className="text-[#C13535]/60 dark:text-[#DDDADB]/40 font-['Montserrat'] text-xs uppercase tracking-[0.05em] text-center md:text-left">
+          © 2024 Estudio Radio América. Patrimonio de Carabobo.
+        </div>
+      </footer>
     </div>
   );
 }
