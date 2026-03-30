@@ -1,4 +1,4 @@
-import React, { useContext, useState, useRef } from 'react'
+import React, { useContext, useState, useRef, useEffect } from 'react'
 import { useNavigate } from 'react-router-dom'
 import './App.css'
 import { VideoContext } from './VideoContext'
@@ -72,8 +72,27 @@ function App() {
     (e.target as HTMLFormElement).reset();
   };
 
-  // Busca el video destacado más reciente
-  const featuredVideo = videos.find(v => v.isFeatured);
+  // Carrusel dinámico de videos destacados
+  const featuredVideos = videos.filter(v => v.isFeatured);
+  const [currentFeaturedIndex, setCurrentFeaturedIndex] = useState(0);
+  const [fadeClass, setFadeClass] = useState('opacity-100');
+
+  useEffect(() => {
+    // Si hay 1 o menos videos destacados, no es necesario rotar
+    if (featuredVideos.length <= 1) return;
+
+    const interval = setInterval(() => {
+      setFadeClass('opacity-0'); // Inicia el desvanecimiento
+      setTimeout(() => {
+        setCurrentFeaturedIndex(prev => (prev + 1) % featuredVideos.length);
+        setFadeClass('opacity-100'); // Aparece la nueva imagen y contenido
+      }, 1000); // 1 segundo exacto de margen de separación
+    }, 7000); // Cambia cada 7 segundos
+
+    return () => clearInterval(interval);
+  }, [featuredVideos.length]);
+
+  const featuredVideo = featuredVideos[currentFeaturedIndex] || null;
 
   // Encuentra el próximo episodio o video similar
   let nextVideo = null;
@@ -138,12 +157,12 @@ function App() {
         {/* Hero Section: Cinematic Style */}
         <section className="relative h-[870px] w-full flex items-center overflow-hidden bg-white dark:bg-transparent">
           <div className="absolute inset-0 z-0">
-            <img alt="Radio Interview" className="w-full h-full object-cover" src={featuredVideo ? featuredVideo.thumbnail : "media/enconexion_pureba.webp"} />
+            <img alt="Radio Interview" className={`w-full h-full object-cover transition-opacity duration-1000 ${fadeClass}`} src={featuredVideo ? featuredVideo.thumbnail : "media/enconexion_pureba.webp"} />
             <div className="absolute inset-0 bg-gradient-to-r from-white dark:from-surface via-white/80 dark:via-surface/80 to-transparent"></div>
             <div className="absolute inset-0 bg-gradient-to-t from-white dark:from-surface via-transparent to-transparent"></div>
           </div>
           
-          <div className="relative z-10 max-w-7xl mx-auto px-8 w-full grid md:grid-cols-2 gap-12 items-center">
+          <div className={`relative z-10 max-w-7xl mx-auto px-8 w-full grid md:grid-cols-2 gap-12 items-center transition-opacity duration-1000 ${fadeClass}`}>
             <div className="space-y-6">
               <div className="flex items-center gap-3">
                 <span className="bg-primary-container text-on-primary-container px-3 py-1 rounded-sm text-xs font-bold tracking-widest uppercase">Especial</span>
