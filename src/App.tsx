@@ -118,7 +118,7 @@ function App() {
 
   return (
     <>
-      <audio ref={audioRef} id="radio" src="https://transmision.radioamerica.com.ve:8087/RA909FM" type="audio/mpeg" className="hidden" />
+      <audio ref={audioRef} id="radio" src="https://transmision.radioamerica.com.ve:8087/RA909FM" className="hidden" />
 
       {/* TopNavBar */}
       <nav className="fixed top-0 w-full z-50 bg-white/80 dark:bg-[#131314]/80 backdrop-blur-xl flex justify-between items-center px-8 h-20 shadow-sm dark:shadow-none border-b border-zinc-200 dark:border-transparent">
