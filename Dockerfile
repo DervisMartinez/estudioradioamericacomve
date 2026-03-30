@@ -22,6 +22,9 @@ FROM nginx:stable-alpine
 # Copiamos los archivos estáticos construidos en la etapa anterior al directorio de Nginx.
 COPY --from=build /app/dist /usr/share/nginx/html
 
+# Copiamos la configuración personalizada de Nginx para que funcione React Router.
+COPY nginx.conf /etc/nginx/conf.d/default.conf
+
 # Exponemos el puerto 80 para que se pueda acceder a la aplicación.
 EXPOSE 80
 
