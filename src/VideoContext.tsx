@@ -66,7 +66,8 @@ export const VideoContext = createContext<VideoContextType>({
   incrementView: () => {},
 });
 
-const API_URL = '/api';
+// URL absoluta hacia tu backend. Ajusta el puerto (ej. 3000, 8000) según donde corra tu servidor BACK
+const API_URL = 'http://localhost:3306/api';
 
 export const VideoProvider = ({ children }: { children: ReactNode }) => {
   const [videos, setVideos] = useState<Video[]>([]);
