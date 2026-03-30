@@ -66,8 +66,10 @@ export const VideoContext = createContext<VideoContextType>({
   incrementView: () => {},
 });
 
-// URL absoluta hacia tu backend. Ajusta el puerto (ej. 3000, 8000) según donde corra tu servidor BACK
-const API_URL = 'http://localhost:3306/api';
+// Detecta si estamos en producción o local para asignar la URL correcta de la API
+const API_URL = window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1'
+  ? 'http://localhost:3000/api' // URL para tu entorno local (Asegúrate que tu backend local corra en el 3000)
+  : 'http://estudio.radioamerica.com.ve/api'; // URL para tu entorno de producción
 
 export const VideoProvider = ({ children }: { children: ReactNode }) => {
   const [videos, setVideos] = useState<Video[]>([]);
