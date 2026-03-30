@@ -6,6 +6,7 @@ import App from './App.tsx'
 import Admin from './Admin.tsx'
 import Watch from './Watch.tsx'
 import Login from './Login.tsx'
+import AllPrograms from './AllPrograms.tsx'
 import ProgramView from './Program.tsx'
 import { VideoProvider } from './VideoContext.tsx'
 
@@ -29,6 +30,10 @@ const router = createBrowserRouter([
   {
     path: "/program/:id",
     element: <ProgramView />,
+  },
+  {
+    path: "/programas",
+    element: <AllPrograms />,
   },
 ]);
 

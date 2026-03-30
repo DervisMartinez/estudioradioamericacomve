@@ -10,7 +10,7 @@ function Admin() {
   const [activeTab, setActiveTab] = useState<'dashboard' | 'library' | 'programs' | 'analytics' | 'settings'>('dashboard');
   const [editingId, setEditingId] = useState<string | null>(null);
   const [newVideo, setNewVideo] = useState({ title: '', category: 'Historia', thumbnail: '', url: '', description: '', isFeatured: false, isShort: false, programId: '' });
-  const [newProgram, setNewProgram] = useState({ name: '', category: 'Política', thumbnail: '' });
+  const [newProgram, setNewProgram] = useState({ name: '', category: '', thumbnail: '', type: 'Programa' as 'Programa' | 'Podcast' });
   const [profileForm, setProfileForm] = useState(userProfile);
 
   useEffect(() => {
@@ -93,7 +93,7 @@ function Admin() {
       ...newProgram
     });
     setIsProgramModalOpen(false);
-    setNewProgram({ name: '', category: 'Política', thumbnail: '' });
+    setNewProgram({ name: '', category: '', thumbnail: '', type: 'Programa' });
   };
 
   const handleLogout = () => {
@@ -111,6 +111,9 @@ function Admin() {
   const totalViews = videos.reduce((acc, video) => acc + (video.views || 0), 0);
   const sortedByViews = [...videos].sort((a, b) => b.views - a.views);
   const mostViewed = sortedByViews.slice(0, 4); // Top 4
+
+  // Extraer todas las categorías existentes para sugerirlas
+  const allCategories = Array.from(new Set([...programs.map(p => p.category), ...videos.map(v => v.category)]));
 
   return (
     <div className="text-on-surface antialiased overflow-x-hidden">
@@ -534,10 +537,18 @@ function Admin() {
                 <input required value={newProgram.name} onChange={e => setNewProgram({...newProgram, name: e.target.value})} className="w-full bg-surface-container-lowest border-none rounded-lg p-3 text-sm text-[#DDDADB]" type="text" placeholder="Ej: Visión Deportiva" />
               </div>
               <div>
-                <label className="block text-xs font-bold text-[#DDDADB]/60 mb-1">Categoría</label>
-                <select value={newProgram.category} onChange={e => setNewProgram({...newProgram, category: e.target.value})} className="w-full bg-surface-container-lowest border-none rounded-lg p-3 text-sm text-[#DDDADB]">
-                  <option>Política</option><option>Deportes</option><option>Personajes</option><option>Sociedad</option><option>Cultura</option>
+                <label className="block text-xs font-bold text-[#DDDADB]/60 mb-1">Tipo de Contenido</label>
+                <select value={newProgram.type} onChange={e => setNewProgram({...newProgram, type: e.target.value as 'Programa' | 'Podcast'})} className="w-full bg-surface-container-lowest border-none rounded-lg p-3 text-sm text-[#DDDADB]">
+                  <option value="Programa">Programa</option>
+                  <option value="Podcast">Podcast</option>
                 </select>
+              </div>
+              <div>
+                <label className="block text-xs font-bold text-[#DDDADB]/60 mb-1">Categoría (Selecciona o escribe una nueva)</label>
+                <input required list="categories-list" value={newProgram.category} onChange={e => setNewProgram({...newProgram, category: e.target.value})} className="w-full bg-surface-container-lowest border-none rounded-lg p-3 text-sm text-[#DDDADB]" type="text" placeholder="Ej: Tecnología" />
+                <datalist id="categories-list">
+                  {allCategories.map(cat => <option key={cat} value={cat} />)}
+                </datalist>
               </div>
               <div>
                 <label className="block text-xs font-bold text-[#DDDADB]/60 mb-1">Póster Vertical (URL o subir archivo)</label>

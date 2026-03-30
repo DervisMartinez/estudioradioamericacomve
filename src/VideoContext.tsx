@@ -20,6 +20,7 @@ export interface Program {
   name: string;
   category: string;
   thumbnail: string;
+  type: 'Programa' | 'Podcast';
 }
 
 export interface UserProfile {
@@ -65,10 +66,10 @@ const defaultVideos: Video[] = [
 ];
 
 const defaultPrograms: Program[] = [
-  { id: 'p1', name: 'Debate Político', category: 'Política', thumbnail: 'https://lh3.googleusercontent.com/aida-public/AB6AXuCoc1Qg5LVpdo2zL0b_cp3r14h5XkLWtxqA0JHe5UojWyBM1Fh7thbtqWkJ9Ro9gb5xZvbDCKPP0QNNFAT6Avy6nkWlm_LeI--MUfI1iLK6jORcTjlG2Xvc1BMfRk0SdT_YOaApBEVntZL-AE5MlQebs7X3z_dteoYZ0oGLIx6sVfZBYxKwKhU1jZ1SpIF93FSBHfsVo6R-LVk6IsRPERmOEILpAtJF5-beMKhPW0JYPOFRRn8Ph1ajiYPjy_CWVEDEN4BN2ctSBNHy' },
-  { id: 'p2', name: 'Visión Deportiva', category: 'Deportes', thumbnail: 'https://lh3.googleusercontent.com/aida-public/AB6AXuCSFHBkOHXCW-yTt36ZX7cWK7yAkQkLoW-QL9z3PqkSQh3auFgRzdjjImM3V2TYGi93wbm-Q5gZ3npdb9BoKXby2it5-ZPUqRGqK7VXo-u4xrMi4TB_bJdkEQ-ULERpuSr5GhXzJYBqO-YGbbAVOL3AIwWgRQwH1_XFiexnhKgTxNBUdVlk9h_BYaL-_fVJ-cwLU8DwqiLhZhNxaKcgvkbyoLXWqSCEzxyM87qTTWBy9XVbFRQzyQUYZmN5ZF5iUVo2ZvTnczUclhId' },
-  { id: 'p3', name: 'Perfiles de Éxito', category: 'Personajes', thumbnail: 'https://lh3.googleusercontent.com/aida-public/AB6AXuClntysuUAxBYXccJnomizpFynhCyXBskKa_ZYi44oCJnKloNXdN1MhrKKu2I61Z-kA8a-FEJXdMfr3CGH7p8mPQv4S8VknfSJZ3h3L05adnate9any3ODZrJ2aGMqfWFPfBmBKQ-YQiXzjP56CcfA0_0T3-KkwekD0gCl0Oi8qMKtJi53BgawDPTcoihzkEg0Iz6BJGS7aK8OMsonBLUQmKDfe0J2E1i9xSm3ACOhNaJU4ISl3hrpRK2fcecuYGunn5OJowK1cFiBh' },
-  { id: 'p4', name: 'Cultura en la Ciudad', category: 'Cultura', thumbnail: 'https://lh3.googleusercontent.com/aida-public/AB6AXuDQ1UK5IaQ4wkydyELExB3MHYc4uebNizWWS8JGcsV1Xk0gyXqtzBwJ40mi0XXhqHJct898q8qcgSP_ppP4lUuzxrP39f4q4HE-enHV94K_ExRnhiLtcC8KRF98UInzRHDllmAyVtSao0aEq_0XfSnCoKOgpoobFHB1cUXpYCN4-rvTXznfUhNar86Id3KXNKOD183k_9LnqMWlWftYGbAc4g1UIzMxe5JPk7AtiQPvWN-6fiHtCNZFn0Wqp9yAXhTv8_ZwIylcWB3u' },
+  { id: 'p1', name: 'Debate Político', category: 'Política', type: 'Programa', thumbnail: 'https://lh3.googleusercontent.com/aida-public/AB6AXuCoc1Qg5LVpdo2zL0b_cp3r14h5XkLWtxqA0JHe5UojWyBM1Fh7thbtqWkJ9Ro9gb5xZvbDCKPP0QNNFAT6Avy6nkWlm_LeI--MUfI1iLK6jORcTjlG2Xvc1BMfRk0SdT_YOaApBEVntZL-AE5MlQebs7X3z_dteoYZ0oGLIx6sVfZBYxKwKhU1jZ1SpIF93FSBHfsVo6R-LVk6IsRPERmOEILpAtJF5-beMKhPW0JYPOFRRn8Ph1ajiYPjy_CWVEDEN4BN2ctSBNHy' },
+  { id: 'p2', name: 'Visión Deportiva', category: 'Deportes', type: 'Programa', thumbnail: 'https://lh3.googleusercontent.com/aida-public/AB6AXuCSFHBkOHXCW-yTt36ZX7cWK7yAkQkLoW-QL9z3PqkSQh3auFgRzdjjImM3V2TYGi93wbm-Q5gZ3npdb9BoKXby2it5-ZPUqRGqK7VXo-u4xrMi4TB_bJdkEQ-ULERpuSr5GhXzJYBqO-YGbbAVOL3AIwWgRQwH1_XFiexnhKgTxNBUdVlk9h_BYaL-_fVJ-cwLU8DwqiLhZhNxaKcgvkbyoLXWqSCEzxyM87qTTWBy9XVbFRQzyQUYZmN5ZF5iUVo2ZvTnczUclhId' },
+  { id: 'p3', name: 'Perfiles de Éxito', category: 'Personajes', type: 'Podcast', thumbnail: 'https://lh3.googleusercontent.com/aida-public/AB6AXuClntysuUAxBYXccJnomizpFynhCyXBskKa_ZYi44oCJnKloNXdN1MhrKKu2I61Z-kA8a-FEJXdMfr3CGH7p8mPQv4S8VknfSJZ3h3L05adnate9any3ODZrJ2aGMqfWFPfBmBKQ-YQiXzjP56CcfA0_0T3-KkwekD0gCl0Oi8qMKtJi53BgawDPTcoihzkEg0Iz6BJGS7aK8OMsonBLUQmKDfe0J2E1i9xSm3ACOhNaJU4ISl3hrpRK2fcecuYGunn5OJowK1cFiBh' },
+  { id: 'p4', name: 'Cultura en la Ciudad', category: 'Cultura', type: 'Podcast', thumbnail: 'https://lh3.googleusercontent.com/aida-public/AB6AXuDQ1UK5IaQ4wkydyELExB3MHYc4uebNizWWS8JGcsV1Xk0gyXqtzBwJ40mi0XXhqHJct898q8qcgSP_ppP4lUuzxrP39f4q4HE-enHV94K_ExRnhiLtcC8KRF98UInzRHDllmAyVtSao0aEq_0XfSnCoKOgpoobFHB1cUXpYCN4-rvTXznfUhNar86Id3KXNKOD183k_9LnqMWlWftYGbAc4g1UIzMxe5JPk7AtiQPvWN-6fiHtCNZFn0Wqp9yAXhTv8_ZwIylcWB3u' },
 ];
 
 // Lector a prueba de fallos (Evita pantallas blancas)
