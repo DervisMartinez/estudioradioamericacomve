@@ -1,7 +1,7 @@
 import { useState, useContext, useRef, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import type { ChangeEvent, FormEvent } from 'react';
-import { VideoContext } from './VideoContext';
+import { VideoContext, RadioAmericaLoader } from './VideoContext';
 
 function Admin() {
   const { videos, addVideo, updateVideo, deleteVideo, programs, addProgram, updateProgram, deleteProgram, userProfile, updateUserProfile } = useContext(VideoContext);
@@ -549,6 +549,14 @@ function Admin() {
           <button onClick={toggleRadio} className="material-symbols-outlined text-[#F07D00] text-lg hover:scale-110 transition-transform" style={{ fontVariationSettings: "'FILL' 1" }}>{isPlaying ? 'pause' : 'play_arrow'}</button>
         </div>
       </div>
+
+      {/* Uploading Media Overlay */}
+      {isUploading && (
+        <div className="fixed inset-0 z-[200] bg-black/80 backdrop-blur-sm flex flex-col items-center justify-center">
+          <RadioAmericaLoader fullScreen={false} />
+          <p className="text-[#DDDADB] font-bold mt-4 animate-pulse uppercase tracking-widest text-sm">Subiendo y procesando...</p>
+        </div>
+      )}
 
       {/* Modal para Añadir Video */}
       {isModalOpen && (

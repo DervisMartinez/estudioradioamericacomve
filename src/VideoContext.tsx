@@ -50,6 +50,8 @@ interface VideoContextType {
   userProfile: UserProfile;
   updateUserProfile: (profile: UserProfile) => void;
   incrementView: (id: string) => void;
+  isLoading: boolean;
+  setIsLoading: (loading: boolean) => void;
 }
 
 export const VideoContext = createContext<VideoContextType>({
@@ -64,7 +66,48 @@ export const VideoContext = createContext<VideoContextType>({
   userProfile: { firstName: '', lastName: '', avatar: '', bio: '', twitter: '', instagram: '' },
   updateUserProfile: () => {},
   incrementView: () => {},
+  isLoading: true,
+  setIsLoading: () => {},
 });
+
+// --- LOADER GLOBAL DE LA APP ---
+export const RadioAmericaLoader = ({ fullScreen = true }: { fullScreen?: boolean }) => {
+  return (
+    <div className={`${fullScreen ? 'fixed inset-0 z-[10000]' : 'w-full h-48'} flex flex-col items-center justify-center bg-white dark:bg-[#131314] transition-colors duration-300`}>
+      <style>{`
+        @keyframes fillUpClip {
+          0% { clip-path: inset(100% 0 0 0); opacity: 0; }
+          15% { opacity: 1; }
+          50% { clip-path: inset(0 0 0 0); opacity: 1; }
+          85% { opacity: 1; }
+          100% { clip-path: inset(0 0 100% 0); opacity: 0; }
+        }
+        .animate-fill-logo {
+          animation: fillUpClip 2s infinite cubic-bezier(0.4, 0, 0.2, 1);
+        }
+      `}</style>
+      <div className="relative w-24 h-24 md:w-32 md:h-32 flex items-center justify-center">
+        {/* Silueta Base */}
+        <img src="/logo_colors.png" className="absolute w-full h-full object-contain opacity-10 dark:hidden grayscale" alt="Loading" />
+        <img src="/logo_blanco.png" className="absolute w-full h-full object-contain opacity-10 hidden dark:block grayscale" alt="Loading" />
+        
+        {/* Llenado animado */}
+        <img src="/logo_colors.png" className="absolute w-full h-full object-contain dark:hidden animate-fill-logo" alt="Loading" />
+        <img src="/logo_blanco.png" className="absolute w-full h-full object-contain hidden dark:block animate-fill-logo" alt="Loading" />
+      </div>
+      <div className="mt-6 flex flex-col items-center gap-2">
+        <div className="flex gap-1.5">
+          <div className="w-2 h-2 rounded-full bg-[#C13535] animate-bounce" style={{ animationDelay: '0s' }}></div>
+          <div className="w-2 h-2 rounded-full bg-[#F07D00] animate-bounce" style={{ animationDelay: '0.15s' }}></div>
+          <div className="w-2 h-2 rounded-full bg-[#FFB91F] animate-bounce" style={{ animationDelay: '0.3s' }}></div>
+        </div>
+        <span className="text-[10px] font-black tracking-[0.3em] uppercase text-[#C13535] dark:text-[#DDDADB] mt-2 opacity-80">
+          Cargando
+        </span>
+      </div>
+    </div>
+  );
+}
 
 // Al usar solo '/api', Vite enviará los datos al puerto 3000 en local, y en producción Nginx hará lo mismo.
 const API_URL = '/api';
@@ -75,9 +118,19 @@ export const VideoProvider = ({ children }: { children: ReactNode }) => {
   const [userProfile, setUserProfile] = useState<UserProfile>({
     firstName: 'Admin', lastName: 'User', avatar: '', bio: '', twitter: '', instagram: ''
   });
+  const [isLoading, setIsLoading] = useState(true);
 
   useEffect(() => {
+    // Inicializar el tema globalmente para que el loader responda al instante
+    const savedTheme = localStorage.getItem('theme');
+    if (savedTheme === 'dark' || (!savedTheme && document.documentElement.classList.contains('dark'))) {
+      document.documentElement.classList.add('dark');
+    } else {
+      document.documentElement.classList.remove('dark');
+    }
+
     const fetchData = async () => {
+      setIsLoading(true);
       try {
         const [videosRes, programsRes, profileRes] = await Promise.all([
           fetch(`${API_URL}/videos`),
@@ -93,6 +146,9 @@ export const VideoProvider = ({ children }: { children: ReactNode }) => {
         }
       } catch (error) {
         console.error("Error al conectar con la base de datos:", error);
+      }
+      finally {
+        setIsLoading(false);
       }
     };
     fetchData();
@@ -219,8 +275,8 @@ export const VideoProvider = ({ children }: { children: ReactNode }) => {
   };
 
   return (
-    <VideoContext.Provider value={{ videos, addVideo, updateVideo, deleteVideo, programs, addProgram, updateProgram, deleteProgram, userProfile, updateUserProfile, incrementView }}>
-      {children}
+    <VideoContext.Provider value={{ videos, addVideo, updateVideo, deleteVideo, programs, addProgram, updateProgram, deleteProgram, userProfile, updateUserProfile, incrementView, isLoading, setIsLoading }}>
+      {isLoading ? <RadioAmericaLoader fullScreen={true} /> : children}
     </VideoContext.Provider>
   );
 };
