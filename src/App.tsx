@@ -152,6 +152,11 @@ function App() {
     return () => clearInterval(scrollInterval);
   }, [programs.length, isCarouselHovered]);
 
+  // --- Lógica de Próximos Estrenos ---
+  const upcomingVideos = videos
+    .filter(v => v.releaseDate && new Date(v.releaseDate) > new Date())
+    .sort((a, b) => new Date(a.releaseDate!).getTime() - new Date(b.releaseDate!).getTime());
+
   // Filtra los videos que NO son destacados para la sección de abajo
   const nonFeaturedVideos = videos.filter(v => !v.isFeatured && !v.isShort);
   
@@ -305,6 +310,41 @@ function App() {
             </div>
           </div>
         </section>
+
+        {/* Upcoming Releases Section */}
+        {upcomingVideos.length > 0 && (
+            <section className="py-24 bg-white dark:bg-surface">
+                <div className="max-w-7xl mx-auto px-8">
+                    <div className="flex items-end justify-between mb-12">
+                        <div className="font-['Montserrat']">
+                            <h2 className="text-3xl font-black tracking-tight text-[#C13535] dark:text-[#DDDADB]">PRÓXIMOS ESTRENOS</h2>
+                            <div className="h-1 w-12 bg-[#F07D00] mt-2"></div>
+                        </div>
+                        <button className="text-sm font-bold text-[#C13535] dark:text-[#DDDADB]/60 hover:text-[#F07D00] transition-colors">
+                            Ver Calendario Completo
+                        </button>
+                    </div>
+                    <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
+                        {upcomingVideos.slice(0, 3).map((video) => (
+                            <div key={video.id} className="group cursor-pointer bg-zinc-100 dark:bg-surface-container-low rounded-2xl overflow-hidden shadow-lg border border-zinc-200 dark:border-outline-variant/10 transition-all duration-300 hover:shadow-2xl hover:-translate-y-2">
+                                <div className="relative aspect-video">
+                                    <img src={video.thumbnail || '/logo_blanco.png'} alt={video.title} className="w-full h-full object-cover" onError={(e) => { e.currentTarget.src = '/logo_blanco.png'; }} />
+                                    <div className="absolute inset-0 bg-gradient-to-t from-black/70 to-transparent"></div>
+                                    <div className="absolute top-4 right-4 bg-[#C13535] text-white text-xs font-bold px-3 py-1.5 rounded-full shadow-lg">
+                                        {new Date(video.releaseDate!).toLocaleDateString('es-VE', { day: 'numeric', month: 'short' })}
+                                    </div>
+                                </div>
+                                <div className="p-6">
+                                    <p className="text-xs font-bold text-[#F07D00] uppercase tracking-wider mb-2">{video.category}</p>
+                                    <h3 className="font-bold text-xl leading-tight text-[#C13535] dark:text-on-surface line-clamp-2">{video.title}</h3>
+                                    <p className="text-sm text-[#C13535]/80 dark:text-on-surface/60 mt-2 line-clamp-3">{video.description}</p>
+                                </div>
+                            </div>
+                        ))}
+                    </div>
+                </div>
+            </section>
+        )}
 
         {/* Asymmetric Catalog: Noticias & Archivo */}
         <section className="py-24 bg-white dark:bg-surface">

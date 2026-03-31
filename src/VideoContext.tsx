@@ -15,6 +15,7 @@ export interface Video {
   views: number;
   createdAt: string;
   programId?: string;
+  releaseDate?: string;
 }
 
 export interface Program {

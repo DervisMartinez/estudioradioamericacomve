@@ -6,9 +6,10 @@ import { Helmet } from 'react-helmet-async';
 export default function Watch() {
   const { id } = useParams();
   const navigate = useNavigate();
-  const { videos, incrementView } = useContext(VideoContext);
+  const { videos, programs, incrementView } = useContext(VideoContext);
   
   const video = videos.find(v => v.id === id);
+  const program = video?.programId ? programs.find(p => p.id === video.programId) : null;
   const [isVideoPlaying, setIsVideoPlaying] = useState(false);
 
   // Radio Player Logic
@@ -21,6 +22,70 @@ export default function Watch() {
       else audioRef.current.play();
       setIsRadioPlaying(!isRadioPlaying);
     }
+  };
+
+  // --- Helper functions for embeds ---
+  const getSpotifyEmbedUrl = (url: string) => {
+    if (!url) return null;
+    // e.g., https://open.spotify.com/episode/3x245sZ2d42L5q6sZ4p8a9
+    const match = url.match(/open\.spotify\.com\/(track|episode|show|playlist)\/([a-zA-Z0-9]+)/);
+    if (match) {
+      // The embed URL is slightly different
+      return `https://open.spotify.com/embed/${match[1]}/${match[2]}`;
+    }
+    return null;
+  };
+
+  const getZenoEmbedUrl = (url: string) => {
+    if (!url) return null;
+    // e.g., https://zeno.fm/podcast/some-show/
+    const match = url.match(/zeno\.fm\/(?:podcast|show)\/([^/]+)/);
+    if (match && match[1]) {
+      return `https://zeno.fm/player/${match[1]}`;
+    }
+    return null;
+  };
+
+  // Episode Audio Player Logic (Para el formato Podcast/Audio)
+  const episodeAudioRef = useRef<HTMLAudioElement>(null);
+  const [isEpisodePlaying, setIsEpisodePlaying] = useState(false);
+  const [currentTime, setCurrentTime] = useState(0);
+  const [duration, setDuration] = useState(0);
+  const [audioVolume, setAudioVolume] = useState(0.8);
+
+  const toggleEpisodeAudio = () => {
+    if (episodeAudioRef.current) {
+      if (isEpisodePlaying) episodeAudioRef.current.pause();
+      else episodeAudioRef.current.play();
+      setIsEpisodePlaying(!isEpisodePlaying);
+    }
+  };
+
+  const handleTimeUpdate = () => {
+    if (episodeAudioRef.current) setCurrentTime(episodeAudioRef.current.currentTime);
+  };
+
+  const handleLoadedMetadata = () => {
+    if (episodeAudioRef.current) setDuration(episodeAudioRef.current.duration);
+  };
+
+  const handleSeek = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const newTime = Number(e.target.value);
+    if (episodeAudioRef.current) episodeAudioRef.current.currentTime = newTime;
+    setCurrentTime(newTime);
+  };
+
+  const handleVolume = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const newVol = Number(e.target.value);
+    if (episodeAudioRef.current) episodeAudioRef.current.volume = newVol;
+    setAudioVolume(newVol);
+  };
+
+  const formatTime = (time: number) => {
+    if (!time || isNaN(time)) return '00:00';
+    const mins = Math.floor(time / 60);
+    const secs = Math.floor(time % 60);
+    return `${mins}:${secs < 10 ? '0' : ''}${secs}`;
   };
 
   useEffect(() => {
@@ -61,6 +126,196 @@ export default function Watch() {
   const ytId = getYoutubeId(video.url);
   const relatedVideos = videos.filter(v => v.id !== id).slice(0, 6);
 
+  // --- RENDERIZADO DEL REPRODUCTOR DE AUDIO (PODCAST) ---
+  if (video.isAudio) {
+    const spotifyEmbedUrl = getSpotifyEmbedUrl(video.url);
+    const zenoEmbedUrl = getZenoEmbedUrl(video.url);
+    const embedUrl = spotifyEmbedUrl || zenoEmbedUrl;
+
+    return (
+      <div className="bg-white dark:bg-[#131314] text-zinc-800 dark:text-[#e5e2e3] font-['Inter'] selection:bg-[#c13535] selection:text-white min-h-screen antialiased transition-colors duration-300">
+        <style>{`
+          .wave-bar { width: 4px; border-radius: 2px; background-color: #F07D00; }
+        `}</style>
+        <Helmet>
+          <title>{video.title} | Estudio Radio América</title>
+          <meta name="description" content={video.description || `Escucha ${video.title} en Estudio Radio América`} />
+          <meta property="og:title" content={`${video.title} | Estudio Radio América`} />
+          <meta property="og:image" content={video.thumbnail || program?.coverImage || '/logo_colors.png'} />
+        </Helmet>
+
+        <audio ref={audioRef} id="radio" src="https://transmision.radioamerica.com.ve:8087/RA909FM" className="hidden" />
+        {/* Conditionally render the audio element only if it's a direct file */}
+        {!embedUrl && <audio ref={episodeAudioRef} src={video.url} onTimeUpdate={handleTimeUpdate} onLoadedMetadata={handleLoadedMetadata} onEnded={() => setIsEpisodePlaying(false)} className="hidden" />}
+
+        <nav className="fixed top-0 w-full z-50 flex justify-between items-center px-4 md:px-8 h-20 bg-white/80 dark:bg-[#131314]/80 backdrop-blur-xl border-b border-zinc-200 dark:border-transparent transition-all duration-300">
+          <div className="flex items-center gap-4 md:gap-10 cursor-pointer" onClick={() => navigate('/')}>
+            <div className="flex items-center gap-2 md:gap-3 hover:scale-105 transition-transform">
+              <img src="/logo_colors.png" alt="Logo" className="w-8 h-8 object-contain dark:hidden" onError={(e) => { e.currentTarget.src = 'https://ui-avatars.com/api/?name=RA&background=C13535&color=fff&rounded=true'; }} />
+              <img src="/logo_blanco.png" alt="Logo" className="w-8 h-8 object-contain hidden dark:block" onError={(e) => { e.currentTarget.src = 'https://ui-avatars.com/api/?name=RA&background=C13535&color=fff&rounded=true'; }} />
+              <span className="text-lg md:text-2xl font-black text-[#C13535] dark:text-[#DDDADB] tracking-tighter font-['Montserrat'] hidden sm:block">Estudio Radio América</span>
+            </div>
+            <div className="hidden md:flex gap-8">
+              <button onClick={(e) => { e.stopPropagation(); navigate('/'); }} className="text-[#C13535] dark:text-[#DDDADB] hover:text-[#F07D00] transition-colors font-medium">Inicio</button>
+              <button className="text-[#F07D00] border-b-2 border-[#F07D00] pb-1 font-medium">Reproductor Podcast</button>
+            </div>
+          </div>
+          <div className="flex items-center gap-6">
+            <button onClick={() => navigate('/admin')} className="hover:scale-105 transition-transform duration-200 text-[#C13535] dark:text-[#DDDADB]">
+              <span className="material-symbols-outlined" data-icon="account_circle">account_circle</span>
+            </button>
+          </div>
+        </nav>
+
+        <main className="pt-24 pb-32 px-6 md:px-12 lg:px-20 max-w-screen-2xl mx-auto">
+          <div className="grid grid-cols-1 lg:grid-cols-12 gap-12 lg:gap-20 items-start">
+            
+            {/* Left Side: Synopsis */}
+            <div className="lg:col-span-5 space-y-8">
+              <div className="flex items-center gap-3">
+                <span className="bg-[#C13535] text-white text-[10px] font-bold px-3 py-1 rounded-full tracking-widest uppercase">Podcasts</span>
+                <span className="bg-[#F07D00]/20 text-[#F07D00] text-[10px] font-bold px-3 py-1 rounded-full tracking-widest uppercase">{video.category}</span>
+              </div>
+              <div className="space-y-4">
+                <h1 className="text-4xl sm:text-5xl lg:text-6xl font-black tracking-tighter text-[#C13535] dark:text-[#DDDADB] leading-[0.95] break-words">
+                  {video.title}
+                </h1>
+                <div className="flex items-center gap-4 text-sm font-medium text-[#F07D00] flex-wrap">
+                  <span className="flex items-center gap-1">
+                    <span className="material-symbols-outlined text-sm">person</span>
+                    Conducido por {program?.host || 'Estudio Radio América'}
+                  </span>
+                  <span className="w-1.5 h-1.5 rounded-full bg-zinc-300 dark:bg-[#353436]"></span>
+                  <span className="text-zinc-500 dark:text-[#DDDADB]/60">{new Date(video.createdAt).toLocaleDateString()}</span>
+                </div>
+              </div>
+              <p className="text-lg text-zinc-600 dark:text-[#DDDADB]/80 leading-relaxed font-light">
+                {video.description || "Sin descripción disponible para este episodio."}
+              </p>
+              <div className="pt-4 flex flex-wrap items-center gap-4">
+                {!embedUrl ? (
+                  <button onClick={toggleEpisodeAudio} className="bg-[#C13535] hover:bg-[#a12b2b] text-white flex items-center gap-2 px-8 py-4 rounded-full font-bold transition-all active:scale-95 shadow-lg shadow-primary/20">
+                    <span className="material-symbols-outlined" style={{ fontVariationSettings: "'FILL' 1" }}>{isEpisodePlaying ? 'pause' : 'play_arrow'}</span>
+                    {isEpisodePlaying ? 'PAUSAR AHORA' : 'REPRODUCIR AHORA'}
+                  </button>
+                ) : (
+                  <div className="px-8 py-4 rounded-full bg-zinc-200 dark:bg-surface-container text-zinc-500 dark:text-on-surface/50 font-bold flex items-center gap-2 cursor-not-allowed">
+                    <span className="material-symbols-outlined">play_disabled</span>
+                    <span>REPRODUCIR EN PANEL</span>
+                  </div>
+                )}
+                <button className="flex items-center justify-center w-14 h-14 rounded-full border border-zinc-300 dark:border-outline-variant/20 hover:bg-zinc-100 dark:hover:bg-surface-container transition-colors text-[#C13535] dark:text-[#DDDADB]">
+                  <span className="material-symbols-outlined">add</span>
+                </button>
+                <button className="flex items-center justify-center w-14 h-14 rounded-full border border-zinc-300 dark:border-outline-variant/20 hover:bg-zinc-100 dark:hover:bg-surface-container transition-colors text-[#C13535] dark:text-[#DDDADB]">
+                  <span className="material-symbols-outlined">share</span>
+                </button>
+              </div>
+            </div>
+
+            {/* Right Side: Audio Player UI */}
+            <div className="lg:col-span-7">
+              <div className="bg-zinc-100 dark:bg-surface-container-low rounded-3xl p-6 sm:p-8 lg:p-12 relative overflow-hidden shadow-2xl border border-zinc-200 dark:border-transparent">
+                <div className="absolute -top-24 -right-24 w-64 h-64 bg-[#C13535]/10 blur-[100px] rounded-full pointer-events-none"></div>
+                <div className="relative z-10 flex flex-col items-center">
+                  <div className="relative w-full aspect-square max-w-sm mx-auto group">
+                    <img className={`w-full h-full object-cover rounded-2xl shadow-[0_20px_50px_rgba(0,0,0,0.3)] transition-transform duration-700 ${isEpisodePlaying ? 'scale-[1.02]' : ''}`} src={video.thumbnail || program?.coverImage || '/logo_blanco.png'} alt={video.title} onError={(e) => { e.currentTarget.src = '/logo_blanco.png'; }} />
+                    <div className="absolute bottom-6 left-6 bg-black/40 backdrop-blur-md p-3 rounded-xl border border-white/10 hidden dark:block">
+                      <img alt="RA Logo" className="w-10 h-10 object-contain" src="/logo_blanco.png" />
+                    </div>
+                  </div>
+                  
+                  {embedUrl ? (
+                    // --- EMBED PLAYER (Spotify/Zeno) ---
+                    <div className="w-full mt-12">
+                      <iframe
+                        title={`Reproductor de ${spotifyEmbedUrl ? 'Spotify' : 'Zeno.fm'}`}
+                        src={embedUrl}
+                        width="100%"
+                        height={spotifyEmbedUrl ? "152" : "200"}
+                        frameBorder="0"
+                        allow="autoplay; clipboard-write; encrypted-media; fullscreen; picture-in-picture"
+                        loading="lazy"
+                        className="rounded-xl shadow-lg"
+                      ></iframe>
+                    </div>
+                  ) : (
+                    // --- CUSTOM PLAYER (Direct File) ---
+                    <>
+                      {/* Wave Visualizer Simulation */}
+                      <div className={`w-full flex items-end justify-center gap-1 sm:gap-1.5 h-16 mt-12 mb-8 opacity-60 ${isEpisodePlaying ? 'animate-pulse' : ''}`}>
+                        {[4,8,12,6,10,14,8,12,4,10,14,6,8,12,10,14,6,10,4,8,12].map((h, i) => (
+                          <div key={i} className={`wave-bar ${isEpisodePlaying ? 'animate-bounce' : ''}`} style={{ height: `${h * 4}px`, animationDelay: `${i * 0.1}s` }}></div>
+                        ))}
+                      </div>
+
+                      {/* Progress Bar */}
+                      <div className="w-full space-y-2 px-2 sm:px-4">
+                        <div className="relative w-full h-1.5 bg-zinc-300 dark:bg-[#353436] rounded-full overflow-hidden flex items-center group/progress">
+                          <input type="range" min="0" max={duration || 100} value={currentTime} onChange={handleSeek} className="absolute inset-0 w-full h-full opacity-0 cursor-pointer z-20" />
+                          <div className="absolute top-0 left-0 h-full bg-[#F07D00] shadow-[0_0_10px_#F07D00] z-10 pointer-events-none" style={{ width: `${(currentTime / (duration || 1)) * 100}%` }}></div>
+                        </div>
+                        <div className="flex justify-between text-[10px] font-bold text-zinc-500 dark:text-[#DDDADB]/40 tracking-widest">
+                          <span>{formatTime(currentTime)}</span>
+                          <span>{formatTime(duration)}</span>
+                        </div>
+                      </div>
+
+                      {/* Controls */}
+                      <div className="mt-6 sm:mt-8 flex items-center justify-center gap-6 sm:gap-10">
+                        <button className="material-symbols-outlined text-2xl sm:text-3xl text-zinc-400 dark:text-[#DDDADB]/60 hover:text-[#C13535] dark:hover:text-[#DDDADB] transition-colors">shuffle</button>
+                        <button className="material-symbols-outlined text-3xl sm:text-4xl text-[#C13535] dark:text-[#DDDADB] hover:text-[#F07D00] transition-colors">skip_previous</button>
+                        <button onClick={toggleEpisodeAudio} className="w-16 h-16 sm:w-20 sm:h-20 bg-[#C13535] rounded-full flex items-center justify-center shadow-lg shadow-[#C13535]/20 hover:scale-105 active:scale-95 transition-all">
+                          <span className="material-symbols-outlined text-3xl sm:text-4xl text-white" style={{ fontVariationSettings: "'FILL' 1" }}>{isEpisodePlaying ? 'pause' : 'play_arrow'}</span>
+                        </button>
+                        <button className="material-symbols-outlined text-3xl sm:text-4xl text-[#C13535] dark:text-[#DDDADB] hover:text-[#F07D00] transition-colors">skip_next</button>
+                        <button className="material-symbols-outlined text-2xl sm:text-3xl text-zinc-400 dark:text-[#DDDADB]/60 hover:text-[#C13535] dark:hover:text-[#DDDADB] transition-colors">repeat</button>
+                      </div>
+
+                      {/* Volume Slider */}
+                      <div className="mt-8 flex items-center gap-4 w-40">
+                        <span className="material-symbols-outlined text-zinc-500 dark:text-[#DDDADB]/40 text-sm">volume_down</span>
+                        <div className="flex-1 relative h-1.5 bg-zinc-300 dark:bg-[#353436] rounded-full flex items-center">
+                          <input type="range" min="0" max="1" step="0.01" value={audioVolume} onChange={handleVolume} className="absolute inset-0 w-full h-full opacity-0 cursor-pointer z-20" />
+                          <div className="absolute top-0 left-0 h-full bg-[#C13535] dark:bg-[#DDDADB]/60 rounded-full z-10 pointer-events-none" style={{ width: `${audioVolume * 100}%` }}></div>
+                        </div>
+                        <span className="material-symbols-outlined text-zinc-500 dark:text-[#DDDADB]/40 text-sm">volume_up</span>
+                      </div>
+                    </>
+                  )}
+                </div>
+              </div>
+            </div>
+          </div>
+          
+          {/* ... Aquí reutilizamos la misma "Section de Relacionados" del final ... */}
+          {/* Related Content Section */}
+          <section className="px-4 sm:px-8 md:px-16 py-12 md:py-20 mt-10">
+            <div className="flex flex-col gap-2 mb-10">
+              <h2 className="text-2xl font-bold tracking-tight text-[#C13535] dark:text-[#DDDADB] font-['Montserrat']">Sugerencias de Temas Similares</h2>
+              <div className="h-1 w-20 bg-[#F07D00]"></div>
+            </div>
+            <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-6 gap-6">
+              {relatedVideos.map(relVideo => (
+                <div key={relVideo.id} onClick={() => { setIsVideoPlaying(false); setIsEpisodePlaying(false); navigate(`/watch/${relVideo.id}`); window.scrollTo(0,0); }} className="flex flex-col gap-3 group cursor-pointer">
+                  <div className="relative aspect-[2/3] rounded-lg overflow-hidden poster-hover transition-all duration-300 border border-outline-variant/10">
+                    <img className="w-full h-full object-cover" alt={relVideo.title} src={relVideo.thumbnail || '/logo_blanco.png'} onError={(e) => { e.currentTarget.src = '/logo_blanco.png'; }} />
+                    <div className="absolute top-2 right-2 px-1.5 py-0.5 bg-black/60 backdrop-blur-md rounded text-[10px] font-bold text-white uppercase">{relVideo.isAudio ? 'Audio' : relVideo.category}</div>
+                  </div>
+                  <div>
+                    <h3 className="text-sm font-bold truncate text-zinc-800 dark:text-white group-hover:text-[#F07D00] transition-colors">{relVideo.title}</h3>
+                    <p className="text-[10px] text-zinc-500 dark:text-[#DDDADB]/50 uppercase tracking-widest">{relVideo.duration || '00:00'}</p>
+                  </div>
+                </div>
+              ))}
+            </div>
+          </section>
+        </main>
+      </div>
+    );
+  }
+
+  // --- RENDERIZADO ESTÁNDAR DEL REPRODUCTOR DE VIDEO ---
   return (
     <div className="bg-white dark:bg-[#131314] text-zinc-800 dark:text-[#e5e2e3] font-['Inter'] selection:bg-[#c13535] selection:text-white min-h-screen antialiased transition-colors duration-300">
       <Helmet>
