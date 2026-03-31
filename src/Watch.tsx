@@ -52,6 +52,7 @@ export default function Watch() {
   const [currentTime, setCurrentTime] = useState(0);
   const [duration, setDuration] = useState(0);
   const [audioVolume, setAudioVolume] = useState(0.8);
+  const [isFullscreen, setIsFullscreen] = useState(false);
 
   const toggleEpisodeAudio = () => {
     if (episodeAudioRef.current) {
@@ -136,6 +137,10 @@ export default function Watch() {
       <div className="bg-white dark:bg-[#131314] text-zinc-800 dark:text-[#e5e2e3] font-['Inter'] selection:bg-[#c13535] selection:text-white min-h-screen antialiased transition-colors duration-300">
         <style>{`
           .wave-bar { width: 4px; border-radius: 2px; background-color: #F07D00; }
+          @keyframes spin { from { transform: rotate(0deg); } to { transform: rotate(360deg); } }
+          .vinyl-animation { animation: spin 12s linear infinite; }
+          .glass-player { background: rgba(19, 19, 20, 0.8); backdrop-filter: blur(20px); }
+          .editorial-shadow { text-shadow: 0 4px 12px rgba(0,0,0,0.5); }
         `}</style>
         <Helmet>
           <title>{video.title} | Estudio Radio América</title>
@@ -272,14 +277,20 @@ export default function Watch() {
                         <button className="material-symbols-outlined text-2xl sm:text-3xl text-zinc-400 dark:text-[#DDDADB]/60 hover:text-[#C13535] dark:hover:text-[#DDDADB] transition-colors">repeat</button>
                       </div>
 
-                      {/* Volume Slider */}
-                      <div className="mt-8 flex items-center gap-4 w-40">
-                        <span className="material-symbols-outlined text-zinc-500 dark:text-[#DDDADB]/40 text-sm">volume_down</span>
-                        <div className="flex-1 relative h-1.5 bg-zinc-300 dark:bg-[#353436] rounded-full flex items-center">
-                          <input type="range" min="0" max="1" step="0.01" value={audioVolume} onChange={handleVolume} className="absolute inset-0 w-full h-full opacity-0 cursor-pointer z-20" />
-                          <div className="absolute top-0 left-0 h-full bg-[#C13535] dark:bg-[#DDDADB]/60 rounded-full z-10 pointer-events-none" style={{ width: `${audioVolume * 100}%` }}></div>
+                      {/* Controles Secundarios: Volumen & Fullscreen */}
+                      <div className="mt-8 flex items-center justify-between w-full max-w-sm mx-auto">
+                        <div className="flex items-center gap-4 w-32 sm:w-40">
+                          <span className="material-symbols-outlined text-zinc-500 dark:text-[#DDDADB]/40 text-sm">volume_down</span>
+                          <div className="flex-1 relative h-1.5 bg-zinc-300 dark:bg-[#353436] rounded-full flex items-center">
+                            <input type="range" min="0" max="1" step="0.01" value={audioVolume} onChange={handleVolume} className="absolute inset-0 w-full h-full opacity-0 cursor-pointer z-20" />
+                            <div className="absolute top-0 left-0 h-full bg-[#C13535] dark:bg-[#DDDADB]/60 rounded-full z-10 pointer-events-none" style={{ width: `${audioVolume * 100}%` }}></div>
+                          </div>
+                          <span className="material-symbols-outlined text-zinc-500 dark:text-[#DDDADB]/40 text-sm">volume_up</span>
                         </div>
-                        <span className="material-symbols-outlined text-zinc-500 dark:text-[#DDDADB]/40 text-sm">volume_up</span>
+                        <button onClick={() => setIsFullscreen(true)} className="flex items-center gap-1.5 bg-zinc-200 dark:bg-surface-container text-zinc-600 dark:text-[#DDDADB]/80 hover:text-[#C13535] dark:hover:text-white px-4 py-2 rounded-full text-xs font-bold uppercase tracking-wider transition-colors">
+                          <span className="material-symbols-outlined text-base">fullscreen</span>
+                          Expandir
+                        </button>
                       </div>
                     </>
                   )}
@@ -311,6 +322,144 @@ export default function Watch() {
             </div>
           </section>
         </main>
+
+        {/* OVERLAY DE REPRODUCTOR VINILO (PANTALLA COMPLETA) */}
+        {isFullscreen && !embedUrl && (
+          <div className="fixed inset-0 z-[100] bg-[#131314] text-[#e5e2e3] font-['Montserrat'] overflow-hidden h-[100dvh] flex flex-col select-none">
+            {/* Top Navigation Bar */}
+            <header className="absolute top-0 left-0 w-full z-50 flex justify-between items-center px-6 py-4 bg-transparent">
+              <div className="flex items-center gap-2">
+                <img src="/logo_blanco.png" alt="Logo" className="w-8 h-8 object-contain" />
+                <span className="text-xl font-bold tracking-tighter text-[#DDDADB] font-['Montserrat'] hidden sm:block">Radio América</span>
+              </div>
+              <div className="flex items-center gap-6">
+                <button onClick={() => setIsFullscreen(false)} className="material-symbols-outlined text-[#DDDADB]/60 hover:text-[#F07D00] transition-colors scale-95 active:duration-150 text-3xl" title="Salir de Pantalla Completa">fullscreen_exit</button>
+              </div>
+            </header>
+
+            {/* Main Content: Player Canvas */}
+            <div className="relative flex-1 w-full flex flex-col lg:flex-row items-center justify-center gap-8 lg:gap-16 px-6 md:px-20 lg:px-32 pt-16 pb-[18rem] md:pb-48 overflow-y-auto hide-scrollbar">
+              {/* Background Lighting Effects */}
+              <div className="absolute inset-0 pointer-events-none overflow-hidden">
+                <div className="absolute top-[-20%] left-[-10%] w-[60%] h-[60%] bg-[#c13535]/10 rounded-full blur-[120px]"></div>
+                <div className="absolute bottom-[-20%] right-[-10%] w-[60%] h-[60%] bg-[#ef7c00]/5 rounded-full blur-[120px]"></div>
+              </div>
+
+              {/* 3D Vinyl Record Section */}
+              <div className="relative z-10 w-full max-w-[280px] md:max-w-[400px] lg:max-w-[500px] aspect-square flex items-center justify-center group flex-shrink-0 mt-8 lg:mt-0">
+                {/* Turntable Platter Base */}
+                <div className="absolute w-full h-full rounded-full bg-[#201f20] shadow-[0_0_80px_rgba(0,0,0,0.8)] border border-[#59413f]/10"></div>
+                
+                {/* Vinyl Disc */}
+                <div className="vinyl-animation relative w-[96%] h-[96%] rounded-full bg-[#0a0a0a] shadow-2xl flex items-center justify-center overflow-hidden" style={{ animationPlayState: isEpisodePlaying ? 'running' : 'paused' }}>
+                  {/* Grooves Texture */}
+                  <div className="absolute inset-0 opacity-40" style={{ background: 'repeating-radial-gradient(circle, transparent, transparent 1px, #1a1a1a 2px)' }}></div>
+                  {/* Light Reflection */}
+                  <div className="absolute inset-0 bg-gradient-to-tr from-white/5 via-transparent to-white/5"></div>
+                  {/* Center Label (Art) */}
+                  <div className="relative w-[38%] h-[38%] rounded-full overflow-hidden border-[6px] border-[#131314] shadow-inner">
+                    <img alt="Podcast Cover" className="w-full h-full object-cover" src={video.thumbnail || program?.coverImage || '/logo_blanco.png'} onError={(e) => { e.currentTarget.src = '/logo_blanco.png'; }} />
+                    {/* Spindle Hole */}
+                    <div className="absolute inset-0 flex items-center justify-center">
+                      <div className="w-4 h-4 bg-[#131314] rounded-full shadow-lg border border-[#59413f]/20"></div>
+                    </div>
+                  </div>
+                </div>
+                
+                {/* Tonearm (Static UI Element) */}
+                <div className={`absolute top-0 right-0 w-24 h-64 pointer-events-none hidden md:block transition-transform duration-1000 origin-top-right ${isEpisodePlaying ? 'rotate-[12deg]' : 'rotate-0'}`}>
+                  <div className="absolute top-8 right-8 w-8 h-8 rounded-full bg-[#39393a] border border-[#59413f]/30 shadow-lg"></div>
+                  <div className="absolute top-12 right-[46px] w-1 h-48 bg-gradient-to-b from-[#39393a] to-[#59413f] origin-top rotate-[12deg] rounded-full shadow-xl"></div>
+                  <div className="absolute top-[200px] right-[78px] w-4 h-8 bg-[#353436] rounded-sm rotate-[12deg] shadow-lg"></div>
+                </div>
+              </div>
+
+              {/* Editorial Info Section */}
+              <div className="relative z-10 w-full max-w-xl flex flex-col items-center lg:items-start gap-4 text-center lg:text-left">
+                <div className="flex items-center gap-3">
+                  <span className="px-3 py-1 rounded-full bg-[#c13535] text-[10px] font-bold tracking-widest text-[#ffe4e1] uppercase">{video.category}</span>
+                  <span className="text-[#ffba29] font-medium text-sm flex items-center gap-1">
+                    <span className="material-symbols-outlined text-sm" style={{ fontVariationSettings: "'FILL' 1" }}>radio</span>
+                    {program?.name || 'RADIO AMÉRICA'}
+                  </span>
+                </div>
+                <h1 className="text-3xl md:text-4xl lg:text-5xl xl:text-6xl font-extrabold tracking-tight text-[#e5e2e3] editorial-shadow leading-tight font-['Montserrat'] break-words line-clamp-4">
+                  {video.title}
+                </h1>
+                <div className="flex items-center gap-4 mt-2">
+                  <div className="w-10 h-10 rounded-full overflow-hidden border border-[#59413f]/30 bg-[#201f20]">
+                    <img alt="Host Avatar" className="w-full h-full object-cover" src={program?.thumbnail || '/logo_blanco.png'} onError={(e) => { e.currentTarget.src = '/logo_blanco.png'; }} />
+                  </div>
+                  <div className="flex flex-col text-left">
+                    <p className="text-[#e5e2e3] font-semibold text-sm md:text-lg">Con {program?.host || 'Estudio Radio América'}</p>
+                    <p className="text-[#e1bebb] text-xs md:text-sm font-['Inter']">{program?.schedule || new Date(video.createdAt).toLocaleDateString()}</p>
+                  </div>
+                </div>
+                <p className="text-[#e1bebb] text-sm md:text-base leading-relaxed max-w-md mt-2 font-['Inter'] line-clamp-3">
+                  {video.description || 'Disfruta de este episodio y descubre más contenido exclusivo en Estudio Radio América.'}
+                </p>
+              </div>
+            </div>
+
+            {/* Lower Controls: Waveform & Glass Bar */}
+            <div className="absolute bottom-0 left-0 w-full z-[60] flex flex-col items-center">
+              {/* Waveform Visualizer */}
+              <div className="w-full h-16 md:h-24 flex items-end justify-center gap-[2px] md:gap-[3px] opacity-40 px-4 md:px-0">
+                {[20, 40, 60, 80, 95, 70, 50, 30, 60, 85, 100, 75, 55, 40, 90, 65, 45, 70, 85, 60, 35, 55, 20].map((h, i) => {
+                  const colors = ['bg-[#c13535]', 'bg-[#c13535]', 'bg-[#ef7c00]', 'bg-[#ffba29]', 'bg-[#c13535]', 'bg-[#ef7c00]', 'bg-[#ffba29]', 'bg-[#c13535]', 'bg-[#c13535]', 'bg-[#ef7c00]', 'bg-[#ffba29]', 'bg-[#c13535]', 'bg-[#ef7c00]', 'bg-[#ffba29]', 'bg-[#c13535]', 'bg-[#c13535]', 'bg-[#ef7c00]', 'bg-[#ffba29]', 'bg-[#c13535]', 'bg-[#ef7c00]', 'bg-[#ffba29]', 'bg-[#c13535]', 'bg-[#c13535]'];
+                  return (
+                    <div key={i} className={`w-1 ${colors[i]} rounded-full transition-all duration-200 ${isEpisodePlaying ? 'animate-pulse' : ''}`} style={{ height: `${h}%`, animationDelay: `${i * 0.1}s` }}></div>
+                  );
+                })}
+              </div>
+
+              {/* Glass Player Bar */}
+              <div className="w-full glass-player px-4 md:px-8 pb-6 pt-4 md:pb-10 md:pt-6 border-t-2 border-[#ef7c00]/30 shadow-[0_-10px_40px_rgba(0,0,0,0.5)]">
+                <div className="max-w-6xl mx-auto flex flex-col gap-4 md:gap-6">
+                  {/* Progress Bar */}
+                  <div className="w-full flex items-center gap-2 md:gap-4">
+                    <span className="text-[10px] font-bold text-[#e1bebb] font-['Inter'] tracking-widest w-10 text-right">{formatTime(currentTime)}</span>
+                    <div className="relative flex-1 h-1.5 bg-[#353436] rounded-full overflow-hidden group flex items-center">
+                      <input type="range" min="0" max={duration || 100} value={currentTime} onChange={handleSeek} className="absolute inset-0 w-full h-full opacity-0 cursor-pointer z-20" />
+                      <div className="absolute left-0 top-0 h-full bg-gradient-to-r from-[#c13535] to-[#ef7c00] rounded-full pointer-events-none" style={{ width: `${(currentTime / (duration || 1)) * 100}%` }}></div>
+                      {/* Handle Dot Simulation */}
+                      <div className="absolute top-1/2 -translate-y-1/2 w-3 h-3 bg-[#e5e2e3] rounded-full shadow-lg pointer-events-none transition-all" style={{ left: `calc(${(currentTime / (duration || 1)) * 100}% - 6px)` }}></div>
+                    </div>
+                    <span className="text-[10px] font-bold text-[#e1bebb] font-['Inter'] tracking-widest w-10">{formatTime(duration)}</span>
+                  </div>
+
+                  {/* Main Interaction Cluster */}
+                  <div className="flex items-center justify-between">
+                    {/* Volume (Left) */}
+                    <div className="hidden md:flex items-center gap-4 text-[#e1bebb] w-1/3">
+                      <button className="material-symbols-outlined hover:text-[#ffba29] transition-colors">volume_up</button>
+                      <div className="relative w-24 h-1.5 bg-[#353436] rounded-full flex items-center">
+                        <input type="range" min="0" max="1" step="0.01" value={audioVolume} onChange={handleVolume} className="absolute inset-0 w-full h-full opacity-0 cursor-pointer z-20" />
+                        <div className="absolute top-0 left-0 h-full bg-[#e1bebb]/40 rounded-full pointer-events-none" style={{ width: `${audioVolume * 100}%` }}></div>
+                      </div>
+                    </div>
+
+                    {/* Playback Controls (Center) */}
+                    <div className="flex items-center justify-center gap-6 md:gap-12 w-full md:w-1/3">
+                      <button className="material-symbols-outlined text-3xl text-[#e1bebb] hover:text-[#e5e2e3] transition-all active:scale-90">skip_previous</button>
+                      <button onClick={toggleEpisodeAudio} className="w-16 h-16 flex items-center justify-center bg-[#c13535] text-[#ffe4e1] rounded-full shadow-[0_0_25px_rgba(193,53,53,0.4)] hover:scale-105 active:scale-95 transition-all">
+                        <span className="material-symbols-outlined text-4xl" style={{ fontVariationSettings: "'FILL' 1" }}>{isEpisodePlaying ? 'pause' : 'play_arrow'}</span>
+                      </button>
+                      <button className="material-symbols-outlined text-3xl text-[#e1bebb] hover:text-[#e5e2e3] transition-all active:scale-90">skip_next</button>
+                    </div>
+
+                    {/* Options (Right) */}
+                    <div className="hidden md:flex items-center justify-end gap-6 text-[#e1bebb] w-1/3">
+                      <button className="material-symbols-outlined hover:text-[#ef7c00] transition-all">playlist_play</button>
+                      <button className="material-symbols-outlined hover:text-[#c13535] transition-all">favorite</button>
+                      <button className="material-symbols-outlined hover:text-[#ffba29] transition-all">equalizer</button>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+        )}
       </div>
     );
   }
