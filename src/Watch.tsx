@@ -220,13 +220,22 @@ export default function Watch() {
 
             {/* Right Side: Audio Player UI */}
             <div className="lg:col-span-7">
-              <div className="bg-zinc-100 dark:bg-surface-container-low rounded-3xl p-6 sm:p-8 lg:p-12 relative overflow-hidden shadow-2xl border border-zinc-200 dark:border-transparent">
+                <div className="bg-zinc-100 dark:bg-surface-container-low rounded-3xl p-6 sm:p-8 lg:p-10 relative overflow-hidden shadow-2xl border border-zinc-200 dark:border-transparent">
                 <div className="absolute -top-24 -right-24 w-64 h-64 bg-[#C13535]/10 blur-[100px] rounded-full pointer-events-none"></div>
                 <div className="relative z-10 flex flex-col items-center">
-                  <div className="relative w-full aspect-square max-w-sm mx-auto group">
+                    <div className="relative w-full aspect-square max-w-[240px] sm:max-w-[280px] md:max-w-[320px] mx-auto group">
                     <img className={`w-full h-full object-cover rounded-2xl shadow-[0_20px_50px_rgba(0,0,0,0.3)] transition-transform duration-700 ${isEpisodePlaying ? 'scale-[1.02]' : ''}`} src={video.thumbnail || program?.coverImage || '/logo_blanco.png'} alt={video.title} onError={(e) => { e.currentTarget.src = '/logo_blanco.png'; }} />
-                    <div className="absolute bottom-6 left-6 bg-black/40 backdrop-blur-md p-3 rounded-xl border border-white/10 hidden dark:block">
-                      <img alt="RA Logo" className="w-10 h-10 object-contain" src="/logo_blanco.png" />
+                      
+                      {/* Botón Flotante Pantalla Completa */}
+                      {!embedUrl && (
+                        <button onClick={() => setIsFullscreen(true)} className="absolute top-4 right-4 bg-black/70 backdrop-blur-md text-white px-3 py-2 rounded-lg flex items-center gap-2 text-xs font-bold hover:bg-[#F07D00] hover:scale-105 transition-all border border-white/20 shadow-2xl lg:opacity-0 lg:group-hover:opacity-100 z-30">
+                          <span className="material-symbols-outlined text-base">fullscreen</span>
+                          <span className="hidden sm:inline">Pantalla Completa</span>
+                        </button>
+                      )}
+
+                      <div className="absolute bottom-4 left-4 bg-black/40 backdrop-blur-md p-2.5 rounded-xl border border-white/10 hidden dark:block">
+                        <img alt="RA Logo" className="w-8 h-8 object-contain" src="/logo_blanco.png" />
                     </div>
                   </div>
                   
@@ -248,7 +257,7 @@ export default function Watch() {
                     // --- CUSTOM PLAYER (Direct File) ---
                     <>
                       {/* Wave Visualizer Simulation */}
-                      <div className={`w-full flex items-end justify-center gap-1 sm:gap-1.5 h-16 mt-12 mb-8 opacity-60 ${isEpisodePlaying ? 'animate-pulse' : ''}`}>
+                      <div className={`w-full flex items-end justify-center gap-1 sm:gap-1.5 h-14 mt-8 mb-6 opacity-60 ${isEpisodePlaying ? 'animate-pulse' : ''}`}>
                         {[4,8,12,6,10,14,8,12,4,10,14,6,8,12,10,14,6,10,4,8,12].map((h, i) => (
                           <div key={i} className={`wave-bar ${isEpisodePlaying ? 'animate-bounce' : ''}`} style={{ height: `${h * 4}px`, animationDelay: `${i * 0.1}s` }}></div>
                         ))}
@@ -278,17 +287,17 @@ export default function Watch() {
                       </div>
 
                       {/* Controles Secundarios: Volumen & Fullscreen */}
-                      <div className="mt-8 flex items-center justify-between w-full max-w-sm mx-auto">
-                        <div className="flex items-center gap-4 w-32 sm:w-40">
+                      <div className="mt-8 flex items-center justify-between w-full max-w-[320px] mx-auto">
+                        <div className="flex items-center gap-3 w-32 sm:w-40">
                           <span className="material-symbols-outlined text-zinc-500 dark:text-[#DDDADB]/40 text-sm">volume_down</span>
-                          <div className="flex-1 relative h-1.5 bg-zinc-300 dark:bg-[#353436] rounded-full flex items-center">
+                          <div className="flex-1 relative h-1.5 bg-zinc-300 dark:bg-[#353436] rounded-full flex items-center group/vol">
                             <input type="range" min="0" max="1" step="0.01" value={audioVolume} onChange={handleVolume} className="absolute inset-0 w-full h-full opacity-0 cursor-pointer z-20" />
                             <div className="absolute top-0 left-0 h-full bg-[#C13535] dark:bg-[#DDDADB]/60 rounded-full z-10 pointer-events-none" style={{ width: `${audioVolume * 100}%` }}></div>
                           </div>
                           <span className="material-symbols-outlined text-zinc-500 dark:text-[#DDDADB]/40 text-sm">volume_up</span>
                         </div>
-                        <button onClick={() => setIsFullscreen(true)} className="flex items-center gap-1.5 bg-zinc-200 dark:bg-surface-container text-zinc-600 dark:text-[#DDDADB]/80 hover:text-[#C13535] dark:hover:text-white px-4 py-2 rounded-full text-xs font-bold uppercase tracking-wider transition-colors">
-                          <span className="material-symbols-outlined text-base">fullscreen</span>
+                        <button onClick={() => setIsFullscreen(true)} className="flex items-center gap-1.5 bg-[#131314] dark:bg-surface-container text-white dark:text-[#DDDADB] hover:bg-[#C13535] dark:hover:bg-[#C13535] hover:text-white px-4 py-2.5 rounded-full text-[10px] sm:text-xs font-bold uppercase tracking-wider transition-all shadow-md">
+                          <span className="material-symbols-outlined text-base">open_in_full</span>
                           Expandir
                         </button>
                       </div>
@@ -346,7 +355,7 @@ export default function Watch() {
               </div>
 
               {/* 3D Vinyl Record Section */}
-              <div className="relative z-10 w-full max-w-[280px] md:max-w-[400px] lg:max-w-[500px] aspect-square flex items-center justify-center group flex-shrink-0 mt-8 lg:mt-0">
+              <div className="relative z-10 w-full max-w-[260px] md:max-w-[360px] lg:max-w-[420px] aspect-square flex items-center justify-center group flex-shrink-0 mt-8 lg:mt-0">
                 {/* Turntable Platter Base */}
                 <div className="absolute w-full h-full rounded-full bg-[#201f20] shadow-[0_0_80px_rgba(0,0,0,0.8)] border border-[#59413f]/10"></div>
                 
