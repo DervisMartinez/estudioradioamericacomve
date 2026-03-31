@@ -8,6 +8,7 @@ function Admin() {
   const navigate = useNavigate();
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [isProgramModalOpen, setIsProgramModalOpen] = useState(false);
+  const [isSidebarOpen, setIsSidebarOpen] = useState(false);
   const [activeTab, setActiveTab] = useState<'dashboard' | 'library' | 'programs' | 'analytics' | 'settings'>('dashboard');
   const [selectedProgramDetails, setSelectedProgramDetails] = useState<string | null>(null);
   const [editingId, setEditingId] = useState<string | null>(null);
@@ -157,7 +158,7 @@ function Admin() {
       <audio ref={audioRef} id="radio" src="https://transmision.radioamerica.com.ve:8087/RA909FM" className="hidden" />
       
       {/* Side Navigation Shell */}
-      <aside className="h-screen w-64 fixed left-0 top-0 overflow-y-auto bg-[#131314] flex flex-col p-4 border-r border-[#59413f]/15 shadow-2xl shadow-red-900/5 z-50">
+      <aside className={`h-screen w-64 fixed left-0 top-0 overflow-y-auto bg-[#131314] flex flex-col p-4 border-r border-[#59413f]/15 shadow-2xl shadow-red-900/5 z-50 transition-transform transform ${isSidebarOpen ? 'translate-x-0' : '-translate-x-full'} md:translate-x-0`}>
         <div className="mb-10 px-2">
           <div className="flex items-center gap-3 mb-1">
             <img src="/logo_colors.png" alt="Logo" className="w-8 h-8 object-contain dark:hidden" onError={(e) => { e.currentTarget.src = 'https://ui-avatars.com/api/?name=RA&background=C13535&color=fff&rounded=true'; }} />
@@ -167,26 +168,26 @@ function Admin() {
           <p className="text-[10px] uppercase tracking-[0.2em] text-[#DDDADB]/40 font-bold mt-1">Admin Dashboard</p>
         </div>
         <nav className="flex-1 space-y-2">
-          <button onClick={() => { setActiveTab('dashboard'); setSelectedProgramDetails(null); }} className={`w-full flex items-center gap-3 px-4 py-3 rounded-lg font-bold transition-all ${activeTab === 'dashboard' ? 'bg-[#C13535] text-[#DDDADB]' : 'text-[#DDDADB]/60 hover:text-[#DDDADB] hover:bg-[#1c1b1c]'}`}>
+          <button onClick={() => { setActiveTab('dashboard'); setSelectedProgramDetails(null); setIsSidebarOpen(false); }} className={`w-full flex items-center gap-3 px-4 py-3 rounded-lg font-bold transition-all ${activeTab === 'dashboard' ? 'bg-[#C13535] text-[#DDDADB]' : 'text-[#DDDADB]/60 hover:text-[#DDDADB] hover:bg-[#1c1b1c]'}`}>
             <span className="material-symbols-outlined" data-icon="dashboard">dashboard</span>
             <span className="text-sm">Dashboard</span>
           </button>
-          <button onClick={() => { setActiveTab('library'); setSelectedProgramDetails(null); }} className={`w-full flex items-center gap-3 px-4 py-3 rounded-lg font-bold transition-all ${activeTab === 'library' ? 'bg-[#C13535] text-[#DDDADB]' : 'text-[#DDDADB]/60 hover:text-[#DDDADB] hover:bg-[#1c1b1c]'}`}>
+          <button onClick={() => { setActiveTab('library'); setSelectedProgramDetails(null); setIsSidebarOpen(false); }} className={`w-full flex items-center gap-3 px-4 py-3 rounded-lg font-bold transition-all ${activeTab === 'library' ? 'bg-[#C13535] text-[#DDDADB]' : 'text-[#DDDADB]/60 hover:text-[#DDDADB] hover:bg-[#1c1b1c]'}`}>
             <span className="material-symbols-outlined" data-icon="video_library">video_library</span>
             <span className="text-sm">Video Library</span>
           </button>
           
-          <button onClick={() => { setActiveTab('programs'); setSelectedProgramDetails(null); }} className={`w-full flex items-center gap-3 px-4 py-3 rounded-lg font-bold transition-all ${activeTab === 'programs' ? 'bg-[#C13535] text-[#DDDADB]' : 'text-[#DDDADB]/60 hover:text-[#DDDADB] hover:bg-[#1c1b1c]'}`}>
+          <button onClick={() => { setActiveTab('programs'); setSelectedProgramDetails(null); setIsSidebarOpen(false); }} className={`w-full flex items-center gap-3 px-4 py-3 rounded-lg font-bold transition-all ${activeTab === 'programs' ? 'bg-[#C13535] text-[#DDDADB]' : 'text-[#DDDADB]/60 hover:text-[#DDDADB] hover:bg-[#1c1b1c]'}`}>
             <span className="material-symbols-outlined" data-icon="podcasts">podcasts</span>
             <span className="text-sm">Programas</span>
           </button>
           
-          <button onClick={() => setActiveTab('analytics')} className={`w-full flex items-center gap-3 px-4 py-3 rounded-lg font-bold transition-all ${activeTab === 'analytics' ? 'bg-[#C13535] text-[#DDDADB]' : 'text-[#DDDADB]/60 hover:text-[#DDDADB] hover:bg-[#1c1b1c]'}`}>
+          <button onClick={() => { setActiveTab('analytics'); setIsSidebarOpen(false); }} className={`w-full flex items-center gap-3 px-4 py-3 rounded-lg font-bold transition-all ${activeTab === 'analytics' ? 'bg-[#C13535] text-[#DDDADB]' : 'text-[#DDDADB]/60 hover:text-[#DDDADB] hover:bg-[#1c1b1c]'}`}>
             <span className="material-symbols-outlined" data-icon="trending_up">trending_up</span>
             <span className="text-sm">Analytics</span>
           </button>
 
-          <button onClick={() => setActiveTab('settings')} className={`w-full flex items-center gap-3 px-4 py-3 rounded-lg font-bold transition-all ${activeTab === 'settings' ? 'bg-[#C13535] text-[#DDDADB]' : 'text-[#DDDADB]/60 hover:text-[#DDDADB] hover:bg-[#1c1b1c]'}`}>
+          <button onClick={() => { setActiveTab('settings'); setIsSidebarOpen(false); }} className={`w-full flex items-center gap-3 px-4 py-3 rounded-lg font-bold transition-all ${activeTab === 'settings' ? 'bg-[#C13535] text-[#DDDADB]' : 'text-[#DDDADB]/60 hover:text-[#DDDADB] hover:bg-[#1c1b1c]'}`}>
             <span className="material-symbols-outlined" data-icon="settings">settings</span>
             <span className="text-sm">Settings</span>
           </button>
@@ -211,12 +212,17 @@ function Admin() {
         </div>
       </aside>
 
+      {isSidebarOpen && <div className="fixed inset-0 bg-black/50 z-40 md:hidden" onClick={() => setIsSidebarOpen(false)}></div>}
+
       {/* Main Content Shell */}
-      <main className="ml-64 min-h-screen">
+      <main className="md:ml-64 min-h-screen">
         {/* Top Navigation Bar */}
-        <header className="fixed top-0 right-0 w-[calc(100%-16rem)] z-40 bg-[#131314]/80 backdrop-blur-xl border-b border-[#59413f]/15">
-          <div className="flex justify-between items-center h-16 px-8">
+        <header className="fixed top-0 right-0 w-full md:w-[calc(100%-16rem)] z-40 bg-[#131314]/80 backdrop-blur-xl border-b border-[#59413f]/15">
+          <div className="flex justify-between items-center h-16 px-4 md:px-8">
             <div className="flex items-center gap-8">
+              <button onClick={() => setIsSidebarOpen(!isSidebarOpen)} className="md:hidden text-[#DDDADB]">
+                <span className="material-symbols-outlined">menu</span>
+              </button>
               <h2 className="text-xl font-bold text-[#DDDADB] capitalize">{activeTab.replace('_', ' ')}</h2>
             </div>
             <div className="flex items-center gap-6">
@@ -224,7 +230,7 @@ function Admin() {
                 <span className="absolute inset-y-0 left-3 flex items-center text-[#DDDADB]/40">
                   <span className="material-symbols-outlined text-lg" data-icon="search">search</span>
                 </span>
-                <input className="bg-surface-container-lowest border-none rounded-full py-2 pl-10 pr-4 text-sm text-[#DDDADB] w-64 focus:ring-2 focus:ring-[#FFB91F]/50 transition-all" placeholder="Search videos, guests..." type="text" />
+                <input className="bg-surface-container-lowest border-none rounded-full py-2 pl-10 pr-4 text-sm text-[#DDDADB] w-32 sm:w-48 md:w-64 focus:ring-2 focus:ring-[#FFB91F]/50 transition-all" placeholder="Buscar..." type="text" />
               </div>
               <div className="flex items-center gap-4 text-[#DDDADB]/60">
                 <button className="hover:text-[#DDDADB] transition-colors relative">
@@ -243,7 +249,7 @@ function Admin() {
         </header>
 
         {/* Page Content */}
-        <div className="pt-24 px-8 pb-12">
+        <div className="pt-24 px-4 md:px-8 pb-12">
           
           {/* DASHBOARD & LIBRARY TABS SHARE STATS */}
           {(activeTab === 'dashboard' || activeTab === 'library') && (
@@ -547,7 +553,7 @@ function Admin() {
       {/* Modal para Añadir Video */}
       {isModalOpen && (
         <div className="fixed inset-0 z-[100] bg-black/80 backdrop-blur-sm flex items-center justify-center p-4">
-          <div className="bg-surface-container rounded-2xl p-6 w-full max-w-md border border-outline-variant/20 shadow-2xl">
+          <div className="bg-surface-container rounded-2xl p-4 md:p-6 w-full max-w-md max-h-[90vh] overflow-y-auto border border-outline-variant/20 shadow-2xl">
             <h3 className="text-xl font-bold text-[#DDDADB] mb-4">{editingId ? 'Editar Video' : 'Añadir Nuevo Video'}</h3>
             <form onSubmit={handleSubmit} className="space-y-4">
               <div>
@@ -626,7 +632,7 @@ function Admin() {
       {/* Modal para Añadir Programa */}
       {isProgramModalOpen && (
         <div className="fixed inset-0 z-[100] bg-black/80 backdrop-blur-sm flex items-center justify-center p-4">
-          <div className="bg-surface-container rounded-2xl p-6 w-full max-w-2xl border border-outline-variant/20 shadow-2xl">
+          <div className="bg-surface-container rounded-2xl p-4 md:p-6 w-full max-w-2xl max-h-[90vh] overflow-y-auto border border-outline-variant/20 shadow-2xl">
             <h3 className="text-xl font-bold text-[#DDDADB] mb-4">{editingProgramId ? 'Editar Programa' : 'Añadir Programa o Podcast'}</h3>
             <form onSubmit={handleProgramSubmit} className="space-y-4">
              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">

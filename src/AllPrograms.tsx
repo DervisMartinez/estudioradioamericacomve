@@ -1,4 +1,4 @@
-import { useContext, useState } from 'react';
+import { useContext, useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { VideoContext } from './VideoContext';
 import SearchResults from './SearchResults';
@@ -9,17 +9,24 @@ export default function AllPrograms() {
   const navigate = useNavigate();
   const [searchQuery, setSearchQuery] = useState('');
   const [isSearchOpen, setIsSearchOpen] = useState(false);
-  const [isDarkMode, setIsDarkMode] = useState(() => document.documentElement.classList.contains('dark'));
+  const [isDarkMode, setIsDarkMode] = useState(() => {
+    const savedTheme = localStorage.getItem('theme');
+    if (savedTheme) return savedTheme === 'dark';
+    return document.documentElement.classList.contains('dark');
+  });
+
+  useEffect(() => {
+    if (isDarkMode) {
+      document.documentElement.classList.add('dark');
+      localStorage.setItem('theme', 'dark');
+    } else {
+      document.documentElement.classList.remove('dark');
+      localStorage.setItem('theme', 'light');
+    }
+  }, [isDarkMode]);
 
   const toggleTheme = () => {
-    const html = document.documentElement;
-    if (isDarkMode) {
-      html.classList.remove('dark');
-      setIsDarkMode(false);
-    } else {
-      html.classList.add('dark');
-      setIsDarkMode(true);
-    }
+    setIsDarkMode(!isDarkMode);
   };
 
   // Separamos Programas de Podcasts mediante su tipo real
@@ -38,12 +45,12 @@ export default function AllPrograms() {
       </Helmet>
 
       {/* TopNavBar */}
-      <nav className="fixed top-0 w-full z-50 bg-white/80 dark:bg-[#131314]/80 backdrop-blur-xl flex justify-between items-center px-8 h-20 shadow-sm dark:shadow-none border-b border-zinc-200 dark:border-transparent">
-        <div className="flex items-center gap-12">
-          <div className="flex items-center gap-3 cursor-pointer" onClick={() => navigate('/')}>
+      <nav className="fixed top-0 w-full z-50 bg-white/80 dark:bg-[#131314]/80 backdrop-blur-xl flex justify-between items-center px-4 md:px-8 h-20 shadow-sm dark:shadow-none border-b border-zinc-200 dark:border-transparent">
+        <div className="flex items-center gap-4 md:gap-12">
+          <div className="flex items-center gap-2 md:gap-3 cursor-pointer" onClick={() => navigate('/')}>
             <img src="/logo_colors.png" alt="Logo" className="w-10 h-10 object-contain dark:hidden" onError={(e) => { e.currentTarget.src = 'https://ui-avatars.com/api/?name=RA&background=C13535&color=fff&rounded=true'; }} />
             <img src="/logo_blanco.png" alt="Logo" className="w-10 h-10 object-contain hidden dark:block" onError={(e) => { e.currentTarget.src = 'https://ui-avatars.com/api/?name=RA&background=C13535&color=fff&rounded=true'; }} />
-            <span className="text-2xl font-black text-[#C13535] dark:text-[#DDDADB] tracking-tighter">Estudio Radio América</span>
+            <span className="text-lg md:text-2xl font-black text-[#C13535] dark:text-[#DDDADB] tracking-tighter hidden sm:block">Estudio Radio América</span>
           </div>
         </div>
         <div className="flex items-center gap-6">
@@ -51,8 +58,8 @@ export default function AllPrograms() {
             <span className="material-symbols-outlined absolute left-3 top-1/2 -translate-y-1/2 text-[#C13535]/60 dark:text-[#DDDADB]/40">search</span>
             <input 
               type="text" 
-              placeholder="Buscar programas..."
-              className="bg-zinc-100 dark:bg-surface-container-low border-none rounded-full py-2 pl-10 pr-4 text-sm text-[#C13535] dark:text-[#DDDADB] w-48 focus:ring-2 focus:ring-[#F07D00]/50 transition-all"
+              placeholder="Buscar..."
+              className="bg-zinc-100 dark:bg-surface-container-low border-none rounded-full py-2 pl-10 pr-4 text-sm text-[#C13535] dark:text-[#DDDADB] w-32 sm:w-48 focus:ring-2 focus:ring-[#F07D00]/50 transition-all"
               onFocus={() => setIsSearchOpen(true)}
               onChange={(e) => setSearchQuery(e.target.value)}
             />
@@ -66,9 +73,9 @@ export default function AllPrograms() {
 
       <main className="pt-32 pb-24 px-8 max-w-7xl mx-auto space-y-20">
         {/* Header */}
-        <div className="text-center space-y-4">
-          <h1 className="text-5xl font-black tracking-tighter text-[#C13535] dark:text-[#DDDADB] font-['Montserrat']">CATÁLOGO DE <span className="text-[#F07D00]">CONTENIDO</span></h1>
-          <p className="text-lg text-[#C13535]/80 dark:text-[#DDDADB]/60 max-w-2xl mx-auto">Explora toda nuestra parrilla, desde programas de información general hasta podcasts de nicho.</p>
+        <div className="text-center space-y-2 md:space-y-4">
+          <h1 className="text-3xl sm:text-4xl md:text-5xl font-black tracking-tighter text-[#C13535] dark:text-[#DDDADB] font-['Montserrat']">CATÁLOGO DE <span className="text-[#F07D00]">CONTENIDO</span></h1>
+          <p className="text-base md:text-lg text-[#C13535]/80 dark:text-[#DDDADB]/60 max-w-2xl mx-auto">Explora toda nuestra parrilla, desde programas de información general hasta podcasts de nicho.</p>
         </div>
 
         {/* Programas */}

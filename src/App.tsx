@@ -16,7 +16,11 @@ function App() {
   const [isSearchOpen, setIsSearchOpen] = useState(false);
 
   // Theme State
-  const [isDarkMode, setIsDarkMode] = useState(() => document.documentElement.classList.contains('dark'));
+  const [isDarkMode, setIsDarkMode] = useState(() => {
+    const savedTheme = localStorage.getItem('theme');
+    if (savedTheme) return savedTheme === 'dark';
+    return document.documentElement.classList.contains('dark');
+  });
 
   // Radio Player Logic
   const audioRef = useRef<HTMLAudioElement>(null);
@@ -39,15 +43,18 @@ function App() {
     }
   };
 
-  const toggleTheme = () => {
-    const html = document.documentElement;
+  useEffect(() => {
     if (isDarkMode) {
-      html.classList.remove('dark');
-      setIsDarkMode(false);
+      document.documentElement.classList.add('dark');
+      localStorage.setItem('theme', 'dark');
     } else {
-      html.classList.add('dark');
-      setIsDarkMode(true);
+      document.documentElement.classList.remove('dark');
+      localStorage.setItem('theme', 'light');
     }
+  }, [isDarkMode]);
+
+  const toggleTheme = () => {
+    setIsDarkMode(!isDarkMode);
   };
 
   // Estado para reproducir shorts en línea
@@ -171,14 +178,14 @@ function App() {
       <audio ref={audioRef} id="radio" src="https://transmision.radioamerica.com.ve:8087/RA909FM" className="hidden" />
 
       {/* TopNavBar */}
-      <nav className="fixed top-0 w-full z-50 bg-white/80 dark:bg-[#131314]/80 backdrop-blur-xl flex justify-between items-center px-8 h-20 shadow-sm dark:shadow-none border-b border-zinc-200 dark:border-transparent">
-        <div className="flex items-center gap-12">
-          <div className="flex items-center gap-3">
+      <nav className="fixed top-0 w-full z-50 bg-white/80 dark:bg-[#131314]/80 backdrop-blur-xl flex justify-between items-center px-4 md:px-8 h-20 shadow-sm dark:shadow-none border-b border-zinc-200 dark:border-transparent">
+        <div className="flex items-center gap-4 md:gap-12">
+          <div className="flex items-center gap-2 md:gap-3">
             <img src="/logo_colors.png" alt="Logo" className="w-10 h-10 object-contain dark:hidden" onError={(e) => { e.currentTarget.src = 'https://ui-avatars.com/api/?name=RA&background=C13535&color=fff&rounded=true'; }} />
             <img src="/logo_blanco.png" alt="Logo" className="w-10 h-10 object-contain hidden dark:block" onError={(e) => { e.currentTarget.src = 'https://ui-avatars.com/api/?name=RA&background=C13535&color=fff&rounded=true'; }} />
-            <span className="text-2xl font-black text-[#C13535] dark:text-[#DDDADB] tracking-tighter">Estudio Radio América</span>
+            <span className="text-lg md:text-2xl font-black text-[#C13535] dark:text-[#DDDADB] tracking-tighter hidden sm:block">Estudio Radio América</span>
           </div>
-          <div className="hidden md:flex gap-8 items-center font-['Montserrat'] tracking-tight font-bold">
+          <div className="hidden lg:flex gap-8 items-center font-['Montserrat'] tracking-tight font-bold">
             <a className="text-[#C13535] dark:text-[#DDDADB] border-b-2 border-[#C13535] dark:border-[#DDDADB] pb-1" href="#">Inicio</a>
             <a className="text-[#C13535] dark:text-[#DDDADB] hover:text-[#F07D00] transition-colors duration-300" href="/programas" target="_blank" rel="noopener noreferrer">Programas Destacados</a>
           </div>
@@ -188,8 +195,8 @@ function App() {
             <span className="material-symbols-outlined absolute left-3 top-1/2 -translate-y-1/2 text-[#C13535]/60 dark:text-[#DDDADB]/40">search</span>
             <input 
               type="text" 
-              placeholder="Buscar programas o videos..."
-              className="bg-zinc-100 dark:bg-surface-container-low border-none rounded-full py-2 pl-10 pr-4 text-sm text-[#C13535] dark:text-[#DDDADB] w-48 md:w-64 focus:ring-2 focus:ring-[#F07D00]/50 transition-all"
+              placeholder="Buscar..."
+              className="bg-zinc-100 dark:bg-surface-container-low border-none rounded-full py-2 pl-10 pr-4 text-sm text-[#C13535] dark:text-[#DDDADB] w-32 sm:w-48 md:w-64 focus:ring-2 focus:ring-[#F07D00]/50 transition-all"
               onFocus={() => setIsSearchOpen(true)}
               onChange={(e) => setSearchQuery(e.target.value)}
             />
@@ -206,14 +213,14 @@ function App() {
 
       <main className="pt-20">
         {/* Hero Section: Cinematic Style */}
-        <section className="relative h-[870px] w-full flex items-center overflow-hidden bg-white dark:bg-transparent">
+        <section className="relative min-h-[600px] md:h-[700px] lg:h-[870px] w-full flex items-center overflow-hidden bg-white dark:bg-transparent py-12 md:py-0">
           <div className="absolute inset-0 z-0">
             <img alt="Radio Interview" className={`w-full h-full object-cover transition-opacity duration-1000 ${fadeClass}`} src={featuredVideo ? (featuredVideo.thumbnail || '/logo_blanco.png') : "media/enconexion_pureba.webp"} onError={(e) => { e.currentTarget.src = '/logo_blanco.png'; }} />
             <div className="absolute inset-0 bg-gradient-to-r from-white dark:from-surface via-white/80 dark:via-surface/80 to-transparent"></div>
             <div className="absolute inset-0 bg-gradient-to-t from-white dark:from-surface via-transparent to-transparent"></div>
           </div>
           
-          <div className={`relative z-10 max-w-7xl mx-auto px-8 w-full grid md:grid-cols-2 gap-12 items-center transition-opacity duration-1000 ${fadeClass}`}>
+          <div className={`relative z-10 max-w-7xl mx-auto px-6 md:px-8 w-full grid md:grid-cols-2 gap-8 md:gap-12 items-center transition-opacity duration-1000 ${fadeClass}`}>
             <div className="space-y-6">
               <div className="flex items-center gap-3">
                 <span className="bg-primary-container text-on-primary-container px-3 py-1 rounded-sm text-xs font-bold tracking-widest uppercase">Especial</span>
@@ -222,7 +229,7 @@ function App() {
                   ENTREVISTA DESTACADA
                 </span>
               </div>
-              <h1 className="text-5xl md:text-7xl font-black tracking-tighter text-[#C13535] dark:text-on-surface leading-none text-shadow-editorial">
+              <h1 className="text-4xl sm:text-5xl md:text-7xl font-black tracking-tighter text-[#C13535] dark:text-on-surface leading-none text-shadow-editorial break-words">
                 {featuredVideo ? (
                   <span dangerouslySetInnerHTML={{ __html: featuredVideo.title.replace(' ', '<br />') }} />
                 ) : (
@@ -235,11 +242,11 @@ function App() {
                   : "Una conversación íntima con los líderes que están transformando la realidad actual. Descubre las historias que nunca se contaron detrás de los micrófonos de Estudio Radio América."}
               </p>
               <div className="flex items-center gap-4 pt-4">
-                <button onClick={() => featuredVideo && navigate(`/watch/${featuredVideo.id}`)} className="bg-[#C13535] text-white px-8 py-4 rounded-full font-bold flex items-center gap-2 hover:bg-[#a12b2b] transition-all transform hover:scale-105 active:scale-95 shadow-lg shadow-primary/20">
+                <button onClick={() => featuredVideo && navigate(`/watch/${featuredVideo.id}`)} className="bg-[#C13535] text-white px-6 md:px-8 py-3 md:py-4 rounded-full text-sm md:text-base font-bold flex items-center gap-2 hover:bg-[#a12b2b] transition-all transform hover:scale-105 active:scale-95 shadow-lg shadow-primary/20 whitespace-nowrap">
                   <span className="material-symbols-outlined" style={{ fontVariationSettings: "'FILL' 1" }}>play_arrow</span>
                   ESCUCHAR AHORA
                 </button>
-                <button className="bg-zinc-200/50 dark:bg-surface-container/50 backdrop-blur-md text-[#C13535] dark:text-on-surface px-8 py-4 rounded-full font-bold border border-zinc-300 dark:border-outline-variant/30 hover:bg-zinc-200 dark:hover:bg-surface-container transition-all">
+                <button className="bg-zinc-200/50 dark:bg-surface-container/50 backdrop-blur-md text-[#C13535] dark:text-on-surface px-6 md:px-8 py-3 md:py-4 rounded-full text-sm md:text-base font-bold border border-zinc-300 dark:border-outline-variant/30 hover:bg-zinc-200 dark:hover:bg-surface-container transition-all whitespace-nowrap">
                   MÁS INFO
                 </button>
               </div>
@@ -302,12 +309,12 @@ function App() {
         {/* Asymmetric Catalog: Noticias & Archivo */}
         <section className="py-24 bg-white dark:bg-surface">
           <div className="max-w-7xl mx-auto px-8">
-            <div className="flex flex-col md:flex-row md:items-center justify-between gap-4 mb-16">
+            <div className="flex flex-col lg:flex-row lg:items-center justify-between gap-4 mb-12 md:mb-16">
               <div className="max-w-xl">
                 <h2 className="text-4xl font-black tracking-tighter text-[#C13535] dark:text-on-surface">FORMATO <span className="text-[#F07D00]">VERTICAL</span></h2>
                 <p className="text-[#C13535] dark:text-[#DDDADB]/60 mt-2">Disfruta de nuestros Shorts y Reels. Un vistazo rápido al mejor contenido de Estudio Radio América.</p>
               </div>
-              <div className="flex gap-2">
+              <div className="flex flex-wrap gap-2">
                 {['Todo', 'Historia', 'Personajes', 'Sociedad', 'Deportes'].map(category => (
                   <button 
                     key={category}
@@ -408,7 +415,7 @@ function App() {
             <div className="inline-block p-4 rounded-full bg-[#C13535]/10 border border-[#C13535]/20 mb-4">
               <span className="material-symbols-outlined text-4xl text-[#C13535] dark:text-[#DDDADB]" style={{ fontVariationSettings: "'FILL' 1" }}>mail</span>
             </div>
-            <h2 className="text-4xl md:text-5xl font-black tracking-tighter text-[#C13535] dark:text-on-surface">ÚNETE A LA <span className="text-[#C13535] dark:text-[#DDDADB]">COMUNIDAD</span></h2>
+            <h2 className="text-3xl sm:text-4xl md:text-5xl font-black tracking-tighter text-[#C13535] dark:text-on-surface">ÚNETE A LA <span className="text-[#C13535] dark:text-[#DDDADB]">COMUNIDAD</span></h2>
             <p className="text-xl text-[#C13535] dark:text-[#DDDADB]/60 max-w-2xl mx-auto">Recibe todas las últimas novedades de tus programas favoritos directamente en tu correo. Entérate al instante cuando subamos nuevo contenido.</p>
             <form onSubmit={handleSubscribe} className="flex flex-col sm:flex-row gap-4 max-w-md mx-auto">
               <input name="email" required type="email" className="flex-1 bg-white dark:bg-surface-container-lowest border border-zinc-300 dark:border-outline-variant/20 focus:ring-2 focus:ring-[#F07D00] rounded-full px-6 py-4 text-[#C13535] dark:text-[#DDDADB] placeholder:text-[#C13535]/50 dark:placeholder:text-[#DDDADB]/30" placeholder="Tu correo electrónico" />
@@ -420,10 +427,10 @@ function App() {
       </main>
 
       {/* Now Playing Persistent Bar */}
-      <div className="fixed bottom-0 w-full z-50 px-4 pb-4">
-        <div className="max-w-7xl mx-auto h-20 bg-white/80 dark:bg-[#131314]/80 backdrop-blur-xl rounded-2xl border-t-2 border-[#F07D00]/30 flex items-center justify-between px-6 shadow-2xl">
+      <div className="fixed bottom-0 w-full z-50 px-2 md:px-4 pb-2 md:pb-4">
+        <div className="max-w-7xl mx-auto py-2 md:py-0 md:h-20 bg-white/80 dark:bg-[#131314]/80 backdrop-blur-xl rounded-2xl border-t-2 border-[#F07D00]/30 flex flex-row items-center justify-between px-4 md:px-6 shadow-2xl">
           <div className="flex items-center gap-4">
-            <div className="w-12 h-12 rounded-lg overflow-hidden bg-white dark:bg-surface-container relative group flex items-center justify-center">
+            <div className="w-10 h-10 md:w-12 md:h-12 rounded-lg overflow-hidden bg-white dark:bg-surface-container relative group flex items-center justify-center">
               <img src="/logo_colors.png" alt="Logo" className="w-full h-full object-contain p-1 dark:hidden" />
               <img src="/logo_blanco.png" alt="Logo" className="w-full h-full object-contain p-1 hidden dark:block" />
               <div className="absolute inset-0 bg-black/40 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity">
@@ -438,11 +445,11 @@ function App() {
             </div>
           </div>
           
-          <div className="flex items-center gap-8">
+          <div className="flex items-center gap-4 md:gap-8">
             <button className="text-zinc-500 dark:text-[#DDDADB]/60 hover:text-zinc-800 dark:hover:text-on-surface transition-colors hidden md:block">
               <span className="material-symbols-outlined">skip_previous</span>
             </button>
-            <button onClick={toggleRadio} className="w-12 h-12 rounded-full bg-[#C13535] flex items-center justify-center text-white shadow-lg shadow-primary/20 hover:scale-110 transition-transform">
+            <button onClick={toggleRadio} className="w-10 h-10 md:w-12 md:h-12 rounded-full bg-[#C13535] flex items-center justify-center text-white shadow-lg shadow-primary/20 hover:scale-110 transition-transform">
               <span className="material-symbols-outlined" style={{ fontVariationSettings: "'FILL' 1" }}>{isPlaying ? 'pause' : 'play_arrow'}</span>
             </button>
             <button className="text-zinc-500 dark:text-[#DDDADB]/60 hover:text-zinc-800 dark:hover:text-on-surface transition-colors hidden md:block">
