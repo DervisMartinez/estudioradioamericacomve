@@ -1,4 +1,4 @@
-import { useContext, useState, useRef } from 'react';
+import { useContext, useState, useRef, useEffect } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import { VideoContext } from './VideoContext';
 import { Helmet } from 'react-helmet-async';
@@ -76,12 +76,12 @@ export default function ProgramView() {
 
       {/* TopAppBar */}
       <header className="fixed top-0 w-full z-50 bg-white/80 dark:bg-[#131314]/80 backdrop-blur-xl border-b border-zinc-200 dark:border-transparent transition-all duration-300">
-        <div className="flex justify-between items-center px-6 py-4 w-full max-w-screen-2xl mx-auto">
-          <div className="flex items-center gap-8">
-            <div className="flex items-center gap-3 cursor-pointer" onClick={() => navigate('/')}>
+        <div className="flex justify-between items-center px-4 md:px-6 py-4 w-full max-w-screen-2xl mx-auto">
+          <div className="flex items-center gap-4 md:gap-8">
+            <div className="flex items-center gap-2 md:gap-3 cursor-pointer" onClick={() => navigate('/')}>
               <img src="/logo_colors.png" alt="Logo" className="w-8 h-8 object-contain dark:hidden" onError={(e) => { e.currentTarget.src = 'https://ui-avatars.com/api/?name=RA&background=C13535&color=fff&rounded=true'; }} />
               <img src="/logo_blanco.png" alt="Logo" className="w-8 h-8 object-contain hidden dark:block" onError={(e) => { e.currentTarget.src = 'https://ui-avatars.com/api/?name=RA&background=C13535&color=fff&rounded=true'; }} />
-              <span className="text-2xl font-black text-[#C13535] dark:text-[#DDDADB] tracking-tighter font-['Montserrat']">Estudio Radio América</span>
+              <span className="text-lg md:text-2xl font-black text-[#C13535] dark:text-[#DDDADB] tracking-tighter font-['Montserrat'] hidden sm:block">Estudio Radio América</span>
             </div>
             <nav className="hidden md:flex items-center gap-6">
               <button onClick={() => navigate('/')} className="text-[#C13535] dark:text-[#DDDADB] hover:text-[#F07D00] transition-colors font-['Montserrat'] font-bold tracking-tight">Inicio</button>
@@ -97,7 +97,7 @@ export default function ProgramView() {
 
       <main className="relative pt-16 flex-1">
         {/* Hero Section */}
-        <section className="relative min-h-[600px] md:min-h-[870px] flex items-center overflow-hidden bg-zinc-100 dark:bg-transparent">
+        <section className="relative min-h-[500px] md:min-h-[700px] lg:min-h-[870px] flex items-center overflow-hidden bg-zinc-100 dark:bg-transparent py-16 md:py-0">
           <div className="absolute inset-0 z-0">
             <img alt={program.name} className="w-full h-full object-cover object-center" style={{ maskImage: 'linear-gradient(to bottom, black 80%, transparent 100%)', WebkitMaskImage: 'linear-gradient(to bottom, black 80%, transparent 100%)' }} src={program.coverImage || program.thumbnail || '/logo_blanco.png'} onError={(e) => { e.currentTarget.src = '/logo_blanco.png'; }} />
             <div className="absolute inset-0 bg-gradient-to-r from-white dark:from-[#131314] via-white/80 dark:via-[#131314]/80 to-transparent"></div>
@@ -111,7 +111,7 @@ export default function ProgramView() {
                 {program.category}
               </div>
               <div className="space-y-4">
-                <h1 className="text-6xl md:text-8xl font-black font-['Montserrat'] tracking-tighter text-[#C13535] dark:text-white leading-none">
+                <h1 className="text-4xl sm:text-6xl md:text-8xl font-black font-['Montserrat'] tracking-tighter text-[#C13535] dark:text-white leading-none break-words">
                   {program.name}
                 </h1>
                 <p className="text-lg md:text-xl text-[#C13535]/80 dark:text-[#e1bebb] font-medium leading-relaxed max-w-xl">
@@ -119,12 +119,12 @@ export default function ProgramView() {
                 </p>
               </div>
               
-              <div className="flex flex-wrap gap-4">
-                <button onClick={() => latestVideo && navigate(`/watch/${latestVideo.id}`)} className="bg-[#C13535] text-white px-8 py-4 rounded-full font-bold flex items-center gap-3 hover:scale-105 transition-all active:scale-95 shadow-[0_0_20px_rgba(193,53,53,0.3)]" disabled={!latestVideo}>
+              <div className="flex flex-wrap gap-3 md:gap-4">
+                <button onClick={() => latestVideo && navigate(`/watch/${latestVideo.id}`)} className="bg-[#C13535] text-white px-6 md:px-8 py-3 md:py-4 rounded-full text-sm md:text-base font-bold flex items-center gap-2 md:gap-3 hover:scale-105 transition-all active:scale-95 shadow-[0_0_20px_rgba(193,53,53,0.3)]" disabled={!latestVideo}>
                   <span className="material-symbols-outlined" style={{ fontVariationSettings: "'FILL' 1" }}>play_arrow</span>
                   REPRODUCIR ÚLTIMO
                 </button>
-                <button className="bg-zinc-200/50 dark:bg-[#2a2a2b]/40 backdrop-blur-md border border-zinc-300 dark:border-[#59413f]/50 text-[#C13535] dark:text-[#DDDADB] px-8 py-4 rounded-full font-bold flex items-center gap-3 hover:bg-zinc-300 dark:hover:bg-[#2a2a2b]/60 transition-all">
+                <button className="bg-zinc-200/50 dark:bg-[#2a2a2b]/40 backdrop-blur-md border border-zinc-300 dark:border-[#59413f]/50 text-[#C13535] dark:text-[#DDDADB] px-6 md:px-8 py-3 md:py-4 rounded-full text-sm md:text-base font-bold flex items-center gap-2 md:gap-3 hover:bg-zinc-300 dark:hover:bg-[#2a2a2b]/60 transition-all">
                   <span className="material-symbols-outlined">add</span>
                   MI LISTA
                 </button>
@@ -183,7 +183,7 @@ export default function ProgramView() {
                   <span className="bg-[#F07D00]/20 text-[#F07D00] text-[10px] font-bold px-3 py-1 rounded-full tracking-widest uppercase">Escuchando</span>
                 </div>
                 <div className="space-y-4">
-                  <h2 className="text-4xl lg:text-6xl font-black tracking-tighter font-['Montserrat'] text-[#C13535] dark:text-[#DDDADB] leading-[0.95]">
+                  <h2 className="text-3xl sm:text-4xl lg:text-6xl font-black tracking-tighter font-['Montserrat'] text-[#C13535] dark:text-[#DDDADB] leading-[0.95] break-words">
                     {activePodcast.title}
                   </h2>
                   <div className="flex items-center gap-4 text-sm font-medium text-[#F07D00]">
@@ -208,7 +208,7 @@ export default function ProgramView() {
               
               {/* Right Side: Audio Player UI */}
               <div className="lg:col-span-7">
-                <div className="bg-zinc-100 dark:bg-surface-container-low rounded-3xl p-8 lg:p-12 relative overflow-hidden shadow-2xl border border-zinc-200 dark:border-transparent">
+                <div className="bg-zinc-100 dark:bg-surface-container-low rounded-3xl p-6 md:p-8 lg:p-12 relative overflow-hidden shadow-2xl border border-zinc-200 dark:border-transparent">
                   <div className="absolute -top-24 -right-24 w-64 h-64 bg-[#C13535]/10 blur-[100px] rounded-full pointer-events-none"></div>
                   <div className="relative z-10 flex flex-col items-center">
                     

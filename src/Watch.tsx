@@ -77,12 +77,12 @@ export default function Watch() {
       <audio ref={audioRef} id="radio" src="https://transmision.radioamerica.com.ve:8087/RA909FM" className="hidden" />
 
       {/* TopAppBar */}
-      <nav className="fixed top-0 w-full z-50 flex justify-between items-center px-8 h-20 bg-white/80 dark:bg-[#131314]/80 backdrop-blur-xl border-b border-zinc-200 dark:border-transparent transition-all duration-300">
-        <div className="flex items-center gap-10 cursor-pointer" onClick={() => navigate('/')}>
-          <div className="flex items-center gap-3 hover:scale-105 transition-transform">
+      <nav className="fixed top-0 w-full z-50 flex justify-between items-center px-4 md:px-8 h-20 bg-white/80 dark:bg-[#131314]/80 backdrop-blur-xl border-b border-zinc-200 dark:border-transparent transition-all duration-300">
+        <div className="flex items-center gap-4 md:gap-10 cursor-pointer" onClick={() => navigate('/')}>
+          <div className="flex items-center gap-2 md:gap-3 hover:scale-105 transition-transform">
             <img src="/logo_colors.png" alt="Logo" className="w-8 h-8 object-contain dark:hidden" onError={(e) => { e.currentTarget.src = 'https://ui-avatars.com/api/?name=RA&background=C13535&color=fff&rounded=true'; }} />
             <img src="/logo_blanco.png" alt="Logo" className="w-8 h-8 object-contain hidden dark:block" onError={(e) => { e.currentTarget.src = 'https://ui-avatars.com/api/?name=RA&background=C13535&color=fff&rounded=true'; }} />
-            <span className="text-2xl font-black text-[#C13535] dark:text-[#DDDADB] tracking-tighter font-['Montserrat']">Estudio Radio América</span>
+            <span className="text-lg md:text-2xl font-black text-[#C13535] dark:text-[#DDDADB] tracking-tighter font-['Montserrat'] hidden sm:block">Estudio Radio América</span>
           </div>
           <div className="hidden md:flex gap-8">
             <button onClick={(e) => { e.stopPropagation(); navigate('/'); }} className="text-[#C13535] dark:text-[#DDDADB] hover:text-[#F07D00] transition-colors font-medium">Inicio</button>
@@ -101,15 +101,15 @@ export default function Watch() {
 
       <main className="pt-20 min-h-screen">
         {/* Hero Section: Video Player & Synopsis */}
-        <section className="relative h-auto md:h-[65vh] lg:h-[75vh] min-h-[500px] flex flex-col md:flex-row items-stretch overflow-hidden border-b border-outline-variant/10">
+        <section className="relative h-auto md:h-[65vh] lg:h-[75vh] min-h-[500px] flex flex-col-reverse md:flex-row items-stretch overflow-hidden border-b border-outline-variant/10">
           
           {/* Left Side: Detailed Synopsis */}
-          <div className="relative z-10 w-full md:w-[35%] p-8 md:pl-12 lg:pl-16 flex flex-col justify-center bg-gradient-to-r from-white dark:from-[#131314] via-white dark:via-[#131314] to-transparent shrink-0">
+          <div className="relative z-10 w-full md:w-[35%] p-6 sm:p-8 md:pl-12 lg:pl-16 flex flex-col justify-center bg-white dark:bg-[#131314] md:bg-transparent md:bg-gradient-to-r md:from-white md:dark:from-[#131314] md:via-white md:dark:via-[#131314] md:to-transparent shrink-0">
             <div className="mb-4 flex items-center gap-3">
               <span className="px-2 py-0.5 bg-primary-container text-on-primary-container text-[10px] font-bold tracking-widest uppercase rounded-sm">Premium Archive</span>
               <span className="text-tertiary text-sm font-semibold tracking-wide">● {new Date(video.createdAt).getFullYear()} Remastered</span>
             </div>
-            <h1 className="text-4xl md:text-5xl font-black leading-tight mb-6 tracking-tight text-[#C13535] dark:text-white font-['Montserrat']">
+            <h1 className="text-3xl sm:text-4xl md:text-5xl font-black leading-tight mb-6 tracking-tight text-[#C13535] dark:text-white font-['Montserrat'] break-words">
               {video.title}
             </h1>
             <div className="flex items-center gap-4 text-xs font-bold text-[#C13535]/80 dark:text-[#DDDADB]/60 uppercase tracking-widest mb-6">
@@ -191,7 +191,7 @@ export default function Watch() {
         </section>
 
         {/* Related Content Section */}
-        <section className="px-8 md:px-16 py-20">
+        <section className="px-4 sm:px-8 md:px-16 py-12 md:py-20">
           <div className="flex flex-col gap-2 mb-10">
             <h2 className="text-2xl font-bold tracking-tight text-[#C13535] dark:text-[#DDDADB] font-['Montserrat']">Sugerencias de Temas Similares</h2>
             <div className="h-1 w-20 bg-[#F07D00]"></div>
