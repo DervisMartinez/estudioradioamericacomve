@@ -1,5 +1,6 @@
 import { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
+import { RadioAmericaLoader } from './VideoContext';
 
 interface SearchResultsProps {
   query: string;
@@ -48,7 +49,9 @@ export default function SearchResults({ query, onClose }: SearchResultsProps) {
       <h3 className="text-xs font-bold uppercase text-[#DDDADB]/50 px-4 pb-2">Resultados de Búsqueda</h3>
       <div className="max-h-96 overflow-y-auto">
         {loading ? (
-          <p className="text-center text-sm text-[#DDDADB]/50 py-8">Buscando...</p>
+          <div className="py-6">
+            <RadioAmericaLoader fullScreen={false} />
+          </div>
         ) : (
           <>
             {results.videos.map(video => (
