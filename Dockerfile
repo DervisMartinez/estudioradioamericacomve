@@ -25,6 +25,11 @@ COPY --from=build /app/dist /usr/share/nginx/html
 # Copiamos la configuración personalizada de Nginx para que funcione React Router.
 COPY nginx.conf /etc/nginx/conf.d/default.conf
 
+# Garantizamos el acceso total a las carpetas nativas de Nginx
+RUN mkdir -p /var/cache/nginx /var/run /var/log/nginx && \
+    chmod -R 777 /var/cache/nginx /var/run /var/log/nginx && \
+    chown -R nginx:nginx /var/cache/nginx /var/run /var/log/nginx
+
 # Exponemos el puerto 80 para que se pueda acceder a la aplicación.
 EXPOSE 80
 
