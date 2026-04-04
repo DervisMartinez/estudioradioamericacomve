@@ -5,6 +5,7 @@ import './App.css'
 import { VideoContext } from './VideoContext'
 import SearchResults from './SearchResults';
 import { Helmet } from 'react-helmet-async';
+import PressNoteButton from './PressNoteButton';
 
 function App() {
   const { videos, programs } = useContext(VideoContext);
@@ -251,9 +252,10 @@ function App() {
                   <span className="material-symbols-outlined" style={{ fontVariationSettings: "'FILL' 1" }}>play_arrow</span>
                   ESCUCHAR AHORA
                 </button>
-                <button className="bg-zinc-200/50 dark:bg-surface-container/50 backdrop-blur-md text-[#C13535] dark:text-on-surface px-6 md:px-8 py-3 md:py-4 rounded-full text-sm md:text-base font-bold border border-zinc-300 dark:border-outline-variant/30 hover:bg-zinc-200 dark:hover:bg-surface-container transition-all whitespace-nowrap">
-                  MÁS INFO
-                </button>
+                <PressNoteButton 
+                  url={(featuredVideo as any)?.pressNoteUrl} 
+                  className="bg-zinc-200/50 dark:bg-surface-container/50 backdrop-blur-md text-[#C13535] dark:text-on-surface px-6 md:px-8 py-3 md:py-4 rounded-full text-sm md:text-base font-bold border border-zinc-300 dark:border-outline-variant/30 hover:bg-zinc-200 dark:hover:bg-surface-container transition-all whitespace-nowrap flex items-center gap-2" 
+                />
               </div>
             </div>
 

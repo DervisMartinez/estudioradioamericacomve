@@ -13,7 +13,7 @@ function Admin() {
   const [selectedProgramDetails, setSelectedProgramDetails] = useState<string | null>(null);
   const [editingId, setEditingId] = useState<string | null>(null);
   const [editingProgramId, setEditingProgramId] = useState<string | null>(null);
-  const [newVideo, setNewVideo] = useState({ title: '', category: 'Historia', thumbnail: '', url: '', description: '', isFeatured: false, isShort: false, isAudio: false, programId: '', releaseDate: '' });
+  const [newVideo, setNewVideo] = useState({ title: '', category: 'Historia', thumbnail: '', url: '', description: '', isFeatured: false, isShort: false, isAudio: false, programId: '', releaseDate: '', duration: '', pressNoteUrl: '' });
   const [newProgram, setNewProgram] = useState({ name: '', category: '', thumbnail: '', type: 'Programa' as 'Programa' | 'Podcast', description: '', schedule: '', host: '', coverImage: '' });
   const [profileForm, setProfileForm] = useState(userProfile);
   const [isUploading, setIsUploading] = useState(false);
@@ -99,7 +99,7 @@ function Admin() {
     const videoData = {
       title: newVideo.title, category: newVideo.category, description: newVideo.description,
       isFeatured: newVideo.isFeatured, isShort: newVideo.isShort, isAudio: newVideo.isAudio, thumbnail: newVideo.thumbnail, 
-      url: newVideo.url, programId: newVideo.programId, duration: '10:00', releaseDate: newVideo.releaseDate
+      url: newVideo.url, programId: newVideo.programId, duration: newVideo.duration || '00:00', releaseDate: newVideo.releaseDate, pressNoteUrl: newVideo.pressNoteUrl
     };
 
     if (editingId) {
@@ -140,7 +140,9 @@ function Admin() {
         isShort: video.isShort || false, 
         isAudio: video.isAudio || false, 
         programId: video.programId || '',
-        releaseDate: video.releaseDate ? new Date(video.releaseDate).toISOString().split('T')[0] : ''
+        releaseDate: video.releaseDate ? new Date(video.releaseDate).toISOString().split('T')[0] : '',
+        duration: video.duration || '',
+        pressNoteUrl: video.pressNoteUrl || ''
     });
     setEditingId(video.id);
     setIsModalOpen(true);
@@ -204,7 +206,7 @@ function Admin() {
           </button>
         </nav>
         <div className="mt-auto pt-6 border-t border-[#59413f]/15">
-          <button onClick={() => { setEditingId(null); setNewVideo({ title: '', category: 'Historia', thumbnail: '', url: '', description: '', isFeatured: false, isShort: false, isAudio: false, programId: '', releaseDate: '' }); setIsModalOpen(true); }} className="w-full bg-[#C13535] text-white py-3 rounded-xl font-bold text-sm flex items-center justify-center gap-2 hover:opacity-90 transition-opacity editorial-shadow">
+          <button onClick={() => { setEditingId(null); setNewVideo({ title: '', category: 'Historia', thumbnail: '', url: '', description: '', isFeatured: false, isShort: false, isAudio: false, programId: '', releaseDate: '', duration: '', pressNoteUrl: '' }); setIsModalOpen(true); }} className="w-full bg-[#C13535] text-white py-3 rounded-xl font-bold text-sm flex items-center justify-center gap-2 hover:opacity-90 transition-opacity editorial-shadow">
             <span className="material-symbols-outlined text-sm" data-icon="upload">upload</span>
             Upload Video
           </button>
@@ -251,7 +253,7 @@ function Admin() {
                 <button className="hover:text-[#DDDADB] transition-colors">
                   <span className="material-symbols-outlined" data-icon="help_outline">help_outline</span>
                 </button>
-                <button onClick={() => { setEditingId(null); setNewVideo({ title: '', category: 'Historia', thumbnail: '', url: '', description: '', isFeatured: false, isShort: false, isAudio: false, programId: selectedProgramDetails || '', releaseDate: '' }); setIsModalOpen(true); }} className="bg-[#C13535] text-white px-5 py-2 rounded-full text-sm font-bold hover:opacity-90 active:scale-95 transition-all">
+                <button onClick={() => { setEditingId(null); setNewVideo({ title: '', category: 'Historia', thumbnail: '', url: '', description: '', isFeatured: false, isShort: false, isAudio: false, programId: selectedProgramDetails || '', releaseDate: '', duration: '', pressNoteUrl: '' }); setIsModalOpen(true); }} className="bg-[#C13535] text-white px-5 py-2 rounded-full text-sm font-bold hover:opacity-90 active:scale-95 transition-all">
                   Add New Video
                 </button>
               </div>
@@ -414,8 +416,8 @@ function Admin() {
                     <span>Host: {activeProgramData.host || 'N/A'}</span> • <span>Horario: {activeProgramData.schedule || 'N/A'}</span>
                   </div>
                   <div className="pt-4 flex gap-4">
-                    <button onClick={() => { setEditingId(null); setNewVideo({ title: '', category: activeProgramData.category, thumbnail: '', url: '', description: '', isFeatured: false, isShort: false, isAudio: false, programId: activeProgramData.id, releaseDate: '' }); setIsModalOpen(true); }} className="bg-[#C13535] text-white px-5 py-2 rounded-full text-sm font-bold hover:opacity-90 active:scale-95 transition-all">Añadir Episodio (Video)</button>
-                    <button onClick={() => { setEditingId(null); setNewVideo({ title: '', category: activeProgramData.category, thumbnail: '', url: '', description: '', isFeatured: false, isShort: false, isAudio: true, programId: activeProgramData.id, releaseDate: '' }); setIsModalOpen(true); }} className="bg-[#F07D00] text-black px-5 py-2 rounded-full text-sm font-bold hover:opacity-90 active:scale-95 transition-all">Añadir Episodio (Audio)</button>
+                  <button onClick={() => { setEditingId(null); setNewVideo({ title: '', category: activeProgramData.category, thumbnail: '', url: '', description: '', isFeatured: false, isShort: false, isAudio: false, programId: activeProgramData.id, releaseDate: '', duration: '', pressNoteUrl: '' }); setIsModalOpen(true); }} className="bg-[#C13535] text-white px-5 py-2 rounded-full text-sm font-bold hover:opacity-90 active:scale-95 transition-all">Añadir Episodio (Video)</button>
+                  <button onClick={() => { setEditingId(null); setNewVideo({ title: '', category: activeProgramData.category, thumbnail: '', url: '', description: '', isFeatured: false, isShort: false, isAudio: true, programId: activeProgramData.id, releaseDate: '', duration: '', pressNoteUrl: '' }); setIsModalOpen(true); }} className="bg-[#F07D00] text-black px-5 py-2 rounded-full text-sm font-bold hover:opacity-90 active:scale-95 transition-all">Añadir Episodio (Audio)</button>
                   </div>
                 </div>
               </div>
@@ -581,6 +583,10 @@ function Admin() {
                   <option value="video">🎥 Video (YouTube, MP4, Reel)</option>
                   <option value="audio">🎧 Audio / Podcast (MP3, WAV, Enlace)</option>
                 </select>
+              </div>
+              <div>
+                <label className="block text-xs font-bold text-[#DDDADB]/60 mb-1">URL de Nota de Prensa (Opcional)</label>
+                <input value={newVideo.pressNoteUrl || ''} onChange={e => setNewVideo({...newVideo, pressNoteUrl: e.target.value})} className="w-full bg-surface-container-lowest border-none rounded-lg p-3 text-sm text-[#DDDADB]" type="url" placeholder="https://ejemplo.com/noticia" />
               </div>
               <div>
                 <label className="block text-xs font-bold text-[#DDDADB]/60 mb-1">Título</label>
