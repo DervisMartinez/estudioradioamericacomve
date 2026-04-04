@@ -212,6 +212,7 @@ export default function Watch() {
                 )}
                 <PressNoteButton 
                   url={(video as any)?.pressNoteUrl} 
+                  text="MÁS INFO"
                   className="bg-zinc-200/50 dark:bg-surface-container/50 backdrop-blur-md text-[#C13535] dark:text-[#DDDADB] px-6 py-4 rounded-full text-sm font-bold border border-zinc-300 dark:border-outline-variant/20 hover:bg-zinc-100 dark:hover:bg-surface-container transition-colors flex items-center gap-2" 
                 />
                 <button className="flex items-center justify-center w-14 h-14 rounded-full border border-zinc-300 dark:border-outline-variant/20 hover:bg-zinc-100 dark:hover:bg-surface-container transition-colors text-[#C13535] dark:text-[#DDDADB]">
@@ -551,6 +552,7 @@ export default function Watch() {
               </button>
             <PressNoteButton 
               url={(video as any)?.pressNoteUrl} 
+              text="MÁS INFO"
               className="flex items-center gap-2 px-6 py-4 border border-zinc-300 dark:border-[#DDDADB]/15 text-[#C13535] dark:text-[#DDDADB] rounded-full font-bold hover:bg-zinc-100 dark:hover:bg-[#DDDADB]/5 transition-all" 
             />
             </div>
