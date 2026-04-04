@@ -2,6 +2,7 @@ import { useContext, useState, useRef, useEffect } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import { VideoContext } from './VideoContext';
 import { Helmet } from 'react-helmet-async';
+import PressNoteButton from './PressNoteButton';
 
 export default function Watch() {
   const { id } = useParams();
@@ -209,6 +210,10 @@ export default function Watch() {
                     <span>REPRODUCIR EN PANEL</span>
                   </div>
                 )}
+                <PressNoteButton 
+                  url={(video as any)?.pressNoteUrl} 
+                  className="bg-zinc-200/50 dark:bg-surface-container/50 backdrop-blur-md text-[#C13535] dark:text-[#DDDADB] px-6 py-4 rounded-full text-sm font-bold border border-zinc-300 dark:border-outline-variant/20 hover:bg-zinc-100 dark:hover:bg-surface-container transition-colors flex items-center gap-2" 
+                />
                 <button className="flex items-center justify-center w-14 h-14 rounded-full border border-zinc-300 dark:border-outline-variant/20 hover:bg-zinc-100 dark:hover:bg-surface-container transition-colors text-[#C13535] dark:text-[#DDDADB]">
                   <span className="material-symbols-outlined">add</span>
                 </button>
@@ -544,6 +549,10 @@ export default function Watch() {
                 <span className="material-symbols-outlined">add</span>
                 Mi Lista
               </button>
+            <PressNoteButton 
+              url={(video as any)?.pressNoteUrl} 
+              className="flex items-center gap-2 px-6 py-4 border border-zinc-300 dark:border-[#DDDADB]/15 text-[#C13535] dark:text-[#DDDADB] rounded-full font-bold hover:bg-zinc-100 dark:hover:bg-[#DDDADB]/5 transition-all" 
+            />
             </div>
           </div>
 
