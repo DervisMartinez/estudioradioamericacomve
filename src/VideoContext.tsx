@@ -16,6 +16,7 @@ export interface Video {
   createdAt: string;
   programId?: string;
   releaseDate?: string;
+  pressNoteUrl?: string;
 }
 
 export interface Program {
@@ -37,6 +38,8 @@ export interface UserProfile {
   bio?: string;
   twitter?: string;
   instagram?: string;
+  youtube?: string;
+  facebook?: string;
 }
 
 interface VideoContextType {
@@ -64,7 +67,7 @@ export const VideoContext = createContext<VideoContextType>({
   addProgram: () => {},
   updateProgram: () => {},
   deleteProgram: () => {},
-  userProfile: { firstName: '', lastName: '', avatar: '', bio: '', twitter: '', instagram: '' },
+  userProfile: { firstName: '', lastName: '', avatar: '', bio: '', twitter: '', instagram: '', youtube: '', facebook: '' },
   updateUserProfile: () => {},
   incrementView: () => {},
   isLoading: true,
@@ -117,7 +120,7 @@ export const VideoProvider = ({ children }: { children: ReactNode }) => {
   const [videos, setVideos] = useState<Video[]>([]);
   const [programs, setPrograms] = useState<Program[]>([]);
   const [userProfile, setUserProfile] = useState<UserProfile>({
-    firstName: 'Admin', lastName: 'User', avatar: '', bio: '', twitter: '', instagram: ''
+    firstName: 'Admin', lastName: 'User', avatar: '', bio: '', twitter: '', instagram: '', youtube: '', facebook: ''
   });
   const [isLoading, setIsLoading] = useState(true);
 
