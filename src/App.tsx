@@ -69,6 +69,13 @@ function App() {
     return match ? match[1] : null;
   };
 
+  // Extrae el ID de Instagram
+  const getInstagramId = (url: string) => {
+    if (!url) return null;
+    const match = url.match(/(?:instagram\.com|instagr\.am)\/(?:p|reel|tv)\/([a-zA-Z0-9_-]+)/i);
+    return match ? match[1] : null;
+  };
+
   // Detecta si es un archivo de video directo (mp4) o una carga local
   const isDirectVideo = (url: string) => {
     if (!url) return false;
@@ -397,6 +404,8 @@ function App() {
                             </div>
                             {getYoutubeId(short.url) ? (
                               <iframe className="w-full h-full relative z-10" src={`https://www.youtube.com/embed/${getYoutubeId(short.url)}?autoplay=1&rel=0`} frameBorder="0" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share" allowFullScreen></iframe>
+                            ) : getInstagramId(short.url) ? (
+                              <iframe className="w-full h-full relative z-10 bg-white" src={`https://www.instagram.com/p/${getInstagramId(short.url)}/embed`} frameBorder="0" scrolling="no" allowTransparency={true} allowFullScreen></iframe>
                             ) : isDirectVideo(short.url) ? (
                               <video className="w-full h-full object-cover relative z-10 bg-black" src={short.url} poster={short.thumbnail || '/logo_blanco.png'} controls autoPlay playsInline preload="metadata"></video>
                             ) : (
