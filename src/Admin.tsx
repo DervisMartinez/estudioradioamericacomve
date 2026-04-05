@@ -574,27 +574,19 @@ function Admin() {
       {/* Modal para Añadir Video */}
       {isModalOpen && (
         <div className="fixed inset-0 z-[100] bg-black/80 backdrop-blur-sm flex items-center justify-center p-4">
-          <div className="bg-surface-container rounded-2xl p-4 md:p-6 w-full max-w-md max-h-[90vh] overflow-y-auto border border-outline-variant/20 shadow-2xl">
-            <h3 className="text-xl font-bold text-[#DDDADB] mb-4">{editingId ? 'Editar Video' : 'Añadir Nuevo Video'}</h3>
-            <form onSubmit={handleSubmit} className="space-y-4">
+          <div className="bg-surface-container rounded-2xl p-4 md:p-8 w-full max-w-4xl max-h-[90vh] overflow-y-auto border border-outline-variant/20 shadow-2xl custom-scrollbar">
+            <h3 className="text-xl font-bold text-[#DDDADB] mb-6">{editingId ? 'Editar Video' : 'Añadir Nuevo Video'}</h3>
+            <form onSubmit={handleSubmit} className="grid grid-cols-1 md:grid-cols-2 gap-5">
+              <div className="md:col-span-2">
+                <label className="block text-xs font-bold text-[#DDDADB]/60 mb-1">Título</label>
+                <input required value={newVideo.title} onChange={e => setNewVideo({...newVideo, title: e.target.value})} className="w-full bg-surface-container-lowest border-none rounded-lg p-3 text-sm text-[#DDDADB]" type="text" placeholder="Ej: Entrevista Exclusiva" />
+              </div>
               <div>
                 <label className="block text-xs font-bold text-[#DDDADB]/60 mb-1">Formato de Medio</label>
                 <select value={newVideo.isAudio ? 'audio' : 'video'} onChange={e => setNewVideo({...newVideo, isAudio: e.target.value === 'audio'})} className="w-full bg-surface-container-lowest border-none rounded-lg p-3 text-sm text-[#DDDADB]">
                   <option value="video">🎥 Video (YouTube, MP4, Reel)</option>
                   <option value="audio">🎧 Audio / Podcast (MP3, WAV, Enlace)</option>
                 </select>
-              </div>
-              <div>
-                <label className="block text-xs font-bold text-[#DDDADB]/60 mb-1">URL de Nota de Prensa (Opcional)</label>
-                <input value={newVideo.pressNoteUrl || ''} onChange={e => setNewVideo({...newVideo, pressNoteUrl: e.target.value})} className="w-full bg-surface-container-lowest border-none rounded-lg p-3 text-sm text-[#DDDADB]" type="url" placeholder="https://ejemplo.com/noticia" />
-              </div>
-              <div>
-                <label className="block text-xs font-bold text-[#DDDADB]/60 mb-1">Título</label>
-                <input required value={newVideo.title} onChange={e => setNewVideo({...newVideo, title: e.target.value})} className="w-full bg-surface-container-lowest border-none rounded-lg p-3 text-sm text-[#DDDADB]" type="text" placeholder="Ej: Entrevista Exclusiva" />
-              </div>
-              <div>
-                <label className="block text-xs font-bold text-[#DDDADB]/60 mb-1">Descripción</label>
-                <textarea required value={newVideo.description} onChange={e => setNewVideo({...newVideo, description: e.target.value})} className="w-full bg-surface-container-lowest border-none rounded-lg p-3 text-sm text-[#DDDADB]" placeholder="Una breve sinopsis del video..."></textarea>
               </div>
               <div>
                 <label className="block text-xs font-bold text-[#DDDADB]/60 mb-1">Categoría</label>
@@ -625,7 +617,14 @@ function Admin() {
                     onChange={e => setNewVideo({...newVideo, releaseDate: e.target.value})} 
                     className="w-full bg-surface-container-lowest border-none rounded-lg p-3 text-sm text-[#DDDADB]" 
                 />
-                <p className="text-[10px] text-[#DDDADB]/40 mt-1">Si se establece una fecha futura, aparecerá en "Próximos Estrenos".</p>
+              </div>
+              <div className="md:col-span-2">
+                <label className="block text-xs font-bold text-[#DDDADB]/60 mb-1">Descripción</label>
+                <textarea required value={newVideo.description} onChange={e => setNewVideo({...newVideo, description: e.target.value})} className="w-full bg-surface-container-lowest border-none rounded-lg p-3 text-sm text-[#DDDADB]" placeholder="Una breve sinopsis del video..." rows={3}></textarea>
+              </div>
+              <div className="md:col-span-2">
+                <label className="block text-xs font-bold text-[#DDDADB]/60 mb-1">URL de Nota de Prensa (Opcional)</label>
+                <input value={newVideo.pressNoteUrl || ''} onChange={e => setNewVideo({...newVideo, pressNoteUrl: e.target.value})} className="w-full bg-surface-container-lowest border-none rounded-lg p-3 text-sm text-[#DDDADB]" type="url" placeholder="https://ejemplo.com/noticia" />
               </div>
               <div>
                 <label className="block text-xs font-bold text-[#DDDADB]/60 mb-1">Miniatura (URL o subir archivo)</label>
@@ -640,24 +639,26 @@ function Admin() {
               <div>
                 <label className="block text-xs font-bold text-[#DDDADB]/60 mb-1">{newVideo.isAudio ? 'Audio (URL o subir archivo MP3)' : 'Video (URL de YouTube/Reels o subir archivo MP4)'}</label>
                 <div className="flex gap-2">
-                  <input required value={newVideo.url} onChange={e => setNewVideo({...newVideo, url: e.target.value})} className="flex-1 bg-surface-container-lowest border-none rounded-lg p-3 text-sm text-[#DDDADB]" type="text" placeholder={newVideo.isAudio ? 'Enlace de audio o carga local 👉' : 'Enlace de YouTube o carga local 👉'} />
+                  <input required value={newVideo.url} onChange={e => setNewVideo({...newVideo, url: e.target.value})} className="flex-1 bg-surface-container-lowest border-none rounded-lg p-3 text-sm text-[#DDDADB]" type="text" placeholder={newVideo.isAudio ? 'Enlace de audio o carga 👉' : 'Enlace de YouTube o carga 👉'} />
                   <label className="bg-surface-container-high hover:bg-surface-bright cursor-pointer px-4 py-3 rounded-lg flex items-center justify-center transition-colors shadow-sm">
                     <span className="material-symbols-outlined text-[#DDDADB]">upload_file</span>
                     <input type="file" accept={newVideo.isAudio ? "audio/*" : "video/*"} className="hidden" onChange={(e) => handleFileUpload(e, 'url')} />
                   </label>
                 </div>
               </div>
-              <div className="flex items-center gap-2">
-                <input id="isFeatured" checked={newVideo.isFeatured} onChange={e => setNewVideo({...newVideo, isFeatured: e.target.checked})} type="checkbox" className="h-4 w-4 rounded bg-surface-container-lowest border-outline-variant/50 text-[#C13535] focus:ring-[#C13535]" />
-                <label htmlFor="isFeatured" className="text-sm text-[#DDDADB]/80">Marcar como Entrevista Destacada</label>
+              <div className="md:col-span-2 flex flex-col sm:flex-row gap-6 bg-surface-container-lowest p-4 rounded-lg border border-outline-variant/10 mt-2">
+                <div className="flex items-center gap-2">
+                  <input id="isFeatured" checked={newVideo.isFeatured} onChange={e => setNewVideo({...newVideo, isFeatured: e.target.checked})} type="checkbox" className="h-5 w-5 rounded bg-surface-container-highest border-none text-[#C13535] cursor-pointer" />
+                  <label htmlFor="isFeatured" className="text-sm text-[#DDDADB] font-medium cursor-pointer">Marcar como Entrevista Destacada</label>
+                </div>
+                <div className="flex items-center gap-2">
+                  <input id="isShort" checked={newVideo.isShort} onChange={e => setNewVideo({...newVideo, isShort: e.target.checked})} type="checkbox" className="h-5 w-5 rounded bg-surface-container-highest border-none text-[#F07D00] cursor-pointer" />
+                  <label htmlFor="isShort" className="text-sm text-[#DDDADB] font-medium cursor-pointer">Es un Short / Reel (Vertical)</label>
+                </div>
               </div>
-              <div className="flex items-center gap-2 mt-2">
-                <input id="isShort" checked={newVideo.isShort} onChange={e => setNewVideo({...newVideo, isShort: e.target.checked})} type="checkbox" className="h-4 w-4 rounded bg-surface-container-lowest border-outline-variant/50 text-[#F07D00] focus:ring-[#F07D00]" />
-                <label htmlFor="isShort" className="text-sm text-[#DDDADB]/80">Es un Short / Reel (Video Vertical)</label>
-              </div>
-              <div className="flex justify-end gap-3 mt-6">
-                <button type="button" onClick={() => setIsModalOpen(false)} className="px-4 py-2 rounded-lg text-sm font-bold text-[#DDDADB]/60 hover:text-[#DDDADB]">Cancelar</button>
-                <button type="submit" disabled={isUploading} className={`bg-[#C13535] text-white px-6 py-2 rounded-lg text-sm font-bold ${isUploading ? 'opacity-50 cursor-not-allowed' : 'hover:opacity-90 transition-all'}`}>{isUploading ? 'Subiendo...' : 'Guardar Video'}</button>
+              <div className="md:col-span-2 flex justify-end gap-3 mt-4 pt-4 border-t border-outline-variant/20">
+                <button type="button" onClick={() => setIsModalOpen(false)} className="px-6 py-2.5 rounded-lg text-sm font-bold text-[#DDDADB]/60 hover:text-[#DDDADB] hover:bg-surface-container-highest transition-all">Cancelar</button>
+                <button type="submit" disabled={isUploading} className={`bg-[#C13535] text-white px-8 py-2.5 rounded-lg text-sm font-bold shadow-lg ${isUploading ? 'opacity-50 cursor-not-allowed' : 'hover:scale-105 active:scale-95 transition-all'}`}>{isUploading ? 'Subiendo...' : 'Guardar Video'}</button>
               </div>
             </form>
           </div>
@@ -667,10 +668,9 @@ function Admin() {
       {/* Modal para Añadir Programa */}
       {isProgramModalOpen && (
         <div className="fixed inset-0 z-[100] bg-black/80 backdrop-blur-sm flex items-center justify-center p-4">
-          <div className="bg-surface-container rounded-2xl p-4 md:p-6 w-full max-w-2xl max-h-[90vh] overflow-y-auto border border-outline-variant/20 shadow-2xl">
-            <h3 className="text-xl font-bold text-[#DDDADB] mb-4">{editingProgramId ? 'Editar Programa' : 'Añadir Programa o Podcast'}</h3>
-            <form onSubmit={handleProgramSubmit} className="space-y-4">
-             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+          <div className="bg-surface-container rounded-2xl p-4 md:p-8 w-full max-w-4xl max-h-[90vh] overflow-y-auto border border-outline-variant/20 shadow-2xl custom-scrollbar">
+            <h3 className="text-xl font-bold text-[#DDDADB] mb-6">{editingProgramId ? 'Editar Programa' : 'Añadir Programa o Podcast'}</h3>
+            <form onSubmit={handleProgramSubmit} className="grid grid-cols-1 md:grid-cols-2 gap-5">
               <div>
                 <label className="block text-xs font-bold text-[#DDDADB]/60 mb-1">Nombre del Programa</label>
                 <input required value={newProgram.name} onChange={e => setNewProgram({...newProgram, name: e.target.value})} className="w-full bg-surface-container-lowest border-none rounded-lg p-3 text-sm text-[#DDDADB]" type="text" placeholder="Ej: Visión Deportiva" />
@@ -690,6 +690,14 @@ function Admin() {
                 </datalist>
               </div>
               <div>
+                <label className="block text-xs font-bold text-[#DDDADB]/60 mb-1">Host / Presentador</label>
+                <input required value={newProgram.host || ''} onChange={e => setNewProgram({...newProgram, host: e.target.value})} className="w-full bg-surface-container-lowest border-none rounded-lg p-3 text-sm text-[#DDDADB]" type="text" placeholder="Ej: Carlos Arvelo" />
+              </div>
+              <div>
+                <label className="block text-xs font-bold text-[#DDDADB]/60 mb-1">Horario</label>
+                <input required value={newProgram.schedule || ''} onChange={e => setNewProgram({...newProgram, schedule: e.target.value})} className="w-full bg-surface-container-lowest border-none rounded-lg p-3 text-sm text-[#DDDADB]" type="text" placeholder="Ej: Lun - Vie, 8:00 AM" />
+              </div>
+              <div>
                 <label className="block text-xs font-bold text-[#DDDADB]/60 mb-1">Póster Vertical (URL o subir archivo)</label>
                 <div className="flex gap-2">
                   <input required value={newProgram.thumbnail} onChange={e => setNewProgram({...newProgram, thumbnail: e.target.value})} className="flex-1 bg-surface-container-lowest border-none rounded-lg p-3 text-sm text-[#DDDADB]" type="text" placeholder="URL o subir imagen 👉" />
@@ -699,34 +707,23 @@ function Admin() {
                   </label>
                 </div>
               </div>
-                  </div>
-            <div>
-              <label className="block text-xs font-bold text-[#DDDADB]/60 mb-1">Imagen de Portada Amplia (Opcional, si se omite usará el póster)</label>
-              <div className="flex gap-2">
-                <input value={newProgram.coverImage || ''} onChange={e => setNewProgram({...newProgram, coverImage: e.target.value})} className="flex-1 bg-surface-container-lowest border-none rounded-lg p-3 text-sm text-[#DDDADB]" type="text" placeholder="URL o subir imagen ancha 👉" />
-                <label className="bg-surface-container-high hover:bg-surface-bright cursor-pointer px-4 py-3 rounded-lg flex items-center justify-center transition-colors shadow-sm">
-                  <span className="material-symbols-outlined text-[#DDDADB]">upload_file</span>
-                  <input type="file" accept="image/*" className="hidden" onChange={(e) => handleFileUpload(e, 'program_cover')} />
-                </label>
+              <div className="md:col-span-2">
+                <label className="block text-xs font-bold text-[#DDDADB]/60 mb-1">Imagen de Portada Amplia (Opcional)</label>
+                <div className="flex gap-2">
+                  <input value={newProgram.coverImage || ''} onChange={e => setNewProgram({...newProgram, coverImage: e.target.value})} className="flex-1 bg-surface-container-lowest border-none rounded-lg p-3 text-sm text-[#DDDADB]" type="text" placeholder="URL o subir imagen ancha 👉" />
+                  <label className="bg-surface-container-high hover:bg-surface-bright cursor-pointer px-4 py-3 rounded-lg flex items-center justify-center transition-colors shadow-sm">
+                    <span className="material-symbols-outlined text-[#DDDADB]">upload_file</span>
+                    <input type="file" accept="image/*" className="hidden" onChange={(e) => handleFileUpload(e, 'program_cover')} />
+                  </label>
+                </div>
               </div>
-            </div>
-                  <div>
-                    <label className="block text-xs font-bold text-[#DDDADB]/60 mb-1">Sinopsis / Descripción</label>
-                    <textarea required value={newProgram.description || ''} onChange={e => setNewProgram({...newProgram, description: e.target.value})} className="w-full bg-surface-container-lowest border-none rounded-lg p-3 text-sm text-[#DDDADB]" placeholder="Sinopsis del programa..."></textarea>
-                  </div>
-                  <div className="grid grid-cols-2 gap-4">
-                    <div>
-                      <label className="block text-xs font-bold text-[#DDDADB]/60 mb-1">Host / Presentador</label>
-                      <input required value={newProgram.host || ''} onChange={e => setNewProgram({...newProgram, host: e.target.value})} className="w-full bg-surface-container-lowest border-none rounded-lg p-3 text-sm text-[#DDDADB]" type="text" placeholder="Ej: Carlos Arvelo" />
-                    </div>
-                    <div>
-                      <label className="block text-xs font-bold text-[#DDDADB]/60 mb-1">Horario</label>
-                      <input required value={newProgram.schedule || ''} onChange={e => setNewProgram({...newProgram, schedule: e.target.value})} className="w-full bg-surface-container-lowest border-none rounded-lg p-3 text-sm text-[#DDDADB]" type="text" placeholder="Ej: Lun - Vie, 8:00 AM" />
-                    </div>
-                  </div>
-              <div className="flex justify-end gap-3 mt-6">
-                <button type="button" onClick={() => setIsProgramModalOpen(false)} className="px-4 py-2 rounded-lg text-sm font-bold text-[#DDDADB]/60 hover:text-[#DDDADB]">Cancelar</button>
-                <button type="submit" className="bg-[#F07D00] text-black px-6 py-2 rounded-lg text-sm font-bold">Guardar Programa</button>
+              <div className="md:col-span-2">
+                <label className="block text-xs font-bold text-[#DDDADB]/60 mb-1">Sinopsis / Descripción</label>
+                <textarea required value={newProgram.description || ''} onChange={e => setNewProgram({...newProgram, description: e.target.value})} className="w-full bg-surface-container-lowest border-none rounded-lg p-3 text-sm text-[#DDDADB]" placeholder="Sinopsis del programa..." rows={3}></textarea>
+              </div>
+              <div className="md:col-span-2 flex justify-end gap-3 mt-4 pt-4 border-t border-outline-variant/20">
+                <button type="button" onClick={() => setIsProgramModalOpen(false)} className="px-6 py-2.5 rounded-lg text-sm font-bold text-[#DDDADB]/60 hover:text-[#DDDADB] hover:bg-surface-container-highest transition-all">Cancelar</button>
+                <button type="submit" className="bg-[#F07D00] text-black px-8 py-2.5 rounded-lg text-sm font-bold shadow-lg hover:scale-105 active:scale-95 transition-all">Guardar Programa</button>
               </div>
             </form>
           </div>
