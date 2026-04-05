@@ -255,7 +255,7 @@ function App() {
                 <PressNoteButton 
                   url={(featuredVideo as any)?.pressNoteUrl} 
                   text="LEA LA NOTA COMPLETA AQUI"
-                  className="bg-zinc-200/50 dark:bg-surface-container/50 backdrop-blur-md text-[#C13535] dark:text-on-surface px-5 md:px-6 py-3 md:py-4 rounded-full text-xs md:text-sm font-bold border border-zinc-300 dark:border-outline-variant/30 hover:bg-zinc-200 dark:hover:bg-surface-container transition-all whitespace-nowrap flex items-center gap-2" 
+                  className="bg-zinc-200/50 dark:bg-surface-container/50 backdrop-blur-md text-[#C13535] dark:text-on-surface px-5 py-3 md:py-4 rounded-full text-xs md:text-sm font-bold border border-zinc-300 dark:border-outline-variant/30 hover:bg-zinc-200 dark:hover:bg-surface-container transition-all whitespace-nowrap flex items-center gap-2 shadow-lg" 
                 />
               </div>
             </div>
