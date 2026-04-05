@@ -8,7 +8,7 @@ import { Helmet } from 'react-helmet-async';
 import PressNoteButton from './PressNoteButton';
 
 function App() {
-  const { videos, programs } = useContext(VideoContext);
+  const { videos, programs, userProfile } = useContext(VideoContext);
   const navigate = useNavigate();
   const [activeCategory, setActiveCategory] = useState('Todo');
 
@@ -448,6 +448,45 @@ function App() {
                   </div>
                 )}
               </div>
+            </div>
+          </div>
+        </section>
+
+        {/* Social Media & YouTube Section */}
+        <section className="py-24 bg-white dark:bg-[#131314] border-t border-zinc-200 dark:border-outline-variant/10">
+          <div className="max-w-7xl mx-auto px-8 flex flex-col items-center text-center">
+            <h2 className="text-3xl md:text-5xl font-black tracking-tighter text-[#C13535] dark:text-[#DDDADB] font-['Montserrat'] mb-4">
+              SÍGUENOS EN <span className="text-[#F07D00]">REDES SOCIALES</span>
+            </h2>
+            <p className="text-lg text-zinc-600 dark:text-[#DDDADB]/70 mb-12 max-w-2xl font-light">
+              Mantente conectado con Estudio Radio América. Suscríbete a nuestro canal de YouTube y síguenos en nuestras redes para no perderte ninguna entrevista, podcast o noticia de último momento.
+            </p>
+            
+            <div className="flex flex-wrap justify-center gap-6">
+              {userProfile?.youtube && (
+                <a href={userProfile.youtube} target="_blank" rel="noreferrer" className="flex items-center gap-3 px-8 py-4 rounded-full bg-[#FF0000] text-white font-bold hover:scale-105 transition-transform shadow-lg shadow-red-900/20">
+                  <span className="material-symbols-outlined text-2xl">smart_display</span>
+                  YouTube
+                </a>
+              )}
+              {userProfile?.instagram && (
+                <a href={userProfile.instagram.startsWith('http') ? userProfile.instagram : `https://instagram.com/${userProfile.instagram.replace('@','')}`} target="_blank" rel="noreferrer" className="flex items-center gap-3 px-8 py-4 rounded-full bg-gradient-to-tr from-[#fd5949] to-[#d6249f] text-white font-bold hover:scale-105 transition-transform shadow-lg shadow-pink-900/20">
+                  <span className="material-symbols-outlined text-2xl">photo_camera</span>
+                  Instagram
+                </a>
+              )}
+              {userProfile?.facebook && (
+                <a href={userProfile.facebook} target="_blank" rel="noreferrer" className="flex items-center gap-3 px-8 py-4 rounded-full bg-[#1877F2] text-white font-bold hover:scale-105 transition-transform shadow-lg shadow-blue-900/20">
+                  <span className="material-symbols-outlined text-2xl">thumb_up</span>
+                  Facebook
+                </a>
+              )}
+              {userProfile?.twitter && (
+                <a href={userProfile.twitter.startsWith('http') ? userProfile.twitter : `https://twitter.com/${userProfile.twitter.replace('@','')}`} target="_blank" rel="noreferrer" className="flex items-center gap-3 px-8 py-4 rounded-full bg-black dark:bg-white dark:text-black text-white font-bold hover:scale-105 transition-transform shadow-lg">
+                  <span className="font-black text-xl leading-none">𝕏</span>
+                  Twitter
+                </a>
+              )}
             </div>
           </div>
         </section>

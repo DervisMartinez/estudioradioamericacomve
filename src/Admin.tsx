@@ -534,6 +534,14 @@ function Admin() {
                     <label className="block text-xs font-bold text-[#DDDADB]/60 mb-1">Usuario de Instagram</label>
                     <input value={profileForm.instagram || ''} onChange={e => setProfileForm({...profileForm, instagram: e.target.value})} className="w-full bg-surface-container-lowest border-none rounded-lg p-3 text-sm text-[#DDDADB]" type="text" placeholder="@usuario" />
                   </div>
+                  <div>
+                    <label className="block text-xs font-bold text-[#DDDADB]/60 mb-1">Canal de YouTube</label>
+                    <input value={profileForm.youtube || ''} onChange={e => setProfileForm({...profileForm, youtube: e.target.value})} className="w-full bg-surface-container-lowest border-none rounded-lg p-3 text-sm text-[#DDDADB]" type="url" placeholder="https://youtube.com/..." />
+                  </div>
+                  <div>
+                    <label className="block text-xs font-bold text-[#DDDADB]/60 mb-1">Página de Facebook</label>
+                    <input value={profileForm.facebook || ''} onChange={e => setProfileForm({...profileForm, facebook: e.target.value})} className="w-full bg-surface-container-lowest border-none rounded-lg p-3 text-sm text-[#DDDADB]" type="url" placeholder="https://facebook.com/..." />
+                  </div>
                 </div>
                 <div className="flex justify-end mt-8">
                   <button type="submit" className="bg-[#C13535] text-white px-8 py-3 rounded-lg font-bold hover:opacity-90 transition-all">Guardar Cambios</button>
