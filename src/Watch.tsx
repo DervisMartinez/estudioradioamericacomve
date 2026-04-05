@@ -114,7 +114,7 @@ export default function Watch() {
   // Extrae el ID de YouTube (Mejorado para soportar múltiples formatos)
   const getYoutubeId = (url: string) => {
     if (!url) return null;
-    const regExp = /(?:youtube\.com\/(?:[^\/]+\/.+\/|(?:v|e(?:mbed)?)\/|.*[?&]v=)|youtu\.be\/|youtube\.com\/shorts\/)([^"&?\/\s]{11})/i;
+    const regExp = /(?:youtube\.com\/(?:[^\/]+\/.+\/|(?:v|e(?:mbed)?|live)\/|.*[?&]v=)|youtu\.be\/|youtube\.com\/(?:shorts|live)\/)([^"&?\/\s]{11})/i;
     const match = url.match(regExp);
     return match ? match[1] : null;
   };
