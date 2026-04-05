@@ -119,6 +119,13 @@ export default function Watch() {
     return match ? match[1] : null;
   };
 
+  // Extrae el ID de Instagram
+  const getInstagramId = (url: string) => {
+    if (!url) return null;
+    const match = url.match(/(?:instagram\.com|instagr\.am)\/(?:p|reel|tv)\/([a-zA-Z0-9_-]+)/i);
+    return match ? match[1] : null;
+  };
+
   // Detecta si es un archivo de video directo (mp4) o una carga local
   const isDirectVideo = (url: string) => {
     if (!url) return false;
@@ -126,6 +133,7 @@ export default function Watch() {
   };
 
   const ytId = getYoutubeId(video.url);
+  const igId = getInstagramId(video.url);
   const relatedVideos = videos.filter(v => v.id !== id).slice(0, 6);
 
   // --- RENDERIZADO DEL REPRODUCTOR DE AUDIO (PODCAST) ---
@@ -572,6 +580,8 @@ export default function Watch() {
                 </div>
                 {ytId ? (
                   <iframe className="w-full aspect-video max-h-full relative z-10" src={`https://www.youtube.com/embed/${ytId}?autoplay=1&rel=0`} title={video.title} frameBorder="0" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share" allowFullScreen></iframe>
+                ) : igId ? (
+                  <iframe className="w-full h-full max-h-full relative z-10 bg-white" src={`https://www.instagram.com/p/${igId}/embed`} title={video.title} frameBorder="0" scrolling="no" allowTransparency={true} allowFullScreen></iframe>
                 ) : isDirectVideo(video.url) ? (
                   <video className="w-full aspect-video max-h-full relative z-10 bg-black" src={video.url} poster={video.thumbnail || '/logo_blanco.png'} controls autoPlay playsInline preload="metadata"></video>
                 ) : (
