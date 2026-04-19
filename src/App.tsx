@@ -6,6 +6,44 @@ import { VideoContext } from './VideoContext'
 import SearchResults from './SearchResults';
 import { Helmet } from 'react-helmet-async';
 import PressNoteButton from './PressNoteButton';
+VOLVAimport Hls from 'hls.js';
+
+// COMPONENTE EXTERNO PARA REPRODUCTOR HLS Y MP4 (SHORTS)
+const HlsVideoPlayer = ({ src, poster, className }: { src: string, poster: string, className: string }) => {
+  const videoRef = useRef<HTMLVideoElement>(null);
+  
+  useEffect(() => {
+    const video = videoRef.current;
+    if (!video || !src) return;
+
+    let hls: Hls | null = null;
+
+    if (src.endsWith('.m3u8')) {
+      if (Hls.isSupported()) {
+        hls = new Hls();
+        hls.loadSource(src);
+        hls.attachMedia(video);
+      } else if (video.canPlayType('application/vnd.apple.mpegurl')) {
+        video.src = src; // Soporte nativo para Safari/iOS
+      }
+    } else {
+      video.src = src; // MP4 normal o enlace externo
+    }
+
+    return () => {
+      if (hls) hls.destroy();
+    };
+  }, [src]);
+  
+  const isProtected = src.endsWith('.m3u8');
+
+  return (
+    <video ref={videoRef} className={className} poster={poster} controls autoPlay playsInline preload="metadata" 
+      controlsList={isProtected ? "nodownload" : undefined} 
+      onContextMenu={isProtected ? (e) => e.preventDefault() : undefined}>
+    </video>
+  );
+};
 
 function App() {
   const { videos, programs, userProfile } = useContext(VideoContext);
@@ -416,7 +454,7 @@ function App() {
                             ) : getInstagramId(short.url) ? (
                               <iframe className="w-full h-full relative z-10 bg-white" src={`https://www.instagram.com/p/${getInstagramId(short.url)}/embed`} frameBorder="0" scrolling="no" allowTransparency={true} allowFullScreen></iframe>
                             ) : isDirectVideo(short.url) ? (
-                              <video className="w-full h-full object-cover relative z-10 bg-black" src={short.url} poster={short.thumbnail || '/logo_blanco.png'} controls autoPlay playsInline preload="metadata"></video>
+                              <HlsVideoPlayer className="w-full h-full object-cover relative z-10 bg-black" src={short.url} poster={short.thumbnail || '/logo_blanco.png'} />
                             ) : (
                               <div className="w-full h-full relative z-10 flex flex-col items-center justify-center bg-zinc-200 dark:bg-surface-container-highest p-4 text-center">
                                 <span className="material-symbols-outlined text-4xl text-[#F07D00] mb-2">link</span>

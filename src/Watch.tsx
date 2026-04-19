@@ -5,6 +5,45 @@ import { Helmet } from 'react-helmet-async';
 import PressNoteButton from './PressNoteButton';
 import Hls from 'hls.js';
 
+// COMPONENTE EXTERNO PARA REPRODUCTOR HLS Y MP4
+const HlsVideoPlayer = ({ src, poster, className }: { src: string, poster: string, className: string }) => {
+  const videoRef = useRef<HTMLVideoElement>(null);
+  
+  useEffect(() => {
+    const video = videoRef.current;
+    if (!video || !src) return;
+
+    let hls: Hls | null = null;
+
+    if (src.endsWith('.m3u8')) {
+      if (Hls.isSupported()) {
+        hls = new Hls();
+        hls.loadSource(src);
+        hls.attachMedia(video);
+      } else if (video.canPlayType('application/vnd.apple.mpegurl')) {
+        video.src = src; // Soporte nativo para Safari/iOS
+      }
+    } else {
+      // MP4 normal (local o externo)
+      video.src = src;
+    }
+
+    return () => {
+      if (hls) hls.destroy();
+    };
+  }, [src]);
+  
+  // Solo bloqueamos click derecho y descargas si es original de la radio (.m3u8)
+  const isProtected = src.endsWith('.m3u8');
+
+  return (
+    <video ref={videoRef} className={className} poster={poster} controls autoPlay playsInline preload="metadata" 
+      controlsList={isProtected ? "nodownload" : undefined} 
+      onContextMenu={isProtected ? (e) => e.preventDefault() : undefined}>
+    </video>
+  );
+};
+
 export default function Watch() {
   const { id } = useParams();
   const navigate = useNavigate();
@@ -97,30 +136,6 @@ export default function Watch() {
       incrementView(id);
     }
   }, [id, incrementView]);
-
-  // Componente interno para manejar los videos encriptados HLS y MP4 normales
-  const HlsVideoPlayer = ({ src, poster, className }: { src: string, poster: string, className: string }) => {
-    const videoRef = useRef<HTMLVideoElement>(null);
-    
-    useEffect(() => {
-      if (videoRef.current && src) {
-        if (src.endsWith('.m3u8')) {
-          if (Hls.isSupported()) {
-            const hls = new Hls();
-            hls.loadSource(src);
-            hls.attachMedia(videoRef.current);
-            return () => hls.destroy();
-          } else if (videoRef.current.canPlayType('application/vnd.apple.mpegurl')) {
-            videoRef.current.src = src; // Soporte nativo para Safari/iOS
-          }
-        } else {
-          videoRef.current.src = src; // MP4 normal
-        }
-      }
-    }, [src]);
-    
-    return <video ref={videoRef} className={className} poster={poster} controls autoPlay playsInline preload="metadata" controlsList="nodownload" onContextMenu={(e) => e.preventDefault()}></video>;
-  };
 
   if (!video) {
     return (
