@@ -1,4 +1,4 @@
-import { useContext, useState, useRef } from 'react';
+import { useContext, useState, useRef, useEffect, useMemo } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import { VideoContext } from './VideoContext';
 import { Helmet } from 'react-helmet-async';
@@ -27,11 +27,66 @@ export default function ProgramView() {
   const [activePodcastId, setActivePodcastId] = useState<string | null>(latestAudio ? latestAudio.id : null);
   const activePodcast = audioEpisodes.find(a => a.id === activePodcastId);
 
+  // --- LÓGICA DE LISTA DE REPRODUCCIÓN (PATROCINADORES) ---
+  const playlist = useMemo(() => {
+    if (!activePodcast?.url) return [];
+    try {
+      const arr = JSON.parse(activePodcast.url);
+      if (Array.isArray(arr)) return arr;
+    } catch(e) {}
+    return [activePodcast.url];
+  }, [activePodcast?.url]);
+
+  const [currentTrackIndex, setCurrentTrackIndex] = useState(0);
+  const isAdPlaying = playlist.length > 1 && currentTrackIndex < playlist.length - 1;
+  const currentSrc = playlist[currentTrackIndex] || '';
+
+  // Resetear la pista si cambias de episodio
+  useEffect(() => {
+    setCurrentTrackIndex(0);
+    setIsPodcastPlaying(false);
+  }, [activePodcastId]);
+
+  useEffect(() => {
+    if (currentTrackIndex > 0 && podcastAudioRef.current) {
+      podcastAudioRef.current.play().catch(() => console.warn("Autoplay bloqueado por el navegador"));
+      setIsPodcastPlaying(true);
+    }
+  }, [currentTrackIndex]);
+
+  // Lógica de progreso real
+  const [currentTime, setCurrentTime] = useState(0);
+  const [duration, setDuration] = useState(0);
+
+  const handleTimeUpdate = () => { if (podcastAudioRef.current) setCurrentTime(podcastAudioRef.current.currentTime); };
+  const handleLoadedMetadata = () => { if (podcastAudioRef.current) setDuration(podcastAudioRef.current.duration); };
+  
+  const handleSeek = (e: React.ChangeEvent<HTMLInputElement>) => {
+    if (isAdPlaying) return; // Bloquear salto de anuncio
+    const newTime = Number(e.target.value);
+    if (podcastAudioRef.current) podcastAudioRef.current.currentTime = newTime;
+    setCurrentTime(newTime);
+  };
+  const formatTime = (time: number) => {
+    if (!time || isNaN(time)) return '00:00';
+    const mins = Math.floor(time / 60);
+    const secs = Math.floor(time % 60);
+    return `${mins}:${secs < 10 ? '0' : ''}${secs}`;
+  };
+
   const togglePodcast = () => {
     if (podcastAudioRef.current) {
       if (isPodcastPlaying) podcastAudioRef.current.pause(); 
       else podcastAudioRef.current.play();
       setIsPodcastPlaying(!isPodcastPlaying);
+    }
+  };
+
+  const handleEnded = () => {
+    if (currentTrackIndex < playlist.length - 1) {
+      setCurrentTrackIndex(prev => prev + 1);
+    } else {
+      setIsPodcastPlaying(false);
     }
   };
 
@@ -72,7 +127,7 @@ export default function ProgramView() {
         <meta name="twitter:card" content="summary_large_image" />
       </Helmet>
 
-      {activePodcast && <audio ref={podcastAudioRef} src={activePodcast.url} onEnded={() => setIsPodcastPlaying(false)} className="hidden" />}
+      {activePodcast && <audio ref={podcastAudioRef} src={currentSrc} onTimeUpdate={handleTimeUpdate} onLoadedMetadata={handleLoadedMetadata} onEnded={handleEnded} className="hidden" />}
 
       {/* TopAppBar */}
       <header className="fixed top-0 w-full z-50 bg-white/80 dark:bg-[#131314]/80 backdrop-blur-xl border-b border-zinc-200 dark:border-transparent transition-all duration-300">
@@ -184,7 +239,7 @@ export default function ProgramView() {
                 </div>
                 <div className="space-y-4">
                   <h2 className="text-3xl sm:text-4xl lg:text-6xl font-black tracking-tighter font-['Montserrat'] text-[#C13535] dark:text-[#DDDADB] leading-[0.95] break-words">
-                    {activePodcast.title}
+                    {isAdPlaying ? `Anuncio (${currentTrackIndex + 1}/${playlist.length - 1})` : activePodcast.title}
                   </h2>
                   <div className="flex items-center gap-4 text-sm font-medium text-[#F07D00]">
                     <span className="flex items-center gap-1">
@@ -196,7 +251,7 @@ export default function ProgramView() {
                   </div>
                 </div>
                 <p className="text-lg text-zinc-600 dark:text-[#DDDADB]/80 leading-relaxed font-light">
-                  {activePodcast.description}
+                  {isAdPlaying ? 'Este episodio es traído a ti por nuestros aliados comerciales.' : activePodcast.description}
                 </p>
                 <div className="pt-4 flex items-center gap-6">
                   <button onClick={togglePodcast} className="bg-[#C13535] hover:bg-[#C13535]/90 text-white flex items-center gap-2 px-8 py-4 rounded-full font-bold transition-all active:scale-95">
@@ -226,10 +281,15 @@ export default function ProgramView() {
                       ))}
                     </div>
                     
-                    {/* Progress Bar (Simulated) */}
+                    {/* Progress Bar (Real) */}
                     <div className="w-full space-y-2 px-4">
-                      <div className="relative w-full h-1.5 bg-zinc-300 dark:bg-[#353436] rounded-full overflow-hidden">
-                        <div className={`absolute top-0 left-0 h-full bg-[#F07D00] w-1/3 shadow-[0_0_10px_#F07D00] ${isPodcastPlaying ? 'animate-pulse' : ''}`}></div>
+                      <div className={`relative w-full h-1.5 rounded-full overflow-hidden flex items-center group/progress transition-colors ${isAdPlaying ? 'bg-zinc-700' : 'bg-zinc-300 dark:bg-[#353436]'}`}>
+                        <input type="range" min="0" max={duration || 100} value={currentTime} onChange={handleSeek} className={`absolute inset-0 w-full h-full opacity-0 z-20 ${isAdPlaying ? 'cursor-not-allowed' : 'cursor-pointer'}`} disabled={isAdPlaying} />
+                        <div className={`absolute top-0 left-0 h-full z-10 pointer-events-none transition-all duration-300 ${isAdPlaying ? 'bg-[#FFB91F] shadow-[0_0_10px_#FFB91F]' : 'bg-[#F07D00] shadow-[0_0_10px_#F07D00]'}`} style={{ width: `${(currentTime / (duration || 1)) * 100}%` }}></div>
+                      </div>
+                      <div className="flex justify-between text-[10px] font-bold text-zinc-500 dark:text-[#DDDADB]/40 tracking-widest px-1">
+                        <span>{formatTime(currentTime)}</span>
+                        <span>{formatTime(duration)}</span>
                       </div>
                     </div>
                     
