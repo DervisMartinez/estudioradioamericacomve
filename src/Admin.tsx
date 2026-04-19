@@ -225,7 +225,7 @@ function Admin() {
           <div className="flex items-center gap-3 mb-1">
             <img src="/logo_colors.png" alt="Logo" className="w-8 h-8 object-contain dark:hidden" onError={(e) => { e.currentTarget.src = 'https://ui-avatars.com/api/?name=RA&background=C13535&color=fff&rounded=true'; }} />
             <img src="/logo_blanco.png" alt="Logo" className="w-8 h-8 object-contain hidden dark:block" onError={(e) => { e.currentTarget.src = 'https://ui-avatars.com/api/?name=RA&background=C13535&color=fff&rounded=true'; }} />
-            <h1 className="text-2xl font-black tracking-tighter text-[#C13535]">Estudio Radio América</h1>
+            <h1 className="text-2xl font-black tracking-tighter text-[#C13535]">Estudio Radio América <span className="text-[10px] text-[#F07D00] align-top bg-[#F07D00]/10 px-2 py-0.5 rounded-full ml-2">v2.0</span></h1>
           </div>
           <p className="text-[10px] uppercase tracking-[0.2em] text-[#DDDADB]/40 font-bold mt-1">Admin Dashboard</p>
         </div>
