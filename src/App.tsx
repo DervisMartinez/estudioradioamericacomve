@@ -2,11 +2,11 @@ import { useContext, useState, useRef, useEffect } from 'react'
 import { useNavigate } from 'react-router-dom'
 import type { FormEvent, ChangeEvent } from 'react'
 import './App.css'
-import { VideoContext } from './VideoContext'
+import { VideoContext, API_URL } from './VideoContext'
 import SearchResults from './SearchResults';
 import { Helmet } from 'react-helmet-async';
 import PressNoteButton from './PressNoteButton';
-VOLVAimport Hls from 'hls.js';
+import Hls from 'hls.js';
 
 // COMPONENTE EXTERNO PARA REPRODUCTOR HLS Y MP4 (SHORTS)
 const HlsVideoPlayer = ({ src, poster, className }: { src: string, poster: string, className: string }) => {
@@ -126,7 +126,7 @@ function App() {
     const form = e.target as HTMLFormElement;
     const emailInput = form.elements.namedItem('email') as HTMLInputElement;
     try {
-      const res = await fetch('/api/subscribe', {
+      const res = await fetch(`${API_URL}/subscribe`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ email: emailInput.value })

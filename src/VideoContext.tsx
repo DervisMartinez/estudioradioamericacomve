@@ -113,8 +113,8 @@ export const RadioAmericaLoader = ({ fullScreen = true }: { fullScreen?: boolean
   );
 }
 
-// Al usar solo '/api', Vite enviará los datos al puerto 3000 en local, y en producción Nginx hará lo mismo.
-const API_URL = '/api';
+// URL base de tu API. Apunta a tu backend local por defecto, o a la variable de entorno en producción.
+export const API_URL = import.meta.env.VITE_API_URL || 'http://localhost:3005/api';
 
 export const VideoProvider = ({ children }: { children: ReactNode }) => {
   const [videos, setVideos] = useState<Video[]>([]);
