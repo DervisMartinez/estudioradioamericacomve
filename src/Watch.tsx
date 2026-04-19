@@ -3,6 +3,7 @@ import { useParams, useNavigate } from 'react-router-dom';
 import { VideoContext } from './VideoContext';
 import { Helmet } from 'react-helmet-async';
 import PressNoteButton from './PressNoteButton';
+import Hls from 'hls.js';
 
 export default function Watch() {
   const { id } = useParams();
@@ -97,6 +98,30 @@ export default function Watch() {
     }
   }, [id, incrementView]);
 
+  // Componente interno para manejar los videos encriptados HLS y MP4 normales
+  const HlsVideoPlayer = ({ src, poster, className }: { src: string, poster: string, className: string }) => {
+    const videoRef = useRef<HTMLVideoElement>(null);
+    
+    useEffect(() => {
+      if (videoRef.current && src) {
+        if (src.endsWith('.m3u8')) {
+          if (Hls.isSupported()) {
+            const hls = new Hls();
+            hls.loadSource(src);
+            hls.attachMedia(videoRef.current);
+            return () => hls.destroy();
+          } else if (videoRef.current.canPlayType('application/vnd.apple.mpegurl')) {
+            videoRef.current.src = src; // Soporte nativo para Safari/iOS
+          }
+        } else {
+          videoRef.current.src = src; // MP4 normal
+        }
+      }
+    }, [src]);
+    
+    return <video ref={videoRef} className={className} poster={poster} controls autoPlay playsInline preload="metadata" controlsList="nodownload" onContextMenu={(e) => e.preventDefault()}></video>;
+  };
+
   if (!video) {
     return (
       <>
@@ -129,7 +154,7 @@ export default function Watch() {
   // Detecta si es un archivo de video directo (mp4) o una carga local
   const isDirectVideo = (url: string) => {
     if (!url) return false;
-    return url.startsWith('data:video/') || url.match(/\.(mp4|webm|ogg)$/i);
+    return url.startsWith('data:video/') || url.match(/\.(mp4|webm|ogg|m3u8)$/i);
   };
 
   const ytId = getYoutubeId(video.url);
@@ -583,7 +608,7 @@ export default function Watch() {
                 ) : igId ? (
                   <iframe className="w-full h-full max-h-full relative z-10 bg-white" src={`https://www.instagram.com/p/${igId}/embed`} title={video.title} frameBorder="0" scrolling="no" allowTransparency={true} allowFullScreen></iframe>
                 ) : isDirectVideo(video.url) ? (
-                  <video className="w-full aspect-video max-h-full relative z-10 bg-black" src={video.url} poster={video.thumbnail || '/logo_blanco.png'} controls autoPlay playsInline preload="metadata"></video>
+                  <HlsVideoPlayer className="w-full aspect-video max-h-full relative z-10 bg-black" src={video.url} poster={video.thumbnail || '/logo_blanco.png'} />
                 ) : (
                   <div className="w-full h-full relative z-10 flex flex-col items-center justify-center bg-surface-container-highest p-8 text-center">
                      <span className="material-symbols-outlined text-6xl text-[#F07D00] mb-4">dynamic_feed</span>

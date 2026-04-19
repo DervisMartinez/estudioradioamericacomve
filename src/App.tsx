@@ -79,7 +79,7 @@ function App() {
   // Detecta si es un archivo de video directo (mp4) o una carga local
   const isDirectVideo = (url: string) => {
     if (!url) return false;
-    return url.startsWith('data:video/') || url.match(/\.(mp4|webm|ogg)$/i);
+    return url.startsWith('data:video/') || url.match(/\.(mp4|webm|ogg|m3u8)$/i);
   };
 
   // Manejador del Newsletter
