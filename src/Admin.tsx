@@ -749,11 +749,11 @@ function Admin() {
               <div className="md:col-span-2 flex flex-col sm:flex-row gap-6 bg-surface-container-lowest p-4 rounded-lg border border-outline-variant/10 mt-2">
                 <div className="flex items-center gap-2">
                   <input id="isFeatured" checked={newVideo.isFeatured} onChange={e => setNewVideo({...newVideo, isFeatured: e.target.checked})} type="checkbox" className="h-5 w-5 rounded bg-surface-container-highest border-none text-[#C13535] cursor-pointer" />
-                  <label htmlFor="isFeatured" className="text-sm text-[#DDDADB] font-medium cursor-pointer">Marcar como Entrevista Destacada</label>
+                  <label htmlFor="isFeatured" className="text-sm text-[#DDDADB] font-medium cursor-pointer">⭐ Marcar como Entrevista Destacada</label>
                 </div>
                 <div className="flex items-center gap-2">
                   <input id="isShort" checked={newVideo.isShort} onChange={e => setNewVideo({...newVideo, isShort: e.target.checked})} type="checkbox" className="h-5 w-5 rounded bg-surface-container-highest border-none text-[#F07D00] cursor-pointer" />
-                  <label htmlFor="isShort" className="text-sm text-[#DDDADB] font-medium cursor-pointer">Es un Short / Reel (Vertical)</label>
+                  <label htmlFor="isShort" className="text-sm text-[#DDDADB] font-medium cursor-pointer">📱 Es un Short / Reel (Vertical)</label>
                 </div>
               </div>
               <div className="md:col-span-2 flex justify-end gap-3 mt-4 pt-4 border-t border-outline-variant/20">
