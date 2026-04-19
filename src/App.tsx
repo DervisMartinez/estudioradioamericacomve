@@ -93,10 +93,19 @@ function App() {
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ email: emailInput.value })
       });
-      if (res.ok) alert("✅ ¡Gracias por suscribirte! Estás en la lista.");
-      else alert("❌ Hubo un error al procesar tu suscripción.");
+      
+      const data = await res.json().catch(() => ({}));
+      if (res.ok) {
+        if (data.message === 'El usuario ya estaba suscrito.') {
+          alert("ℹEste correo ya está registrado en nuestra lista de boletines.");
+        } else {
+          alert("¡Gracias por suscribirte! Revisa tu bandeja de entrada (o carpeta de Spam).");
+        }
+      } else {
+        alert(`Hubo un error al procesar tu suscripción: ${data.error || ''}`);
+      }
     } catch (error) {
-      alert("❌ Fallo de conexión con el servidor.");
+      alert(" Fallo de conexión con el servidor.");
     }
     form.reset();
   };
