@@ -1,7 +1,7 @@
 import { useState, useContext, useRef, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import type { ChangeEvent, FormEvent } from 'react';
-import { VideoContext, RadioAmericaLoader } from './VideoContext';
+import { VideoContext, RadioAmericaLoader, API_URL } from './VideoContext';
 
 function Admin() {
   const { videos, addVideo, updateVideo, deleteVideo, programs, addProgram, updateProgram, deleteProgram, userProfile, updateUserProfile } = useContext(VideoContext);
@@ -72,7 +72,7 @@ function Admin() {
           const formData = new FormData();
           formData.append('file', file);
           try {
-            const response = await fetch('/api/upload', {
+            const response = await fetch(`${API_URL}/upload`, {
               method: 'POST',
               body: formData // Fetch calcula el multipart/form-data automáticamente
             });

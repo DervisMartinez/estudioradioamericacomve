@@ -1,6 +1,6 @@
 import { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { RadioAmericaLoader } from './VideoContext';
+import { RadioAmericaLoader, API_URL } from './VideoContext';
 
 interface SearchResultsProps {
   query: string;
@@ -22,7 +22,7 @@ export default function SearchResults({ query, onClose }: SearchResultsProps) {
     const fetchResults = async () => {
       setLoading(true);
       try {
-        const res = await fetch(`/api/search?query=${encodeURIComponent(query)}`);
+        const res = await fetch(`${API_URL}/search?query=${encodeURIComponent(query)}`);
         if (res.ok) setResults(await res.json());
       } catch (error) {
         console.error("Error en la búsqueda:", error);
