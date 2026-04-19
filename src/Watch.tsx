@@ -1,4 +1,4 @@
-import { useContext, useState, useRef, useEffect } from 'react';
+import { useContext, useState, useRef, useEffect, useMemo } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import { VideoContext } from './VideoContext';
 import { Helmet } from 'react-helmet-async';
@@ -95,6 +95,34 @@ export default function Watch() {
   const [audioVolume, setAudioVolume] = useState(0.8);
   const [isFullscreen, setIsFullscreen] = useState(false);
 
+  // --- LÓGICA DE LISTA DE REPRODUCCIÓN (PATROCINADORES) ---
+  const playlist = useMemo(() => {
+    if (!video?.url) return [];
+    try {
+      const arr = JSON.parse(video.url);
+      if (Array.isArray(arr)) return arr;
+    } catch(e) {}
+    return [video.url];
+  }, [video?.url]);
+
+  const [currentTrackIndex, setCurrentTrackIndex] = useState(0);
+  const isAdPlaying = playlist.length > 1 && currentTrackIndex < playlist.length - 1;
+  const currentSrc = playlist[currentTrackIndex] || '';
+
+  // Resetear la pista si cambias de video
+  useEffect(() => {
+    setCurrentTrackIndex(0);
+    setIsEpisodePlaying(false);
+  }, [id]);
+
+  // Auto-play cuando avanza a la siguiente pista de forma nativa
+  useEffect(() => {
+    if (currentTrackIndex > 0 && episodeAudioRef.current) {
+      episodeAudioRef.current.play().catch(() => console.warn("Autoplay bloqueado por el navegador"));
+      setIsEpisodePlaying(true);
+    }
+  }, [currentTrackIndex]);
+
   const toggleEpisodeAudio = () => {
     if (episodeAudioRef.current) {
       if (isEpisodePlaying) episodeAudioRef.current.pause();
@@ -111,7 +139,16 @@ export default function Watch() {
     if (episodeAudioRef.current) setDuration(episodeAudioRef.current.duration);
   };
 
+  const handleEpisodeEnded = () => {
+    if (currentTrackIndex < playlist.length - 1) {
+      setCurrentTrackIndex(prev => prev + 1);
+    } else {
+      setIsEpisodePlaying(false);
+    }
+  };
+
   const handleSeek = (e: React.ChangeEvent<HTMLInputElement>) => {
+    if (isAdPlaying) return; // Bloquea la barra si es publicidad
     const newTime = Number(e.target.value);
     if (episodeAudioRef.current) episodeAudioRef.current.currentTime = newTime;
     setCurrentTime(newTime);
@@ -200,7 +237,7 @@ export default function Watch() {
 
         <audio ref={audioRef} id="radio" src="https://transmision.radioamerica.com.ve:8087/RA909FM" className="hidden" />
         {/* Conditionally render the audio element only if it's a direct file */}
-        {!embedUrl && <audio ref={episodeAudioRef} src={video.url} onTimeUpdate={handleTimeUpdate} onLoadedMetadata={handleLoadedMetadata} onEnded={() => setIsEpisodePlaying(false)} className="hidden" />}
+        {!embedUrl && <audio ref={episodeAudioRef} src={currentSrc} onTimeUpdate={handleTimeUpdate} onLoadedMetadata={handleLoadedMetadata} onEnded={handleEpisodeEnded} className="hidden" />}
 
         <nav className="fixed top-0 w-full z-50 flex justify-between items-center px-4 md:px-8 h-20 bg-white/80 dark:bg-[#131314]/80 backdrop-blur-xl border-b border-zinc-200 dark:border-transparent transition-all duration-300">
           <div className="flex items-center gap-4 md:gap-10 cursor-pointer" onClick={() => navigate('/')}>
@@ -227,12 +264,12 @@ export default function Watch() {
             {/* Left Side: Synopsis */}
             <div className="lg:col-span-5 space-y-8">
               <div className="flex items-center gap-3">
-                <span className="bg-[#C13535] text-white text-[10px] font-bold px-3 py-1 rounded-full tracking-widest uppercase">Podcasts</span>
+                <span className={`text-white text-[10px] font-bold px-3 py-1 rounded-full tracking-widest uppercase transition-colors ${isAdPlaying ? 'bg-[#F07D00]' : 'bg-[#C13535]'}`}>{isAdPlaying ? 'Patrocinado' : 'Podcasts'}</span>
                 <span className="bg-[#F07D00]/20 text-[#F07D00] text-[10px] font-bold px-3 py-1 rounded-full tracking-widest uppercase">{video.category}</span>
               </div>
               <div className="space-y-4">
                 <h1 className="text-4xl sm:text-5xl lg:text-6xl font-black tracking-tighter text-[#C13535] dark:text-[#DDDADB] leading-[0.95] break-words">
-                  {video.title}
+                  {isAdPlaying ? `Anuncio (${currentTrackIndex + 1}/${playlist.length - 1})` : video.title}
                 </h1>
                 <div className="flex items-center gap-4 text-sm font-medium text-[#F07D00] flex-wrap">
                   <span className="flex items-center gap-1">
@@ -244,7 +281,7 @@ export default function Watch() {
                 </div>
               </div>
               <p className="text-lg text-zinc-600 dark:text-[#DDDADB]/80 leading-relaxed font-light">
-                {video.description || "Sin descripción disponible para este episodio."}
+                {isAdPlaying ? 'Estudio Radio América te invita a escuchar a nuestros patrocinantes antes de que inicie el programa.' : (video.description || "Sin descripción disponible para este episodio.")}
               </p>
               <div className="pt-4 flex flex-wrap items-center gap-4">
                 {!embedUrl ? (
@@ -319,9 +356,9 @@ export default function Watch() {
 
                       {/* Progress Bar */}
                       <div className="w-full space-y-2 px-2 sm:px-4">
-                        <div className="relative w-full h-1.5 bg-zinc-300 dark:bg-[#353436] rounded-full overflow-hidden flex items-center group/progress">
-                          <input type="range" min="0" max={duration || 100} value={currentTime} onChange={handleSeek} className="absolute inset-0 w-full h-full opacity-0 cursor-pointer z-20" />
-                          <div className="absolute top-0 left-0 h-full bg-[#F07D00] shadow-[0_0_10px_#F07D00] z-10 pointer-events-none" style={{ width: `${(currentTime / (duration || 1)) * 100}%` }}></div>
+                        <div className={`relative w-full h-1.5 rounded-full overflow-hidden flex items-center group/progress transition-colors ${isAdPlaying ? 'bg-zinc-700' : 'bg-zinc-300 dark:bg-[#353436]'}`}>
+                          <input type="range" min="0" max={duration || 100} value={currentTime} onChange={handleSeek} className={`absolute inset-0 w-full h-full opacity-0 z-20 ${isAdPlaying ? 'cursor-not-allowed' : 'cursor-pointer'}`} disabled={isAdPlaying} />
+                          <div className={`absolute top-0 left-0 h-full z-10 pointer-events-none transition-all duration-300 ${isAdPlaying ? 'bg-[#FFB91F] shadow-[0_0_10px_#FFB91F]' : 'bg-[#F07D00] shadow-[0_0_10px_#F07D00]'}`} style={{ width: `${(currentTime / (duration || 1)) * 100}%` }}></div>
                         </div>
                         <div className="flex justify-between text-[10px] font-bold text-zinc-500 dark:text-[#DDDADB]/40 tracking-widest">
                           <span>{formatTime(currentTime)}</span>
@@ -447,7 +484,7 @@ export default function Watch() {
                   </span>
                 </div>
                 <h1 className="text-3xl md:text-4xl lg:text-5xl xl:text-6xl font-extrabold tracking-tight text-[#e5e2e3] editorial-shadow leading-tight font-['Montserrat'] break-words line-clamp-4">
-                  {video.title}
+                  {isAdPlaying ? `Anuncio (${currentTrackIndex + 1}/${playlist.length - 1})` : video.title}
                 </h1>
                 <div className="flex items-center gap-4 mt-2">
                   <div className="w-10 h-10 rounded-full overflow-hidden border border-[#59413f]/30 bg-[#201f20]">
@@ -459,7 +496,7 @@ export default function Watch() {
                   </div>
                 </div>
                 <p className="text-[#e1bebb] text-sm md:text-base leading-relaxed max-w-md mt-2 font-['Inter'] line-clamp-3">
-                  {video.description || 'Disfruta de este episodio y descubre más contenido exclusivo en Estudio Radio América.'}
+                  {isAdPlaying ? 'Patrocinado por nuestros aliados comerciales.' : (video.description || 'Disfruta de este episodio y descubre más contenido exclusivo en Estudio Radio América.')}
                 </p>
               </div>
             </div>
@@ -482,11 +519,11 @@ export default function Watch() {
                   {/* Progress Bar */}
                   <div className="w-full flex items-center gap-2 md:gap-4">
                     <span className="text-[10px] font-bold text-[#e1bebb] font-['Inter'] tracking-widest w-10 text-right">{formatTime(currentTime)}</span>
-                    <div className="relative flex-1 h-1.5 bg-[#353436] rounded-full overflow-hidden group flex items-center">
-                      <input type="range" min="0" max={duration || 100} value={currentTime} onChange={handleSeek} className="absolute inset-0 w-full h-full opacity-0 cursor-pointer z-20" />
-                      <div className="absolute left-0 top-0 h-full bg-gradient-to-r from-[#c13535] to-[#ef7c00] rounded-full pointer-events-none" style={{ width: `${(currentTime / (duration || 1)) * 100}%` }}></div>
-                      {/* Handle Dot Simulation */}
-                      <div className="absolute top-1/2 -translate-y-1/2 w-3 h-3 bg-[#e5e2e3] rounded-full shadow-lg pointer-events-none transition-all" style={{ left: `calc(${(currentTime / (duration || 1)) * 100}% - 6px)` }}></div>
+                    <div className={`relative flex-1 h-1.5 rounded-full overflow-hidden group flex items-center transition-colors ${isAdPlaying ? 'bg-zinc-700' : 'bg-[#353436]'}`}>
+                      <input type="range" min="0" max={duration || 100} value={currentTime} onChange={handleSeek} className={`absolute inset-0 w-full h-full opacity-0 z-20 ${isAdPlaying ? 'cursor-not-allowed' : 'cursor-pointer'}`} disabled={isAdPlaying} />
+                      <div className={`absolute left-0 top-0 h-full rounded-full pointer-events-none transition-all duration-300 ${isAdPlaying ? 'bg-[#FFB91F]' : 'bg-gradient-to-r from-[#c13535] to-[#ef7c00]'}`} style={{ width: `${(currentTime / (duration || 1)) * 100}%` }}></div>
+                      {/* Handle Dot Simulation, only show on main podcast */}
+                      {!isAdPlaying && <div className="absolute top-1/2 -translate-y-1/2 w-3 h-3 bg-[#e5e2e3] rounded-full shadow-lg pointer-events-none transition-all" style={{ left: `calc(${(currentTime / (duration || 1)) * 100}% - 6px)` }}></div>}
                     </div>
                     <span className="text-[10px] font-bold text-[#e1bebb] font-['Inter'] tracking-widest w-10">{formatTime(duration)}</span>
                   </div>

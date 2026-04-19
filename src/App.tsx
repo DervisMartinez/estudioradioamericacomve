@@ -579,7 +579,7 @@ function App() {
               <p className="text-xs font-black text-[#C13535] tracking-widest flex items-center gap-2">
                 <span className="w-1.5 h-1.5 rounded-full bg-[#C13535] animate-pulse"></span> EN VIVO
               </p>
-              <p className="font-bold text-sm truncate max-w-[150px] text-zinc-800 dark:text-on-surface">Estudio Radio América - Prime Time</p>
+              <p className="font-bold text-sm truncate max-w-[150px] text-zinc-800 dark:text-on-surface">Radio América 90.9 FM</p>
             </div>
           </div>
           

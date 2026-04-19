@@ -17,6 +17,9 @@ function Admin() {
   const [newProgram, setNewProgram] = useState({ name: '', category: '', thumbnail: '', type: 'Programa' as 'Programa' | 'Podcast', description: '', schedule: '', host: '', coverImage: '' });
   const [profileForm, setProfileForm] = useState(userProfile);
   const [isUploading, setIsUploading] = useState(false);
+  const [isSponsored, setIsSponsored] = useState(false);
+  const [sponsorCount, setSponsorCount] = useState(1);
+  const [sponsorUrls, setSponsorUrls] = useState<string[]>([]);
 
   useEffect(() => {
     const isAuth = localStorage.getItem('admin_auth');
@@ -94,12 +97,42 @@ function Admin() {
     }
   };
 
+  // Manejador independiente para subir cuñas publicitarias
+  const handleSponsorUpload = async (e: ChangeEvent<HTMLInputElement>, index: number) => {
+    const file = e.target.files?.[0];
+    if (!file) return;
+    setIsUploading(true);
+    const formData = new FormData();
+    formData.append('file', file);
+    try {
+      const response = await fetch(`${API_URL}/upload`, { method: 'POST', body: formData });
+      if (!response.ok) throw new Error("Fallo en la subida");
+      const data = await response.json();
+      setSponsorUrls(prev => {
+        const newUrls = [...prev];
+        newUrls[index] = data.url;
+        return newUrls;
+      });
+    } catch (error) { alert("❌ Error al subir la cuña publicitaria."); }
+    setIsUploading(false);
+  };
+
   const handleSubmit = (e: FormEvent) => {
     e.preventDefault();
+
+    let finalUrl = newVideo.url;
+    // Si es audio, está patrocinado y tiene URLs de cuñas, lo convertimos en un JSON Array (Lista de reproducción)
+    if (newVideo.isAudio && isSponsored && sponsorUrls.length > 0) {
+      const validSponsors = sponsorUrls.slice(0, sponsorCount).filter(u => u !== '');
+      if (validSponsors.length > 0) {
+        finalUrl = JSON.stringify([...validSponsors, newVideo.url]);
+      }
+    }
+
     const videoData = {
       title: newVideo.title, category: newVideo.category, description: newVideo.description,
       isFeatured: newVideo.isFeatured, isShort: newVideo.isShort, isAudio: newVideo.isAudio, thumbnail: newVideo.thumbnail, 
-      url: newVideo.url, programId: newVideo.programId, duration: newVideo.duration || '00:00', releaseDate: newVideo.releaseDate, pressNoteUrl: newVideo.pressNoteUrl
+      url: finalUrl, programId: newVideo.programId, duration: newVideo.duration || '00:00', releaseDate: newVideo.releaseDate, pressNoteUrl: newVideo.pressNoteUrl
     };
 
     if (editingId) {
@@ -130,11 +163,27 @@ function Admin() {
   };
 
   const openEditModal = (video: any) => {
+    let parsedUrl = video.url;
+    let sUrls: string[] = [];
+    
+    // Intenta detectar si el archivo guardado es una lista de reproducción (Patrocinado)
+    try {
+      const arr = JSON.parse(video.url);
+      if (Array.isArray(arr) && video.isAudio) {
+        parsedUrl = arr[arr.length - 1]; // El último siempre es el episodio
+        sUrls = arr.slice(0, -1); // El resto son las cuñas
+      }
+    } catch(e) {}
+
+    setIsSponsored(sUrls.length > 0);
+    setSponsorCount(sUrls.length > 0 ? sUrls.length : 1);
+    setSponsorUrls(sUrls);
+
     setNewVideo({ 
         title: video.title, 
         category: video.category, 
         thumbnail: video.thumbnail, 
-        url: video.url, 
+        url: parsedUrl, 
         description: video.description, 
         isFeatured: video.isFeatured, 
         isShort: video.isShort || false, 
@@ -654,6 +703,49 @@ function Admin() {
                   </label>
                 </div>
               </div>
+              
+              {/* LÓGICA DE PATROCINIOS / CUÑAS */}
+              {newVideo.isAudio && (
+                <div className="md:col-span-2 bg-[#F07D00]/10 p-5 rounded-xl border border-[#F07D00]/30 mt-2">
+                  <div className="flex items-center gap-2 mb-4">
+                    <input id="isSponsored" checked={isSponsored} onChange={e => setIsSponsored(e.target.checked)} type="checkbox" className="h-5 w-5 rounded bg-surface-container-highest border-none text-[#F07D00] cursor-pointer" />
+                    <label htmlFor="isSponsored" className="text-sm text-[#DDDADB] font-bold cursor-pointer">¿Episodio Patrocinado? (Añadir Cuñas de Audio)</label>
+                  </div>
+                  {isSponsored && (
+                    <div className="space-y-4 animate-fade-in">
+                      <div>
+                        <label className="block text-xs font-bold text-[#F07D00] mb-1 uppercase tracking-widest">Cantidad de Cuñas a reproducir (Máx 3)</label>
+                        <select value={sponsorCount} onChange={e => setSponsorCount(Number(e.target.value))} className="w-full sm:w-1/3 bg-black/40 border border-white/10 rounded-lg p-3 text-sm text-[#DDDADB] font-bold">
+                          <option value={1}>1 Cuña</option>
+                          <option value={2}>2 Cuñas</option>
+                          <option value={3}>3 Cuñas</option>
+                        </select>
+                      </div>
+                      <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+                        {Array.from({ length: sponsorCount }).map((_, i) => (
+                          <div key={i} className="bg-black/20 p-4 rounded-lg border border-white/5">
+                            <label className="block text-[10px] font-bold text-[#DDDADB]/60 mb-2 uppercase">Audio Patrocinante {i + 1}</label>
+                            <div className="flex flex-col gap-2">
+                              {sponsorUrls[i] ? (
+                                <div className="bg-green-500/20 text-green-400 text-xs px-3 py-2 rounded border border-green-500/30 font-bold flex justify-between items-center">
+                                  Audio Cargado
+                                  <button type="button" onClick={() => setSponsorUrls(prev => { const n = [...prev]; n[i] = ''; return n; })} className="material-symbols-outlined text-sm hover:text-white">close</button>
+                                </div>
+                              ) : (
+                                <label className="bg-[#F07D00]/20 text-[#F07D00] hover:bg-[#F07D00] hover:text-black border border-[#F07D00]/30 cursor-pointer px-4 py-2 rounded-lg flex items-center justify-center transition-all shadow-sm font-bold text-xs">
+                                  <span className="material-symbols-outlined text-sm mr-2">upload</span> Subir MP3
+                                  <input type="file" accept="audio/*" className="hidden" onChange={(e) => handleSponsorUpload(e, i)} />
+                                </label>
+                              )}
+                            </div>
+                          </div>
+                        ))}
+                      </div>
+                    </div>
+                  )}
+                </div>
+              )}
+
               <div className="md:col-span-2 flex flex-col sm:flex-row gap-6 bg-surface-container-lowest p-4 rounded-lg border border-outline-variant/10 mt-2">
                 <div className="flex items-center gap-2">
                   <input id="isFeatured" checked={newVideo.isFeatured} onChange={e => setNewVideo({...newVideo, isFeatured: e.target.checked})} type="checkbox" className="h-5 w-5 rounded bg-surface-container-highest border-none text-[#C13535] cursor-pointer" />
