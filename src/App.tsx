@@ -265,9 +265,6 @@ function App() {
           <button onClick={toggleTheme} className="hover:scale-105 transition-transform duration-200 text-[#C13535] dark:text-[#DDDADB]" title={isDarkMode ? "Cambiar a Modo Claro" : "Cambiar a Modo Oscuro"}>
             <span className="material-symbols-outlined">{isDarkMode ? 'light_mode' : 'dark_mode'}</span>
           </button>
-          <button onClick={() => navigate('/admin')} className="hover:scale-105 transition-transform duration-200 text-[#C13535] dark:text-[#DDDADB]">
-            <span className="material-symbols-outlined">account_circle</span>
-          </button>
         </div>
       </nav>
 
@@ -289,9 +286,9 @@ function App() {
                   ENTREVISTA DESTACADA
                 </span>
               </div>
-              <h1 className="text-4xl sm:text-5xl md:text-7xl font-black tracking-tighter text-[#C13535] dark:text-on-surface leading-none text-shadow-editorial break-words">
+              <h1 className="text-4xl sm:text-5xl md:text-6xl lg:text-7xl font-black tracking-tighter text-[#C13535] dark:text-white leading-[1.1] text-shadow-editorial break-words text-balance line-clamp-3">
                 {featuredVideo ? (
-                  <span dangerouslySetInnerHTML={{ __html: featuredVideo.title.replace(' ', '<br />') }} />
+                  featuredVideo.title
                 ) : (
                   <>VOCES DEL <br /><span className="text-[#C13535] dark:text-[#DDDADB]">MAÑANA</span></>
                 )}
@@ -326,8 +323,8 @@ function App() {
               {nextVideo && (
                 <div onClick={(e) => { e.stopPropagation(); navigate(`/watch/${nextVideo.id}`); }} className="absolute -bottom-6 -right-6 bg-white/60 dark:bg-surface-container/60 backdrop-blur-md p-4 rounded-lg border border-zinc-200 dark:border-outline-variant/20 hidden lg:block hover:scale-105 transition-transform cursor-pointer shadow-2xl z-20">
                   <p className="text-xs font-bold text-[#F07D00] mb-1 uppercase tracking-widest">Siguiente Episodio</p>
-                  <p className="font-bold text-sm line-clamp-1 max-w-[220px]">{nextVideo.title}</p>
-                  <p className="text-[10px] text-[#DDDADB]/60 uppercase tracking-widest mt-1">{nextVideo.category}</p>
+                  <p className="font-bold text-sm line-clamp-1 max-w-[220px] text-[#C13535] dark:text-white">{nextVideo.title}</p>
+                  <p className="text-[10px] text-[#C13535]/80 dark:text-[#DDDADB]/60 uppercase tracking-widest mt-1">{nextVideo.category}</p>
                 </div>
               )}
             </div>
@@ -364,6 +361,54 @@ function App() {
                   </div>
                 </div>
               ))}
+            </div>
+          </div>
+        </section>
+
+        {/* Welcome / Benefits Cinematic Section */}
+        <section className="relative h-[600px] w-full flex items-center justify-center overflow-hidden">
+          {/* Video Background with Faded Edges */}
+          <div className="absolute inset-0 z-0">
+            <img alt="Atmospheric Broadcast Studio" className="w-full h-full object-cover" src="https://lh3.googleusercontent.com/aida-public/AB6AXuD98o0BwOnd0ZlR0NIn8Zt4yP7N9-o3XWb2G_D_5n-n0r7-xKz9u4N8H7qJ9m7-fX_yG_4v_9q8z8n_0m9v_8-7q5q5w5z5_4-0-9-8-7-6-5-4-3-2-1" onError={(e) => { e.currentTarget.src = '/logo_blanco.png'; }} />
+            {/* Radial and Linear Masks for Seamless Blending */}
+            <div className="absolute inset-0 bg-gradient-to-b from-zinc-100 via-transparent to-white dark:from-[#1c1b1c] dark:via-transparent dark:to-[#131314]"></div>
+            <div className="absolute inset-0 bg-gradient-to-r from-white via-transparent to-white opacity-90 dark:from-[#131314] dark:via-transparent dark:to-[#131314]"></div>
+            <div className="absolute inset-0 bg-white/40 dark:bg-black/60"></div>
+          </div>
+          <div className="relative z-10 max-w-5xl mx-auto px-8 text-center space-y-10">
+            <div className="space-y-4">
+              <span className="text-[#F07D00] dark:text-[#FFB91F] font-black tracking-[0.3em] uppercase text-xs">Bienvenido a Estudio Radio América</span>
+              <h2 className="text-4xl md:text-6xl font-black tracking-tighter text-[#C13535] dark:text-white leading-tight font-['Montserrat']">
+                LA EXPERIENCIA <span className="text-[#C13535]">PREMIUM</span> <br/>DEL PERIODISMO SONORO
+              </h2>
+            </div>
+            <div className="grid md:grid-cols-3 gap-8 pt-6">
+              <div className="space-y-3 group cursor-default">
+                <div className="w-12 h-12 mx-auto rounded-full bg-[#C13535]/10 border border-[#C13535]/30 flex items-center justify-center group-hover:bg-[#C13535]/20 transition-colors duration-500">
+                  <span className="material-symbols-outlined text-[#C13535]" style={{ fontVariationSettings: "'FILL' 1" }}>high_quality</span>
+                </div>
+                <h4 className="font-bold text-lg text-[#C13535] dark:text-white">Calidad Master</h4>
+                <p className="text-sm text-zinc-700 dark:text-[#DDDADB]/60 leading-relaxed">Audio de alta fidelidad que te sitúa en el centro de la conversación.</p>
+              </div>
+              <div className="space-y-3 group cursor-default">
+                <div className="w-12 h-12 mx-auto rounded-full bg-[#F07D00]/10 border border-[#F07D00]/30 flex items-center justify-center group-hover:bg-[#F07D00]/20 transition-colors duration-500">
+                  <span className="material-symbols-outlined text-[#F07D00]" style={{ fontVariationSettings: "'FILL' 1" }}>visibility</span>
+                </div>
+                <h4 className="font-bold text-lg text-[#C13535] dark:text-white">Contenido Exclusivo</h4>
+                <p className="text-sm text-zinc-700 dark:text-[#DDDADB]/60 leading-relaxed">Acceso único a entrevistas sin cortes y material detrás de cámaras.</p>
+              </div>
+              <div className="space-y-3 group cursor-default">
+                <div className="w-12 h-12 mx-auto rounded-full bg-[#FFB91F]/10 border border-[#FFB91F]/30 flex items-center justify-center group-hover:bg-[#FFB91F]/20 transition-colors duration-500">
+                  <span className="material-symbols-outlined text-[#FFB91F]" style={{ fontVariationSettings: "'FILL' 1" }}>devices</span>
+                </div>
+                <h4 className="font-bold text-lg text-[#C13535] dark:text-white">Multi-Plataforma</h4>
+                <p className="text-sm text-zinc-700 dark:text-[#DDDADB]/60 leading-relaxed">Tu radio favorita, disponible en todos tus dispositivos, en cualquier lugar.</p>
+              </div>
+            </div>
+            <div className="pt-8">
+              <button className="px-10 py-4 bg-transparent border-2 border-[#C13535] text-[#C13535] dark:text-white font-black rounded-full hover:bg-[#C13535] hover:text-white transition-all duration-300 transform hover:scale-105 tracking-wide uppercase text-sm">
+                Descubre más beneficios
+              </button>
             </div>
           </div>
         </section>

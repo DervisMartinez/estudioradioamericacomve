@@ -21,6 +21,14 @@ function Admin() {
   const [sponsorCount, setSponsorCount] = useState(1);
   const [sponsorUrls, setSponsorUrls] = useState<string[]>([]);
 
+  const resetVideoForm = (overrides = {}) => {
+    setEditingId(null);
+    setNewVideo({ title: '', category: 'Historia', thumbnail: '', url: '', description: '', isFeatured: false, isShort: false, isAudio: false, programId: '', releaseDate: '', duration: '', pressNoteUrl: '', ...overrides });
+    setIsSponsored(false);
+    setSponsorCount(1);
+    setSponsorUrls([]);
+  };
+
   useEffect(() => {
     const isAuth = localStorage.getItem('admin_auth');
     if (isAuth !== 'true') {
@@ -113,6 +121,7 @@ function Admin() {
         newUrls[index] = data.url;
         return newUrls;
       });
+      alert("✅ Cuña publicitaria procesada con éxito.");
     } catch (error) { alert("❌ Error al subir la cuña publicitaria."); }
     setIsUploading(false);
   };
@@ -255,7 +264,7 @@ function Admin() {
           </button>
         </nav>
         <div className="mt-auto pt-6 border-t border-[#59413f]/15">
-          <button onClick={() => { setEditingId(null); setNewVideo({ title: '', category: 'Historia', thumbnail: '', url: '', description: '', isFeatured: false, isShort: false, isAudio: false, programId: '', releaseDate: '', duration: '', pressNoteUrl: '' }); setIsModalOpen(true); }} className="w-full bg-[#C13535] text-white py-3 rounded-xl font-bold text-sm flex items-center justify-center gap-2 hover:opacity-90 transition-opacity editorial-shadow">
+          <button onClick={() => { resetVideoForm(); setIsModalOpen(true); }} className="w-full bg-[#C13535] text-white py-3 rounded-xl font-bold text-sm flex items-center justify-center gap-2 hover:opacity-90 transition-opacity editorial-shadow">
             <span className="material-symbols-outlined text-sm" data-icon="upload">upload</span>
             Upload Video
           </button>
@@ -302,7 +311,7 @@ function Admin() {
                 <button className="hover:text-[#DDDADB] transition-colors">
                   <span className="material-symbols-outlined" data-icon="help_outline">help_outline</span>
                 </button>
-                <button onClick={() => { setEditingId(null); setNewVideo({ title: '', category: 'Historia', thumbnail: '', url: '', description: '', isFeatured: false, isShort: false, isAudio: false, programId: selectedProgramDetails || '', releaseDate: '', duration: '', pressNoteUrl: '' }); setIsModalOpen(true); }} className="bg-[#C13535] text-white px-5 py-2 rounded-full text-sm font-bold hover:opacity-90 active:scale-95 transition-all">
+                <button onClick={() => { resetVideoForm({ programId: selectedProgramDetails || '' }); setIsModalOpen(true); }} className="bg-[#C13535] text-white px-5 py-2 rounded-full text-sm font-bold hover:opacity-90 active:scale-95 transition-all">
                   Add New Video
                 </button>
               </div>
@@ -465,8 +474,8 @@ function Admin() {
                     <span>Host: {activeProgramData.host || 'N/A'}</span> • <span>Horario: {activeProgramData.schedule || 'N/A'}</span>
                   </div>
                   <div className="pt-4 flex gap-4">
-                  <button onClick={() => { setEditingId(null); setNewVideo({ title: '', category: activeProgramData.category, thumbnail: '', url: '', description: '', isFeatured: false, isShort: false, isAudio: false, programId: activeProgramData.id, releaseDate: '', duration: '', pressNoteUrl: '' }); setIsModalOpen(true); }} className="bg-[#C13535] text-white px-5 py-2 rounded-full text-sm font-bold hover:opacity-90 active:scale-95 transition-all">Añadir Episodio (Video)</button>
-                  <button onClick={() => { setEditingId(null); setNewVideo({ title: '', category: activeProgramData.category, thumbnail: '', url: '', description: '', isFeatured: false, isShort: false, isAudio: true, programId: activeProgramData.id, releaseDate: '', duration: '', pressNoteUrl: '' }); setIsModalOpen(true); }} className="bg-[#F07D00] text-black px-5 py-2 rounded-full text-sm font-bold hover:opacity-90 active:scale-95 transition-all">Añadir Episodio (Audio)</button>
+                  <button onClick={() => { resetVideoForm({ category: activeProgramData.category, programId: activeProgramData.id, isAudio: false }); setIsModalOpen(true); }} className="bg-[#C13535] text-white px-5 py-2 rounded-full text-sm font-bold hover:opacity-90 active:scale-95 transition-all">Añadir Episodio (Video)</button>
+                  <button onClick={() => { resetVideoForm({ category: activeProgramData.category, programId: activeProgramData.id, isAudio: true }); setIsModalOpen(true); }} className="bg-[#F07D00] text-black px-5 py-2 rounded-full text-sm font-bold hover:opacity-90 active:scale-95 transition-all">Añadir Episodio (Audio)</button>
                   </div>
                 </div>
               </div>
@@ -675,6 +684,10 @@ function Admin() {
                     className="w-full bg-surface-container-lowest border-none rounded-lg p-3 text-sm text-[#DDDADB]" 
                 />
               </div>
+              <div>
+                <label className="block text-xs font-bold text-[#DDDADB]/60 mb-1">Duración (Opcional, Ej: 45:00)</label>
+                <input type="text" value={newVideo.duration || ''} onChange={e => setNewVideo({...newVideo, duration: e.target.value})} className="w-full bg-surface-container-lowest border-none rounded-lg p-3 text-sm text-[#DDDADB]" placeholder="MM:SS" />
+              </div>
               <div className="md:col-span-2">
                 <label className="block text-xs font-bold text-[#DDDADB]/60 mb-1">Descripción</label>
                 <textarea required value={newVideo.description} onChange={e => setNewVideo({...newVideo, description: e.target.value})} className="w-full bg-surface-container-lowest border-none rounded-lg p-3 text-sm text-[#DDDADB]" placeholder="Una breve sinopsis del video..." rows={3}></textarea>
@@ -725,18 +738,22 @@ function Admin() {
                         {Array.from({ length: sponsorCount }).map((_, i) => (
                           <div key={i} className="bg-black/20 p-4 rounded-lg border border-white/5">
                             <label className="block text-[10px] font-bold text-[#DDDADB]/60 mb-2 uppercase">Audio Patrocinante {i + 1}</label>
-                            <div className="flex flex-col gap-2">
-                              {sponsorUrls[i] ? (
-                                <div className="bg-green-500/20 text-green-400 text-xs px-3 py-2 rounded border border-green-500/30 font-bold flex justify-between items-center">
-                                  Audio Cargado
-                                  <button type="button" onClick={() => setSponsorUrls(prev => { const n = [...prev]; n[i] = ''; return n; })} className="material-symbols-outlined text-sm hover:text-white">close</button>
-                                </div>
-                              ) : (
-                                <label className="bg-[#F07D00]/20 text-[#F07D00] hover:bg-[#F07D00] hover:text-black border border-[#F07D00]/30 cursor-pointer px-4 py-2 rounded-lg flex items-center justify-center transition-all shadow-sm font-bold text-xs">
-                                  <span className="material-symbols-outlined text-sm mr-2">upload</span> Subir MP3
-                                  <input type="file" accept="audio/*" className="hidden" onChange={(e) => handleSponsorUpload(e, i)} />
-                                </label>
-                              )}
+                            <div className="flex flex-col xl:flex-row gap-2 items-center">
+                              <input 
+                                type="text" 
+                                value={sponsorUrls[i] || ''} 
+                                onChange={(e) => {
+                                  const newUrls = [...sponsorUrls];
+                                  newUrls[i] = e.target.value;
+                                  setSponsorUrls(newUrls);
+                                }}
+                                className="w-full xl:w-2/3 bg-black/40 border border-white/10 rounded p-2 text-xs text-[#DDDADB]" 
+                                placeholder="URL o sube archivo 👉" 
+                              />
+                              <label className="w-full xl:w-1/3 bg-[#F07D00]/20 text-[#F07D00] hover:bg-[#F07D00] hover:text-black border border-[#F07D00]/30 cursor-pointer px-3 py-2 rounded-lg flex items-center justify-center transition-all shadow-sm font-bold text-xs text-center">
+                                <span className="material-symbols-outlined text-sm mr-1">upload</span> Subir
+                                <input type="file" accept="audio/*" className="hidden" onChange={(e) => handleSponsorUpload(e, i)} />
+                              </label>
                             </div>
                           </div>
                         ))}
