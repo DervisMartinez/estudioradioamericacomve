@@ -145,7 +145,6 @@ export default function ProgramView() {
           </div>
           <div className="flex items-center gap-4">
             <button onClick={toggleTheme} className="material-symbols-outlined text-[#C13535] dark:text-[#DDDADB] hover:scale-105 transition-transform">{isDarkMode ? 'light_mode' : 'dark_mode'}</button>
-            <button onClick={() => navigate('/admin')} className="material-symbols-outlined text-[#C13535] dark:text-[#DDDADB] hover:scale-105 transition-transform">account_circle</button>
           </div>
         </div>
       </header>

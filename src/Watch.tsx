@@ -251,11 +251,6 @@ export default function Watch() {
               <button className="text-[#F07D00] border-b-2 border-[#F07D00] pb-1 font-medium">Reproductor Podcast</button>
             </div>
           </div>
-          <div className="flex items-center gap-6">
-            <button onClick={() => navigate('/admin')} className="hover:scale-105 transition-transform duration-200 text-[#C13535] dark:text-[#DDDADB]">
-              <span className="material-symbols-outlined" data-icon="account_circle">account_circle</span>
-            </button>
-          </div>
         </nav>
 
         <main className="pt-24 pb-32 px-6 md:px-12 lg:px-20 max-w-screen-2xl mx-auto">
@@ -596,9 +591,6 @@ export default function Watch() {
         <div className="flex items-center gap-6">
           <button className="hover:scale-105 transition-transform duration-200 text-[#C13535] dark:text-[#DDDADB]">
             <span className="material-symbols-outlined" data-icon="search">search</span>
-          </button>
-          <button onClick={() => navigate('/admin')} className="hover:scale-105 transition-transform duration-200 text-[#C13535] dark:text-[#DDDADB]">
-            <span className="material-symbols-outlined" data-icon="account_circle">account_circle</span>
           </button>
         </div>
       </nav>
