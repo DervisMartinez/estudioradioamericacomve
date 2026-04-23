@@ -20,16 +20,9 @@ Sentry.init({
   dsn: "https://775f7f4cbb92fd15dbc2bebad7fe5abe@o4511270070059008.ingest.us.sentry.io/4511270076809216",
   integrations: [
     Sentry.browserTracingIntegration(),
-    Sentry.replayIntegration({
-      maskAllInputs: true,
-      blockAllMedia: true,
-    }),
   ],
   // Monitoreo de Rendimiento
   tracesSampleRate: 1.0, 
-  // Grabación de Sesiones (Replay)
-  replaysSessionSampleRate: 0.1, 
-  replaysOnErrorSampleRate: 1.0, 
 });
 
 initMixpanel();
