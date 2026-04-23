@@ -12,6 +12,9 @@ import NotFound from "../NotFound";
 import { VideoProvider } from "../VideoContext";
 import { initMixpanel } from "./mixpanel";
 
+// Importar los estilos globales (Tailwind CSS)
+import "../index.css"; 
+
 // 1. Inicializar servicios de terceros
 Sentry.init({
   dsn: "https://775f7f4cbb92fd15dbc2bebad7fe5abe@o4511270070059008.ingest.us.sentry.io/4511270076809216",
