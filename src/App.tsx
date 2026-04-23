@@ -666,7 +666,7 @@ function App() {
             <a className="text-[#C13535]/80 dark:text-[#DDDADB]/60 hover:text-[#C13535] transition-colors" href="#">Privacidad</a>
             <a className="text-[#C13535]/80 dark:text-[#DDDADB]/60 hover:text-[#C13535] transition-colors" href="#">Términos</a>
             <a className="text-[#C13535]/80 dark:text-[#DDDADB]/60 hover:text-[#C13535] transition-colors" href="#">Contacto</a>
-            <a className="text-[#C13535]/80 dark:text-[#DDDADB]/60 hover:text-[#C13535] transition-colors" href="#">Publicidad</a>
+            <a className="text-[#C13535]/80 dark:text-[#DDDADB]/60 hover:text-[#C13535] transition-colors" href="https://radioamerica.com.ve/contrato-de-publicidad/">Contrato de Publicidad</a>
           </div>
           <div className="flex gap-6">
             <span className="material-symbols-outlined text-[#C13535]/60 dark:text-[#DDDADB]/40 cursor-pointer hover:text-[#C13535]">share</span>
