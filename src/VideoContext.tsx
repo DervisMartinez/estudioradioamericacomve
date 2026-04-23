@@ -113,8 +113,8 @@ export const RadioAmericaLoader = ({ fullScreen = true }: { fullScreen?: boolean
   );
 }
 
-// URL base de tu API. Apunta a tu backend local por defecto, o a la variable de entorno en producción.
-export const API_URL = import.meta.env.VITE_API_URL || 'http://localhost:3005/api';
+// URL base de tu API. Usa ruta relativa en producción para aprovechar el Reverse Proxy de Nginx.
+export const API_URL = import.meta.env.VITE_API_URL || (import.meta.env.MODE === 'production' ? '/api' : 'http://localhost:3005/api');
 
 export const VideoProvider = ({ children }: { children: ReactNode }) => {
   const [videos, setVideos] = useState<Video[]>([]);
