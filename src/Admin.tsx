@@ -114,7 +114,10 @@ function Admin() {
     formData.append('file', file);
     try {
       const response = await fetch(`${API_URL}/upload`, { method: 'POST', body: formData });
-      if (!response.ok) throw new Error("Fallo en la subida");
+      if (!response.ok) {
+        const errText = await response.text();
+        throw new Error(`Código ${response.status}: ${errText.substring(0, 100)}`);
+      }
       const data = await response.json();
       setSponsorUrls(prev => {
         const newUrls = [...prev];
@@ -122,8 +125,12 @@ function Admin() {
         return newUrls;
       });
       alert("✅ Cuña publicitaria procesada con éxito.");
-    } catch (error) { alert("❌ Error al subir la cuña publicitaria."); }
-    setIsUploading(false);
+    } catch (error: any) { 
+      console.error("Error subiendo cuña:", error);
+      alert(`❌ Error al subir la cuña: ${error.message}`); 
+    } finally {
+      setIsUploading(false);
+    }
   };
 
   const handleSubmit = (e: FormEvent) => {
