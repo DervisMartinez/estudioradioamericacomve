@@ -182,10 +182,16 @@ export const VideoProvider = ({ children }: { children: ReactNode }) => {
       return true;
     }
     if (res.status === 413) {
-      alert("❌ Error: El archivo es demasiado pesado. Pídele al administrador del servidor que aumente el 'client_max_body_size' en Nginx.");
+      alert(" Error: El archivo es demasiado pesado. Pídele al administrador del servidor que aumente el 'client_max_body_size' en Nginx.");
     } else {
-      const errData = await res.json().catch(() => ({}));
-      alert(`❌ Error al guardar: ${errData.error || res.statusText || 'Ruta no encontrada o error de BD (Verifica la consola del backend)'}`);
+      const text = await res.text();
+      let errData: any = {};
+      try {
+        errData = JSON.parse(text);
+      } catch(e) {
+        console.error("Respuesta cruda del servidor:", text);
+      }
+      alert(` Error HTTP ${res.status}: ${errData.error || res.statusText || 'Ruta no encontrada. Por favor, reinicia el servidor Node.js'}`);
     }
     return false;
   };
