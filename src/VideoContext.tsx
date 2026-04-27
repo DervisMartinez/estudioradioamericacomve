@@ -154,7 +154,7 @@ export const VideoProvider = ({ children }: { children: ReactNode }) => {
         const [videosRes, programsRes, sponsorsRes, profileRes] = await Promise.all([
           fetch(`${API_URL}/videos`),
           fetch(`${API_URL}/programs`),
-          fetch(`${API_URL}/sponsors`),
+          fetch(`${API_URL}/programs/sponsors`),
           fetch(`${API_URL}/profile`)
         ]);
 
@@ -282,7 +282,7 @@ export const VideoProvider = ({ children }: { children: ReactNode }) => {
 
   const addSponsor = async (sponsor: Sponsor) => {
     try {
-      const res = await fetch(`${API_URL}/sponsors`, {
+      const res = await fetch(`${API_URL}/programs/sponsors`, {
         method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(sponsor)
       });
       if (await handleResponse(res, 'Cuña registrada exitosamente')) {
@@ -300,7 +300,7 @@ export const VideoProvider = ({ children }: { children: ReactNode }) => {
   const deleteSponsor = async (id: string) => {
     if(window.confirm("¿Estás seguro de que deseas eliminar esta cuña? Esto no la borrará de los episodios donde ya esté incrustada.")) {
       try {
-        const res = await fetch(`${API_URL}/sponsors/${id}`, { method: 'DELETE' });
+        const res = await fetch(`${API_URL}/programs/sponsors/${id}`, { method: 'DELETE' });
         if (await handleResponse(res, 'Cuña eliminada')) {
           setSponsors(sponsors.filter(s => s.id !== id));
         }
