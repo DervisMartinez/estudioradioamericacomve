@@ -185,7 +185,7 @@ export const VideoProvider = ({ children }: { children: ReactNode }) => {
       alert("❌ Error: El archivo es demasiado pesado. Pídele al administrador del servidor que aumente el 'client_max_body_size' en Nginx.");
     } else {
       const errData = await res.json().catch(() => ({}));
-      alert(`❌ Error al guardar: ${errData.error || res.statusText}`);
+      alert(`❌ Error al guardar: ${errData.error || res.statusText || 'Ruta no encontrada o error de BD (Verifica la consola del backend)'}`);
     }
     return false;
   };
