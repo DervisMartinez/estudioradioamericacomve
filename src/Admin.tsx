@@ -4,17 +4,19 @@ import type { ChangeEvent, FormEvent } from 'react';
 import { VideoContext, RadioAmericaLoader, API_URL } from './VideoContext';
 
 function Admin() {
-  const { videos, addVideo, updateVideo, deleteVideo, programs, addProgram, updateProgram, deleteProgram, userProfile, updateUserProfile } = useContext(VideoContext);
+  const { videos, addVideo, updateVideo, deleteVideo, programs, addProgram, updateProgram, deleteProgram, sponsors, addSponsor, deleteSponsor, userProfile, updateUserProfile } = useContext(VideoContext);
   const navigate = useNavigate();
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [isProgramModalOpen, setIsProgramModalOpen] = useState(false);
+  const [isSponsorModalOpen, setIsSponsorModalOpen] = useState(false);
   const [isSidebarOpen, setIsSidebarOpen] = useState(false);
-  const [activeTab, setActiveTab] = useState<'dashboard' | 'library' | 'programs' | 'analytics' | 'settings'>('dashboard');
+  const [activeTab, setActiveTab] = useState<'dashboard' | 'library' | 'programs' | 'sponsors' | 'analytics' | 'settings'>('dashboard');
   const [selectedProgramDetails, setSelectedProgramDetails] = useState<string | null>(null);
   const [editingId, setEditingId] = useState<string | null>(null);
   const [editingProgramId, setEditingProgramId] = useState<string | null>(null);
   const [newVideo, setNewVideo] = useState({ title: '', category: 'Historia', thumbnail: '', url: '', description: '', isFeatured: false, isShort: false, isAudio: false, programId: '', releaseDate: '', duration: '', pressNoteUrl: '' });
   const [newProgram, setNewProgram] = useState({ name: '', category: '', thumbnail: '', type: 'Programa' as 'Programa' | 'Podcast', description: '', schedule: '', host: '', coverImage: '' });
+  const [newSponsorForm, setNewSponsorForm] = useState({ name: '', url: '', programId: '' });
   const [profileForm, setProfileForm] = useState(userProfile);
   const [isUploading, setIsUploading] = useState(false);
   const [isSponsored, setIsSponsored] = useState(false);
@@ -48,7 +50,7 @@ function Admin() {
     }
   };
 
-  const handleFileUpload = (e: ChangeEvent<HTMLInputElement>, field: 'thumbnail' | 'avatar' | 'url' | 'program_thumbnail' | 'program_cover') => {
+  const handleFileUpload = (e: ChangeEvent<HTMLInputElement>, field: 'thumbnail' | 'avatar' | 'url' | 'program_thumbnail' | 'program_cover' | 'sponsor_url') => {
     const file = e.target.files?.[0];
     if (!file) return;
 
@@ -76,8 +78,7 @@ function Admin() {
       };
       reader.readAsDataURL(file);
     } else {
-      // Subida de video o audio en formato real hacia el backend (Soporta > 100GB)
-      if (field === 'url') {
+      if (field === 'url' || field === 'sponsor_url') {
         const uploadMedia = async () => {
           setIsUploading(true);
           const formData = new FormData();
@@ -92,7 +93,11 @@ function Admin() {
               throw new Error(`Código ${response.status}: ${errText.substring(0, 50)}`);
             }
             const data = await response.json();
-            setNewVideo({ ...newVideo, url: data.url, isAudio: file.type.startsWith('audio/') });
+            if (field === 'url') {
+              setNewVideo({ ...newVideo, url: data.url, isAudio: file.type.startsWith('audio/') });
+            } else if (field === 'sponsor_url') {
+              setNewSponsorForm({ ...newSponsorForm, url: data.url });
+            }
             alert("✅ Archivo multimedia procesado y listo para guardar.");
           } catch (error: any) {
             alert(`❌ Falló la carga del archivo. Detalle: ${error.message}`);
@@ -109,6 +114,13 @@ function Admin() {
   const handleSponsorUpload = async (e: ChangeEvent<HTMLInputElement>, index: number) => {
     const file = e.target.files?.[0];
     if (!file) return;
+
+    const sponsorName = window.prompt("Ingresa un nombre para guardar esta cuña en la biblioteca (Ej: Promo Coca-Cola):");
+    if (!sponsorName) {
+      e.target.value = ""; // reset
+      return;
+    }
+
     setIsUploading(true);
     const formData = new FormData();
     formData.append('file', file);
@@ -119,12 +131,17 @@ function Admin() {
         throw new Error(`Código ${response.status}: ${errText.substring(0, 100)}`);
       }
       const data = await response.json();
+      
+      // Guardar globalmente en la BD
+      const newSponsorObj = { id: Date.now().toString(), name: sponsorName, url: data.url, programId: newVideo.programId || '', createdAt: new Date().toISOString() };
+      await addSponsor(newSponsorObj);
+
       setSponsorUrls(prev => {
         const newUrls = [...prev];
         newUrls[index] = data.url;
         return newUrls;
       });
-      alert("✅ Cuña publicitaria procesada con éxito.");
+      alert("✅ Cuña publicitaria procesada, guardada en biblioteca y seleccionada con éxito.");
     } catch (error: any) { 
       console.error("Error subiendo cuña:", error);
       alert(`❌ Error al subir la cuña: ${error.message}`); 
@@ -171,6 +188,13 @@ function Admin() {
     }
     setIsProgramModalOpen(false);
     setNewProgram({ name: '', category: '', thumbnail: '', type: 'Programa', description: '', schedule: '', host: '', coverImage: '' });
+  };
+
+  const handleStandaloneSponsorSubmit = (e: FormEvent) => {
+    e.preventDefault();
+    addSponsor({ id: Date.now().toString(), name: newSponsorForm.name, url: newSponsorForm.url, programId: newSponsorForm.programId, createdAt: new Date().toISOString() });
+    setIsSponsorModalOpen(false);
+    setNewSponsorForm({ name: '', url: '', programId: '' });
   };
 
   const handleLogout = () => {
@@ -260,6 +284,11 @@ function Admin() {
             <span className="text-sm">Programas</span>
           </button>
           
+          <button onClick={() => { setActiveTab('sponsors'); setSelectedProgramDetails(null); setIsSidebarOpen(false); }} className={`w-full flex items-center gap-3 px-4 py-3 rounded-lg font-bold transition-all ${activeTab === 'sponsors' ? 'bg-[#C13535] text-[#DDDADB]' : 'text-[#DDDADB]/60 hover:text-[#DDDADB] hover:bg-[#1c1b1c]'}`}>
+            <span className="material-symbols-outlined" data-icon="campaign">campaign</span>
+            <span className="text-sm">Cuñas (Sponsors)</span>
+          </button>
+
           <button onClick={() => { setActiveTab('analytics'); setIsSidebarOpen(false); }} className={`w-full flex items-center gap-3 px-4 py-3 rounded-lg font-bold transition-all ${activeTab === 'analytics' ? 'bg-[#C13535] text-[#DDDADB]' : 'text-[#DDDADB]/60 hover:text-[#DDDADB] hover:bg-[#1c1b1c]'}`}>
             <span className="material-symbols-outlined" data-icon="trending_up">trending_up</span>
             <span className="text-sm">Analytics</span>
@@ -515,6 +544,43 @@ function Admin() {
             </section>
           )}
 
+          {/* SPONSORS (CUÑAS) TAB */}
+          {activeTab === 'sponsors' && (
+            <section className="bg-surface-container-low rounded-3xl p-8 border border-outline-variant/10">
+              <div className="flex flex-col md:flex-row justify-between items-end gap-6 mb-10">
+                <div>
+                  <h3 className="text-2xl font-bold text-[#DDDADB] mb-2">Biblioteca de Cuñas y Anuncios</h3>
+                  <p className="text-[#DDDADB]/50 text-sm max-w-md">Gestiona los audios publicitarios centralizados. Se pueden reutilizar en múltiples episodios.</p>
+                </div>
+                <button onClick={() => { setNewSponsorForm({ name: '', url: '', programId: '' }); setIsSponsorModalOpen(true); }} className="bg-[#F07D00] text-black px-5 py-2 rounded-full text-sm font-bold hover:opacity-90 active:scale-95 transition-all flex items-center gap-2">
+                  <span className="material-symbols-outlined text-sm">add_circle</span> Añadir Cuña
+                </button>
+              </div>
+
+              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+                {sponsors.length === 0 ? (
+                  <div className="col-span-full p-8 text-center text-[#DDDADB]/40 text-sm">No hay cuñas registradas aún.</div>
+                ) : (
+                  sponsors.map(sponsor => (
+                    <div key={sponsor.id} className="bg-surface-container-highest p-5 rounded-2xl border border-outline-variant/10 hover:border-[#F07D00]/50 transition-colors">
+                      <div className="flex justify-between items-start mb-3">
+                        <h4 className="text-[#DDDADB] font-bold text-lg">{sponsor.name}</h4>
+                        <button onClick={() => deleteSponsor(sponsor.id)} className="text-[#DDDADB]/40 hover:text-[#C13535] transition-colors"><span className="material-symbols-outlined text-lg">delete</span></button>
+                      </div>
+                      <audio controls className="w-full h-8 mb-3 opacity-90 grayscale" src={sponsor.url}></audio>
+                      <div className="flex justify-between items-center mt-2">
+                        <span className="text-[10px] bg-black/40 px-2 py-1 rounded text-[#DDDADB]/60 uppercase tracking-widest">
+                          {sponsor.programId ? `Programa: ${programs.find(p=>p.id === sponsor.programId)?.name || 'Varios'}` : 'Global'}
+                        </span>
+                        <span className="text-[10px] text-[#DDDADB]/30 font-medium italic">{new Date(sponsor.createdAt).toLocaleDateString()}</span>
+                      </div>
+                    </div>
+                  ))
+                )}
+              </div>
+            </section>
+          )}
+
           {/* ANALYTICS TAB */}
           {activeTab === 'analytics' && (
             <div className="space-y-8">
@@ -746,19 +812,20 @@ function Admin() {
                           <div key={i} className="bg-black/20 p-4 rounded-lg border border-white/5">
                             <label className="block text-[10px] font-bold text-[#DDDADB]/60 mb-2 uppercase">Audio Patrocinante {i + 1}</label>
                             <div className="flex flex-col xl:flex-row gap-2 items-center">
-                              <input 
-                                type="text" 
-                                value={sponsorUrls[i] || ''} 
+                              <select 
+                                value={sponsorUrls[i] || ''}
                                 onChange={(e) => {
                                   const newUrls = [...sponsorUrls];
                                   newUrls[i] = e.target.value;
                                   setSponsorUrls(newUrls);
                                 }}
-                                className="w-full xl:w-2/3 bg-black/40 border border-white/10 rounded p-2 text-xs text-[#DDDADB]" 
-                                placeholder="URL o sube archivo 👉" 
-                              />
+                                className="w-full xl:w-2/3 bg-black/40 border border-white/10 rounded p-2 text-xs text-[#DDDADB]"
+                              >
+                                <option value="">-- Seleccionar cuña de la biblioteca --</option>
+                                {sponsors.map(s => <option key={s.id} value={s.url}>{s.name}</option>)}
+                              </select>
                               <label className="w-full xl:w-1/3 bg-[#F07D00]/20 text-[#F07D00] hover:bg-[#F07D00] hover:text-black border border-[#F07D00]/30 cursor-pointer px-3 py-2 rounded-lg flex items-center justify-center transition-all shadow-sm font-bold text-xs text-center">
-                                <span className="material-symbols-outlined text-sm mr-1">upload</span> Subir
+                                <span className="material-symbols-outlined text-sm mr-1">add</span> Nueva
                                 <input type="file" accept="audio/*" className="hidden" onChange={(e) => handleSponsorUpload(e, i)} />
                               </label>
                             </div>
@@ -848,6 +915,44 @@ function Admin() {
               <div className="md:col-span-2 flex justify-end gap-3 mt-4 pt-4 border-t border-outline-variant/20">
                 <button type="button" onClick={() => setIsProgramModalOpen(false)} className="px-6 py-2.5 rounded-lg text-sm font-bold text-[#DDDADB]/60 hover:text-[#DDDADB] hover:bg-surface-container-highest transition-all">Cancelar</button>
                 <button type="submit" className="bg-[#F07D00] text-black px-8 py-2.5 rounded-lg text-sm font-bold shadow-lg hover:scale-105 active:scale-95 transition-all">Guardar Programa</button>
+              </div>
+            </form>
+          </div>
+        </div>
+      )}
+
+      {/* Modal para Añadir Cuña Standalone */}
+      {isSponsorModalOpen && (
+        <div className="fixed inset-0 z-[100] bg-black/80 backdrop-blur-sm flex items-center justify-center p-4">
+          <div className="bg-surface-container rounded-2xl p-4 md:p-8 w-full max-w-2xl border border-outline-variant/20 shadow-2xl">
+            <h3 className="text-xl font-bold text-[#DDDADB] mb-6">Registrar Nueva Cuña (Sponsor)</h3>
+            <form onSubmit={handleStandaloneSponsorSubmit} className="space-y-5">
+              <div>
+                <label className="block text-xs font-bold text-[#DDDADB]/60 mb-1">Nombre Descriptivo de la Cuña</label>
+                <input required value={newSponsorForm.name} onChange={e => setNewSponsorForm({...newSponsorForm, name: e.target.value})} className="w-full bg-surface-container-lowest border-none rounded-lg p-3 text-sm text-[#DDDADB]" type="text" placeholder="Ej: Anuncio Banesco Navidad" />
+              </div>
+              <div>
+                <label className="block text-xs font-bold text-[#DDDADB]/60 mb-1">Audio (URL o subir archivo MP3)</label>
+                <div className="flex gap-2">
+                  <input required value={newSponsorForm.url} onChange={e => setNewSponsorForm({...newSponsorForm, url: e.target.value})} className="flex-1 bg-surface-container-lowest border-none rounded-lg p-3 text-sm text-[#DDDADB]" type="text" placeholder="Enlace de audio o carga 👉" />
+                  <label className="bg-surface-container-high hover:bg-surface-bright cursor-pointer px-4 py-3 rounded-lg flex items-center justify-center transition-colors shadow-sm">
+                    <span className="material-symbols-outlined text-[#DDDADB]">upload_file</span>
+                    <input type="file" accept="audio/*" className="hidden" onChange={(e) => handleFileUpload(e, 'sponsor_url')} />
+                  </label>
+                </div>
+              </div>
+              <div>
+                <label className="block text-xs font-bold text-[#DDDADB]/60 mb-1">Asociar a un Programa en específico (Opcional)</label>
+                <select value={newSponsorForm.programId} onChange={e => setNewSponsorForm({...newSponsorForm, programId: e.target.value})} className="w-full bg-surface-container-lowest border-none rounded-lg p-3 text-sm text-[#DDDADB]">
+                  <option value="">Global / Para cualquier programa</option>
+                  {programs.map(p => <option key={p.id} value={p.id}>{p.name}</option>)}
+                </select>
+              </div>
+              <div className="flex justify-end gap-3 mt-8 pt-4 border-t border-outline-variant/20">
+                <button type="button" onClick={() => setIsSponsorModalOpen(false)} className="px-6 py-2.5 rounded-lg text-sm font-bold text-[#DDDADB]/60 hover:text-[#DDDADB] hover:bg-surface-container-highest transition-all">Cancelar</button>
+                <button type="submit" disabled={isUploading} className="bg-[#F07D00] text-black px-8 py-2.5 rounded-lg text-sm font-bold shadow-lg hover:scale-105 active:scale-95 transition-all">
+                  {isUploading ? 'Subiendo...' : 'Guardar Cuña'}
+                </button>
               </div>
             </form>
           </div>

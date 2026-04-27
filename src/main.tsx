@@ -21,7 +21,7 @@ const router = createBrowserRouter([
   { path: "/programas", element: <AllPrograms />, errorElement: <NotFound /> },
   { path: "/admin", element: <Admin />, errorElement: <NotFound /> },
   { path: "/login", element: <Login />, errorElement: <NotFound /> },
-  { path: "*", element: <NotFound /> } // Ruta comodín para atrapar URLs inexistentes (ej: /hola)
+  { path: "/NotFound", element: <NotFound /> } // Ruta comodín para atrapar URLs inexistentes (ej: /hola)
 ]);
 
 // 2. Renderizar la aplicación con todos sus contextos
