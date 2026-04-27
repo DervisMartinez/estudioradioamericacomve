@@ -282,7 +282,7 @@ export const VideoProvider = ({ children }: { children: ReactNode }) => {
 
   const addSponsor = async (sponsor: Sponsor) => {
     try {
-      const res = await fetch(`${API_URL}/videos/sponsors`, {
+      const res = await fetch(`${API_URL}/sponsors`, {
         method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(sponsor)
       });
       if (await handleResponse(res, 'Cuña registrada exitosamente')) {
