@@ -84,7 +84,7 @@ function Admin() {
           const formData = new FormData();
           formData.append('file', file);
           try {
-            const uploadEndpoint = field === 'sponsor_url' ? `${API_URL}/upload/sponsor` : `${API_URL}/upload`;
+            const uploadEndpoint = field === 'sponsor_url' ? `${API_URL}/upload?type=sponsor` : `${API_URL}/upload`;
             const response = await fetch(uploadEndpoint, {
               method: 'POST',
               body: formData // Fetch calcula el multipart/form-data automáticamente
@@ -126,7 +126,7 @@ function Admin() {
     const formData = new FormData();
     formData.append('file', file);
     try {
-      const response = await fetch(`${API_URL}/upload/sponsor`, { method: 'POST', body: formData });
+      const response = await fetch(`${API_URL}/upload?type=sponsor`, { method: 'POST', body: formData });
       if (!response.ok) {
         const errText = await response.text();
         throw new Error(`Código ${response.status}: ${errText.substring(0, 100)}`);
