@@ -31,6 +31,14 @@ export interface Program {
   coverImage?: string;
 }
 
+export interface Sponsor {
+  id: string;
+  name: string;
+  url: string;
+  programId?: string;
+  createdAt: string;
+}
+
 export interface UserProfile {
   firstName: string;
   lastName: string;
@@ -51,6 +59,9 @@ interface VideoContextType {
   addProgram: (program: Program) => void;
   updateProgram: (program: Program) => void;
   deleteProgram: (id: string) => void;
+  sponsors: Sponsor[];
+  addSponsor: (sponsor: Sponsor) => Promise<boolean>;
+  deleteSponsor: (id: string) => void;
   userProfile: UserProfile;
   updateUserProfile: (profile: UserProfile) => void;
   incrementView: (id: string) => void;
@@ -67,6 +78,9 @@ export const VideoContext = createContext<VideoContextType>({
   addProgram: () => {},
   updateProgram: () => {},
   deleteProgram: () => {},
+  sponsors: [],
+  addSponsor: async () => false,
+  deleteSponsor: () => {},
   userProfile: { firstName: '', lastName: '', avatar: '', bio: '', twitter: '', instagram: '', youtube: '', facebook: '' },
   updateUserProfile: () => {},
   incrementView: () => {},
@@ -119,6 +133,7 @@ export const API_URL = import.meta.env.VITE_API_URL || (import.meta.env.MODE ===
 export const VideoProvider = ({ children }: { children: ReactNode }) => {
   const [videos, setVideos] = useState<Video[]>([]);
   const [programs, setPrograms] = useState<Program[]>([]);
+  const [sponsors, setSponsors] = useState<Sponsor[]>([]);
   const [userProfile, setUserProfile] = useState<UserProfile>({
     firstName: 'Admin', lastName: 'User', avatar: '', bio: '', twitter: '', instagram: '', youtube: '', facebook: ''
   });
@@ -136,14 +151,16 @@ export const VideoProvider = ({ children }: { children: ReactNode }) => {
     const fetchData = async () => {
       setIsLoading(true);
       try {
-        const [videosRes, programsRes, profileRes] = await Promise.all([
+        const [videosRes, programsRes, sponsorsRes, profileRes] = await Promise.all([
           fetch(`${API_URL}/videos`),
           fetch(`${API_URL}/programs`),
+          fetch(`${API_URL}/sponsors`),
           fetch(`${API_URL}/profile`)
         ]);
 
         if (videosRes.ok) setVideos(await videosRes.json());
         if (programsRes.ok) setPrograms(await programsRes.json());
+        if (sponsorsRes.ok) setSponsors(await sponsorsRes.json());
         if (profileRes.ok) {
           const profileData = await profileRes.json();
           if (profileData && profileData.firstName) setUserProfile(profileData);
@@ -257,6 +274,36 @@ export const VideoProvider = ({ children }: { children: ReactNode }) => {
     }
   };
 
+  const addSponsor = async (sponsor: Sponsor) => {
+    try {
+      const res = await fetch(`${API_URL}/sponsors`, {
+        method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(sponsor)
+      });
+      if (await handleResponse(res, 'Cuña registrada exitosamente')) {
+        setSponsors([sponsor, ...sponsors]);
+        return true;
+      }
+      return false;
+    } catch (error) { 
+      console.error(error); 
+      alert("❌ Fallo de conexión con el servidor al registrar la cuña.");
+      return false;
+    }
+  };
+
+  const deleteSponsor = async (id: string) => {
+    if(window.confirm("¿Estás seguro de que deseas eliminar esta cuña? Esto no la borrará de los episodios donde ya esté incrustada.")) {
+      try {
+        const res = await fetch(`${API_URL}/sponsors/${id}`, { method: 'DELETE' });
+        if (await handleResponse(res, 'Cuña eliminada')) {
+          setSponsors(sponsors.filter(s => s.id !== id));
+        }
+      } catch (error) { 
+        console.error(error); 
+      }
+    }
+  };
+
   const updateUserProfile = async (profile: UserProfile) => {
     try {
       const res = await fetch(`${API_URL}/profile`, {
@@ -279,7 +326,7 @@ export const VideoProvider = ({ children }: { children: ReactNode }) => {
   };
 
   return (
-    <VideoContext.Provider value={{ videos, addVideo, updateVideo, deleteVideo, programs, addProgram, updateProgram, deleteProgram, userProfile, updateUserProfile, incrementView, isLoading, setIsLoading }}>
+    <VideoContext.Provider value={{ videos, addVideo, updateVideo, deleteVideo, programs, addProgram, updateProgram, deleteProgram, sponsors, addSponsor, deleteSponsor, userProfile, updateUserProfile, incrementView, isLoading, setIsLoading }}>
       {isLoading ? <RadioAmericaLoader fullScreen={true} /> : children}
     </VideoContext.Provider>
   );
