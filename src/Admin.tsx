@@ -83,10 +83,12 @@ function Admin() {
           setIsUploading(true);
           const formData = new FormData();
           formData.append('file', file);
+          const headers: HeadersInit = {};
+          if (field === 'sponsor_url') headers['X-Action'] = 'upload_sponsor';
           try {
-            const uploadEndpoint = field === 'sponsor_url' ? `${API_URL}/upload?type=sponsor` : `${API_URL}/upload`;
-            const response = await fetch(uploadEndpoint, {
+            const response = await fetch(`${API_URL}/upload`, {
               method: 'POST',
+              headers,
               body: formData // Fetch calcula el multipart/form-data automáticamente
             });
             if (!response.ok) {
@@ -126,7 +128,7 @@ function Admin() {
     const formData = new FormData();
     formData.append('file', file);
     try {
-      const response = await fetch(`${API_URL}/upload?type=sponsor`, { method: 'POST', body: formData });
+      const response = await fetch(`${API_URL}/upload`, { method: 'POST', headers: { 'X-Action': 'upload_sponsor' }, body: formData });
       if (!response.ok) {
         const errText = await response.text();
         throw new Error(`Código ${response.status}: ${errText.substring(0, 100)}`);
