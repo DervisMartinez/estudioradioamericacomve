@@ -14,7 +14,7 @@ function Admin() {
   const [selectedProgramDetails, setSelectedProgramDetails] = useState<string | null>(null);
   const [editingId, setEditingId] = useState<string | null>(null);
   const [editingProgramId, setEditingProgramId] = useState<string | null>(null);
-  const [newVideo, setNewVideo] = useState({ title: '', category: 'Historia', thumbnail: '', url: '', description: '', isFeatured: false, isShort: false, isAudio: false, programId: '', releaseDate: '', duration: '', pressNoteUrl: '' });
+  const [newVideo, setNewVideo] = useState({ title: '', category: 'Historia', thumbnail: '', url: '', description: '', isFeatured: false, isLive: false, isShort: false, isAudio: false, programId: '', releaseDate: '', duration: '', pressNoteUrl: '' });
   const [newProgram, setNewProgram] = useState({ name: '', category: '', thumbnail: '', type: 'Programa' as 'Programa' | 'Podcast', description: '', schedule: '', host: '', coverImage: '' });
   const [newSponsorForm, setNewSponsorForm] = useState({ name: '', url: '', programId: '' });
   const [profileForm, setProfileForm] = useState(userProfile);
@@ -25,7 +25,7 @@ function Admin() {
 
   const resetVideoForm = (overrides = {}) => {
     setEditingId(null);
-    setNewVideo({ title: '', category: 'Historia', thumbnail: '', url: '', description: '', isFeatured: false, isShort: false, isAudio: false, programId: '', releaseDate: '', duration: '', pressNoteUrl: '', ...overrides });
+    setNewVideo({ title: '', category: 'Historia', thumbnail: '', url: '', description: '', isFeatured: false, isLive: false, isShort: false, isAudio: false, programId: '', releaseDate: '', duration: '', pressNoteUrl: '', ...overrides });
     setIsSponsored(false);
     setSponsorCount(1);
     setSponsorUrls([]);
@@ -164,7 +164,7 @@ function Admin() {
 
     const videoData = {
       title: newVideo.title, category: newVideo.category, description: newVideo.description,
-      isFeatured: newVideo.isFeatured, isShort: newVideo.isShort, isAudio: newVideo.isAudio, thumbnail: newVideo.thumbnail, 
+      isFeatured: newVideo.isFeatured, isLive: newVideo.isLive, isShort: newVideo.isShort, isAudio: newVideo.isAudio, thumbnail: newVideo.thumbnail, 
       url: finalUrl, programId: newVideo.programId, duration: newVideo.duration || '00:00', releaseDate: newVideo.releaseDate, pressNoteUrl: newVideo.pressNoteUrl
     };
 
@@ -226,6 +226,7 @@ function Admin() {
         url: parsedUrl, 
         description: video.description, 
         isFeatured: video.isFeatured, 
+        isLive: video.isLive || false,
         isShort: video.isShort || false, 
         isAudio: video.isAudio || false, 
         programId: video.programId || '',
@@ -843,6 +844,10 @@ function Admin() {
                   <label htmlFor="isFeatured" className="text-sm text-[#DDDADB] font-medium cursor-pointer">⭐ Marcar como Entrevista Destacada</label>
                 </div>
                 <div className="flex items-center gap-2">
+              <input id="isLive" checked={newVideo.isLive} onChange={e => setNewVideo({...newVideo, isLive: e.target.checked})} type="checkbox" className="h-5 w-5 rounded bg-surface-container-highest border-none text-red-500 cursor-pointer" />
+              <label htmlFor="isLive" className="text-sm text-[#DDDADB] font-medium cursor-pointer">🔴 Marcar como EN VIVO</label>
+            </div>
+            <div className="flex items-center gap-2">
                   <input id="isShort" checked={newVideo.isShort} onChange={e => setNewVideo({...newVideo, isShort: e.target.checked})} type="checkbox" className="h-5 w-5 rounded bg-surface-container-highest border-none text-[#F07D00] cursor-pointer" />
                   <label htmlFor="isShort" className="text-sm text-[#DDDADB] font-medium cursor-pointer">📱 Es un Short / Reel (Vertical)</label>
                 </div>
