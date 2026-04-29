@@ -8,6 +8,7 @@ export interface Video {
   thumbnail: string;
   description: string;
   isFeatured: boolean;
+  isLive?: boolean;
   isShort?: boolean;
   isAudio?: boolean;
   url: string;

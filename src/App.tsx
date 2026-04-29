@@ -149,26 +149,30 @@ function App() {
   };
 
   // Carrusel dinámico de videos destacados
-  const featuredVideos = videos.filter(v => v.isFeatured);
+  const liveVideos = videos.filter(v => v.isLive);
+  const featuredVideos = videos.filter(v => v.isFeatured && !v.isLive);
+  
+  const activeHeroVideos = liveVideos.length > 0 ? liveVideos : featuredVideos;
+  
   const [currentFeaturedIndex, setCurrentFeaturedIndex] = useState(0);
   const [fadeClass, setFadeClass] = useState('opacity-100');
 
   useEffect(() => {
-    // Si hay 1 o menos videos destacados, no es necesario rotar
-    if (featuredVideos.length <= 1) return;
+    // Si hay 1 o menos videos en el hero, no es necesario rotar
+    if (activeHeroVideos.length <= 1) return;
 
     const interval = setInterval(() => {
       setFadeClass('opacity-0'); // Inicia el desvanecimiento
       setTimeout(() => {
-        setCurrentFeaturedIndex(prev => (prev + 1) % featuredVideos.length);
+        setCurrentFeaturedIndex(prev => (prev + 1) % activeHeroVideos.length);
         setFadeClass('opacity-100'); // Aparece la nueva imagen y contenido
       }, 1000); // 1 segundo exacto de margen de separación
     }, 7000); // Cambia cada 7 segundos
 
     return () => clearInterval(interval);
-  }, [featuredVideos.length]);
+  }, [activeHeroVideos.length]);
 
-  const featuredVideo = featuredVideos[currentFeaturedIndex] || null;
+  const featuredVideo = activeHeroVideos[currentFeaturedIndex] || null;
 
   // Encuentra el próximo episodio o video similar
   let nextVideo = null;
@@ -280,10 +284,16 @@ function App() {
           <div className={`relative z-10 max-w-7xl mx-auto px-6 md:px-8 w-full grid md:grid-cols-2 gap-8 md:gap-12 items-center transition-opacity duration-1000 ${fadeClass}`}>
             <div className="space-y-6">
               <div className="flex items-center gap-3">
-                <span className="bg-primary-container text-on-primary-container px-3 py-1 rounded-sm text-xs font-bold tracking-widest uppercase">Especial</span>
+                {featuredVideo?.isLive ? (
+                  <span className="bg-red-600 text-white px-3 py-1 rounded-sm text-xs font-bold tracking-widest uppercase animate-pulse flex items-center gap-1.5 shadow-lg shadow-red-900/50">
+                    <span className="w-1.5 h-1.5 bg-white rounded-full"></span> EN VIVO
+                  </span>
+                ) : (
+                  <span className="bg-primary-container text-on-primary-container px-3 py-1 rounded-sm text-xs font-bold tracking-widest uppercase">Especial</span>
+                )}
                 <span className="text-tertiary flex items-center gap-1 font-bold text-sm tracking-wide">
-                  <span className="material-symbols-outlined text-sm" style={{ fontVariationSettings: "'FILL' 1" }}>star</span>
-                  ENTREVISTA DESTACADA
+                  <span className="material-symbols-outlined text-sm" style={{ fontVariationSettings: "'FILL' 1" }}>{featuredVideo?.isLive ? 'sensors' : 'star'}</span>
+                  {featuredVideo?.isLive ? 'TRANSMISIÓN EN DIRECTO' : 'ENTREVISTA DESTACADA'}
                 </span>
               </div>
               <h1 className="text-4xl sm:text-5xl md:text-6xl lg:text-7xl font-black tracking-tighter text-[#C13535] dark:text-white leading-[1.1] text-shadow-editorial break-words text-balance line-clamp-3">
@@ -299,9 +309,9 @@ function App() {
                   : "Una conversación íntima con los líderes que están transformando la realidad actual. Descubre las historias que nunca se contaron detrás de los micrófonos de Estudio Radio América."}
               </p>
               <div className="flex items-center gap-4 pt-4">
-                <button onClick={() => featuredVideo && navigate(`/watch/${featuredVideo.id}`)} className="bg-[#C13535] text-white px-6 md:px-8 py-3 md:py-4 rounded-full text-sm md:text-base font-bold flex items-center gap-2 hover:bg-[#a12b2b] transition-all transform hover:scale-105 active:scale-95 shadow-lg shadow-primary/20 whitespace-nowrap">
+                <button onClick={() => featuredVideo && navigate(`/watch/${featuredVideo.id}`)} className={`${featuredVideo?.isLive ? 'bg-red-600 hover:bg-red-700 shadow-red-900/20' : 'bg-[#C13535] hover:bg-[#a12b2b] shadow-primary/20'} text-white px-6 md:px-8 py-3 md:py-4 rounded-full text-sm md:text-base font-bold flex items-center gap-2 transition-all transform hover:scale-105 active:scale-95 shadow-lg whitespace-nowrap`}>
                   <span className="material-symbols-outlined" style={{ fontVariationSettings: "'FILL' 1" }}>play_arrow</span>
-                  ESCUCHAR AHORA
+                  {featuredVideo?.isLive ? 'SINTONIZAR AHORA' : 'ESCUCHAR AHORA'}
                 </button>
                 <PressNoteButton 
                   url={(featuredVideo as any)?.pressNoteUrl} 
@@ -673,7 +683,7 @@ function App() {
             <span className="material-symbols-outlined text-[#C13535]/60 dark:text-[#DDDADB]/40 cursor-pointer hover:text-[#C13535]">language</span>
             <span className="material-symbols-outlined text-[#C13535]/60 dark:text-[#DDDADB]/40 cursor-pointer hover:text-[#C13535]">podcasts</span>
           </div>
-          <p className="text-center font-['Montserrat'] text-sm text-[#C13535]/80 dark:text-[#DDDADB]/40">© 2024 Estudio Radio América. Todos los derechos reservados.</p>
+          <p className="text-center font-['Montserrat'] text-sm text-[#C13535]/80 dark:text-[#DDDADB]/40">© 2026 Estudio Radio América. Todos los derechos reservados.</p>
         </div>
       </footer>
     </>
