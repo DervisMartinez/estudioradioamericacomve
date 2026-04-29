@@ -226,7 +226,7 @@ function Admin() {
         url: parsedUrl, 
         description: video.description, 
         isFeatured: video.isFeatured, 
-        isLive: video.isLive || false,
+        isLive: video.isLive === 1 || video.isLive === true,
         isShort: video.isShort || false, 
         isAudio: video.isAudio || false, 
         programId: video.programId || '',
