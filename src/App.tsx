@@ -293,7 +293,7 @@ function App() {
                 )}
                 <span className="text-tertiary flex items-center gap-1 font-bold text-sm tracking-wide">
                   <span className="material-symbols-outlined text-sm" style={{ fontVariationSettings: "'FILL' 1" }}>{featuredVideo?.isLive ? 'sensors' : 'star'}</span>
-                  {featuredVideo?.isLive ? 'TRANSMISIÓN EN DIRECTO' : 'ENTREVISTA DESTACADA'}
+                  {featuredVideo?.isLive ? 'EN VIVO - DESTACADO' : 'ENTREVISTA DESTACADA'}
                 </span>
               </div>
               <h1 className="text-4xl sm:text-5xl md:text-6xl lg:text-7xl font-black tracking-tighter text-[#C13535] dark:text-white leading-[1.1] text-shadow-editorial break-words text-balance line-clamp-3">
