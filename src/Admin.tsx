@@ -84,30 +84,28 @@ function Admin() {
           setIsUploading(true);
           setUploadProgress(0);
           
-          const chunkSize = 1024 * 1024 * 2; // 2MB por pedazo
-          const totalChunks = Math.ceil(file.size / chunkSize);
-          const folderId = Date.now().toString() + Math.floor(Math.random() * 1000);
-          
           try {
-            let data: any = null;
-            for (let i = 0; i < totalChunks; i++) {
-              const start = i * chunkSize;
-              const end = Math.min(start + chunkSize, file.size);
-              const chunk = file.slice(start, end);
-              
-              const formData = new FormData();
-              formData.append('file', chunk);
-              formData.append('chunkIndex', i.toString());
-              formData.append('totalChunks', totalChunks.toString());
-              formData.append('originalName', file.name);
-              formData.append('folderId', folderId);
-
-              const response = await fetch(`${API_URL}/upload/chunk`, { method: 'POST', body: formData });
-              if (!response.ok) throw new Error(`Fallo en el fragmento ${i + 1}/${totalChunks}`);
-              
-              data = await response.json();
-              setUploadProgress(Math.round(((i + 1) / totalChunks) * 100));
-            }
+            const formData = new FormData();
+            formData.append('file', file);
+            
+            const data = await new Promise<any>((resolve, reject) => {
+              const xhr = new XMLHttpRequest();
+              xhr.open('POST', `${API_URL}/upload`);
+              xhr.upload.onprogress = (e) => {
+                if (e.lengthComputable) {
+                  setUploadProgress(Math.round((e.loaded / e.total) * 100));
+                }
+              };
+              xhr.onload = () => {
+                if (xhr.status >= 200 && xhr.status < 300) {
+                  try { resolve(JSON.parse(xhr.responseText)); } catch(e) { resolve({}); }
+                } else {
+                  reject(new Error(`Código ${xhr.status}: ${xhr.responseText.substring(0, 100)}`));
+                }
+              };
+              xhr.onerror = () => reject(new Error("Fallo de red al intentar subir el archivo."));
+              xhr.send(formData);
+            });
 
             if (field === 'url') setNewVideo({ ...newVideo, url: data.url, isAudio: file.type.startsWith('audio/') });
             else if (field === 'sponsor_url') setNewSponsorForm({ ...newSponsorForm, url: data.url });
@@ -138,27 +136,29 @@ function Admin() {
 
     setIsUploading(true);
     setUploadProgress(0);
-    const chunkSize = 1024 * 1024 * 2;
-    const totalChunks = Math.ceil(file.size / chunkSize);
-    const folderId = Date.now().toString() + index.toString();
 
     try {
-      let data: any = null;
-      for (let i = 0; i < totalChunks; i++) {
-        const start = i * chunkSize;
-        const chunk = file.slice(start, start + chunkSize);
-        const formData = new FormData();
-        formData.append('file', chunk);
-        formData.append('chunkIndex', i.toString());
-        formData.append('totalChunks', totalChunks.toString());
-        formData.append('originalName', file.name);
-        formData.append('folderId', folderId);
+      const formData = new FormData();
+      formData.append('file', file);
 
-        const response = await fetch(`${API_URL}/upload/chunk`, { method: 'POST', body: formData });
-        if (!response.ok) throw new Error(`Fallo en el fragmento ${i + 1}`);
-        data = await response.json();
-        setUploadProgress(Math.round(((i + 1) / totalChunks) * 100));
-      }
+      const data = await new Promise<any>((resolve, reject) => {
+        const xhr = new XMLHttpRequest();
+        xhr.open('POST', `${API_URL}/upload`);
+        xhr.upload.onprogress = (e) => {
+          if (e.lengthComputable) {
+            setUploadProgress(Math.round((e.loaded / e.total) * 100));
+          }
+        };
+        xhr.onload = () => {
+          if (xhr.status >= 200 && xhr.status < 300) {
+            try { resolve(JSON.parse(xhr.responseText)); } catch(e) { resolve({}); }
+          } else {
+            reject(new Error(`Código ${xhr.status}: ${xhr.responseText.substring(0, 100)}`));
+          }
+        };
+        xhr.onerror = () => reject(new Error("Fallo de red al intentar subir la cuña."));
+        xhr.send(formData);
+      });
       
       // Guardar globalmente en la BD
       const newSponsorObj = { id: Date.now().toString(), name: sponsorName, url: data.url, programId: newVideo.programId || '', createdAt: new Date().toISOString() };
