@@ -226,7 +226,7 @@ function Admin() {
         url: parsedUrl, 
         description: video.description, 
         isFeatured: video.isFeatured, 
-        isLive: video.isLive === 1 || video.isLive === true,
+        isLive: !!video.isLive,
         isShort: video.isShort || false, 
         isAudio: video.isAudio || false, 
         programId: video.programId || '',
@@ -277,7 +277,7 @@ function Admin() {
           </button>
           <button onClick={() => { setActiveTab('library'); setSelectedProgramDetails(null); setIsSidebarOpen(false); }} className={`w-full flex items-center gap-3 px-4 py-3 rounded-lg font-bold transition-all ${activeTab === 'library' ? 'bg-[#C13535] text-[#DDDADB]' : 'text-[#DDDADB]/60 hover:text-[#DDDADB] hover:bg-[#1c1b1c]'}`}>
             <span className="material-symbols-outlined" data-icon="video_library">video_library</span>
-            <span className="text-sm">Video Library</span>
+            <span className="text-sm">Libreria de Videos</span>
           </button>
           
           <button onClick={() => { setActiveTab('programs'); setSelectedProgramDetails(null); setIsSidebarOpen(false); }} className={`w-full flex items-center gap-3 px-4 py-3 rounded-lg font-bold transition-all ${activeTab === 'programs' ? 'bg-[#C13535] text-[#DDDADB]' : 'text-[#DDDADB]/60 hover:text-[#DDDADB] hover:bg-[#1c1b1c]'}`}>
@@ -292,12 +292,12 @@ function Admin() {
 
           <button onClick={() => { setActiveTab('analytics'); setIsSidebarOpen(false); }} className={`w-full flex items-center gap-3 px-4 py-3 rounded-lg font-bold transition-all ${activeTab === 'analytics' ? 'bg-[#C13535] text-[#DDDADB]' : 'text-[#DDDADB]/60 hover:text-[#DDDADB] hover:bg-[#1c1b1c]'}`}>
             <span className="material-symbols-outlined" data-icon="trending_up">trending_up</span>
-            <span className="text-sm">Analytics</span>
+            <span className="text-sm">Estadisticas</span>
           </button>
 
           <button onClick={() => { setActiveTab('settings'); setIsSidebarOpen(false); }} className={`w-full flex items-center gap-3 px-4 py-3 rounded-lg font-bold transition-all ${activeTab === 'settings' ? 'bg-[#C13535] text-[#DDDADB]' : 'text-[#DDDADB]/60 hover:text-[#DDDADB] hover:bg-[#1c1b1c]'}`}>
             <span className="material-symbols-outlined" data-icon="settings">settings</span>
-            <span className="text-sm">Settings</span>
+            <span className="text-sm">Herramientas</span>
           </button>
         </nav>
         <div className="mt-auto pt-6 border-t border-[#59413f]/15">
@@ -349,7 +349,7 @@ function Admin() {
                   <span className="material-symbols-outlined" data-icon="help_outline">help_outline</span>
                 </button>
                 <button onClick={() => { resetVideoForm({ programId: selectedProgramDetails || '' }); setIsModalOpen(true); }} className="bg-[#C13535] text-white px-5 py-2 rounded-full text-sm font-bold hover:opacity-90 active:scale-95 transition-all">
-                  Add New Video
+                  Añadir
                 </button>
               </div>
             </div>

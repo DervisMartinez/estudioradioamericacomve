@@ -227,6 +227,8 @@ function App() {
   // Extrae el video destacado para la categoría activa
   const categoryFeaturedVideo = filteredVideos[0];
 
+  const hasLiveVideo = videos.some(v => v.isLive);
+
   return (
     <>
       <Helmet>
@@ -248,6 +250,12 @@ function App() {
             <img src="/logo_colors.png" alt="Logo" className="w-10 h-10 object-contain dark:hidden" onError={(e) => { e.currentTarget.src = 'https://ui-avatars.com/api/?name=RA&background=C13535&color=fff&rounded=true'; }} />
             <img src="/logo_blanco.png" alt="Logo" className="w-10 h-10 object-contain hidden dark:block" onError={(e) => { e.currentTarget.src = 'https://ui-avatars.com/api/?name=RA&background=C13535&color=fff&rounded=true'; }} />
             <span className="text-lg md:text-2xl font-black text-[#C13535] dark:text-[#DDDADB] tracking-tighter hidden sm:block">Estudio Radio América</span>
+            {hasLiveVideo && (
+              <span className="flex h-2.5 w-2.5 relative ml-1" title="Transmitiendo en Vivo">
+                <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-red-500 opacity-75"></span>
+                <span className="relative inline-flex rounded-full h-2.5 w-2.5 bg-red-600"></span>
+              </span>
+            )}
           </div>
           <div className="hidden lg:flex gap-8 items-center font-['Montserrat'] tracking-tight font-bold">
             <a className="text-[#C13535] dark:text-[#DDDADB] border-b-2 border-[#C13535] dark:border-[#DDDADB] pb-1" href="#">Inicio</a>

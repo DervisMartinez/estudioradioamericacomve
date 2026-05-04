@@ -152,11 +152,12 @@ export const VideoProvider = ({ children }: { children: ReactNode }) => {
     const fetchData = async () => {
       setIsLoading(true);
       try {
+        const cacheBuster = `?t=${new Date().getTime()}`;
         const [videosRes, programsRes, sponsorsRes, profileRes] = await Promise.all([
-          fetch(`${API_URL}/videos`),
-          fetch(`${API_URL}/programs`),
-          fetch(`${API_URL}/sponsors`),
-          fetch(`${API_URL}/profile`)
+          fetch(`${API_URL}/videos${cacheBuster}`),
+          fetch(`${API_URL}/programs${cacheBuster}`),
+          fetch(`${API_URL}/sponsors${cacheBuster}`),
+          fetch(`${API_URL}/profile${cacheBuster}`)
         ]);
 
         if (videosRes.ok) setVideos(await videosRes.json());
