@@ -19,6 +19,7 @@ function Admin() {
   const [newSponsorForm, setNewSponsorForm] = useState({ name: '', url: '', programId: '' });
   const [profileForm, setProfileForm] = useState(userProfile);
   const [isUploading, setIsUploading] = useState(false);
+  const [uploadProgress, setUploadProgress] = useState(0);
   const [isSponsored, setIsSponsored] = useState(false);
   const [sponsorCount, setSponsorCount] = useState(1);
   const [sponsorUrls, setSponsorUrls] = useState<string[]>([]);
@@ -81,28 +82,42 @@ function Admin() {
       if (field === 'url' || field === 'sponsor_url') {
         const uploadMedia = async () => {
           setIsUploading(true);
-          const formData = new FormData();
-          formData.append('file', file);
+          setUploadProgress(0);
+          
+          const chunkSize = 1024 * 1024 * 2; // 2MB por pedazo
+          const totalChunks = Math.ceil(file.size / chunkSize);
+          const folderId = Date.now().toString() + Math.floor(Math.random() * 1000);
+          
           try {
-            const response = await fetch(`${API_URL}/upload`, {
-              method: 'POST',
-              body: formData // Fetch calcula el multipart/form-data automáticamente
-            });
-            if (!response.ok) {
-              const errText = await response.text();
-              throw new Error(`Código ${response.status}: ${errText.substring(0, 100)}`);
+            let data: any = null;
+            for (let i = 0; i < totalChunks; i++) {
+              const start = i * chunkSize;
+              const end = Math.min(start + chunkSize, file.size);
+              const chunk = file.slice(start, end);
+              
+              const formData = new FormData();
+              formData.append('file', chunk);
+              formData.append('chunkIndex', i.toString());
+              formData.append('totalChunks', totalChunks.toString());
+              formData.append('originalName', file.name);
+              formData.append('folderId', folderId);
+
+              const response = await fetch(`${API_URL}/upload/chunk`, { method: 'POST', body: formData });
+              if (!response.ok) throw new Error(`Fallo en el fragmento ${i + 1}/${totalChunks}`);
+              
+              data = await response.json();
+              setUploadProgress(Math.round(((i + 1) / totalChunks) * 100));
             }
-            const data = await response.json();
-            if (field === 'url') {
-              setNewVideo({ ...newVideo, url: data.url, isAudio: file.type.startsWith('audio/') });
-            } else if (field === 'sponsor_url') {
-              setNewSponsorForm({ ...newSponsorForm, url: data.url });
-            }
+
+            if (field === 'url') setNewVideo({ ...newVideo, url: data.url, isAudio: file.type.startsWith('audio/') });
+            else if (field === 'sponsor_url') setNewSponsorForm({ ...newSponsorForm, url: data.url });
+            
             alert("✅ Archivo multimedia procesado y listo para guardar.");
           } catch (error: any) {
             alert(`❌ Falló la carga del archivo. Detalle: ${error.message}`);
           } finally {
             setIsUploading(false);
+            setUploadProgress(0);
           }
         };
         uploadMedia();
@@ -122,15 +137,28 @@ function Admin() {
     }
 
     setIsUploading(true);
-    const formData = new FormData();
-    formData.append('file', file);
+    setUploadProgress(0);
+    const chunkSize = 1024 * 1024 * 2;
+    const totalChunks = Math.ceil(file.size / chunkSize);
+    const folderId = Date.now().toString() + index.toString();
+
     try {
-      const response = await fetch(`${API_URL}/upload`, { method: 'POST', body: formData });
-      if (!response.ok) {
-        const errText = await response.text();
-        throw new Error(`Código ${response.status}: ${errText.substring(0, 100)}`);
+      let data: any = null;
+      for (let i = 0; i < totalChunks; i++) {
+        const start = i * chunkSize;
+        const chunk = file.slice(start, start + chunkSize);
+        const formData = new FormData();
+        formData.append('file', chunk);
+        formData.append('chunkIndex', i.toString());
+        formData.append('totalChunks', totalChunks.toString());
+        formData.append('originalName', file.name);
+        formData.append('folderId', folderId);
+
+        const response = await fetch(`${API_URL}/upload/chunk`, { method: 'POST', body: formData });
+        if (!response.ok) throw new Error(`Fallo en el fragmento ${i + 1}`);
+        data = await response.json();
+        setUploadProgress(Math.round(((i + 1) / totalChunks) * 100));
       }
-      const data = await response.json();
       
       // Guardar globalmente en la BD
       const newSponsorObj = { id: Date.now().toString(), name: sponsorName, url: data.url, programId: newVideo.programId || '', createdAt: new Date().toISOString() };
@@ -147,6 +175,7 @@ function Admin() {
       alert(`❌ Error al subir la cuña: ${error.message}`); 
     } finally {
       setIsUploading(false);
+      setUploadProgress(0);
     }
   };
 
@@ -707,7 +736,12 @@ function Admin() {
       {isUploading && (
         <div className="fixed inset-0 z-[200] bg-black/80 backdrop-blur-sm flex flex-col items-center justify-center">
           <RadioAmericaLoader fullScreen={false} />
-          <p className="text-[#DDDADB] font-bold mt-4 animate-pulse uppercase tracking-widest text-sm">Subiendo y procesando...</p>
+          <p className="text-[#DDDADB] font-bold mt-4 uppercase tracking-widest text-sm">Subiendo y procesando... {uploadProgress > 0 ? `${uploadProgress}%` : ''}</p>
+          {uploadProgress > 0 && (
+            <div className="w-64 h-1.5 bg-surface-container-highest rounded-full mt-4 overflow-hidden shadow-inner">
+              <div className="bg-[#C13535] h-full transition-all duration-300" style={{ width: `${uploadProgress}%` }}></div>
+            </div>
+          )}
         </div>
       )}
 
