@@ -1,8 +1,8 @@
 import { useContext, useState, useRef, useEffect, useMemo } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
-import { VideoContext } from '../context/VideoContext';
+import { VideoContext } from './VideoContext';
 import { Helmet } from 'react-helmet-async';
-import PressNoteButton from '../components/PressNoteButton';
+import PressNoteButton from './PressNoteButton';
 import Hls from 'hls.js';
 
 // COMPONENTE EXTERNO PARA REPRODUCTOR HLS Y MP4
