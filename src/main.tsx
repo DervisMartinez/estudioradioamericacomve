@@ -8,6 +8,7 @@ import AllPrograms from "./AllPrograms";
 import Admin from "./Admin";
 import Login from "./Login";
 import NotFound from "./NotFound";
+import Contact from "./Contact";
 import { VideoProvider } from "./VideoContext";
 
 // Importar los estilos globales (Tailwind CSS)
@@ -19,6 +20,7 @@ const router = createBrowserRouter([
   { path: "/watch/:id", element: <Watch />, errorElement: <NotFound /> },
   { path: "/program/:id", element: <ProgramView />, errorElement: <NotFound /> },
   { path: "/programas", element: <AllPrograms />, errorElement: <NotFound /> },
+  { path: "/contacto", element: <Contact />, errorElement: <NotFound /> },
   { path: "/admin", element: <Admin />, errorElement: <NotFound /> },
   { path: "/login", element: <Login />, errorElement: <NotFound /> },
   { path: "/NotFound", element: <NotFound /> } // Ruta comodín para atrapar URLs inexistentes (ej: /hola)
