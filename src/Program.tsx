@@ -6,7 +6,7 @@ import { Helmet } from 'react-helmet-async';
 export default function ProgramView() {
   const { id } = useParams();
   const navigate = useNavigate();
-  const { programs, videos } = useContext(VideoContext);
+  const { programs, videos, addToHistory } = useContext(VideoContext);
   
   const program = programs.find(p => p.id === id);
   
@@ -47,6 +47,12 @@ export default function ProgramView() {
     setCurrentTrackIndex(0);
     setIsPodcastPlaying(false);
   }, [activePodcastId]);
+
+  useEffect(() => {
+    if (activePodcastId) {
+      addToHistory(activePodcastId);
+    }
+  }, [activePodcastId, addToHistory]);
 
   useEffect(() => {
     if (currentTrackIndex > 0 && podcastAudioRef.current) {
