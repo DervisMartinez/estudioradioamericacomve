@@ -20,6 +20,7 @@ export default function ProgramView() {
   const latestAudio = audioEpisodes.length > 0 ? audioEpisodes[0] : null;
 
   const [isDarkMode, setIsDarkMode] = useState(() => document.documentElement.classList.contains('dark'));
+  const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
 
   // Lógica del reproductor de Podcast
   const podcastAudioRef = useRef<HTMLAudioElement>(null);
@@ -138,15 +139,28 @@ export default function ProgramView() {
               <img src="/logo_blanco.png" alt="Logo" className="w-8 h-8 object-contain hidden dark:block" onError={(e) => { e.currentTarget.src = 'https://ui-avatars.com/api/?name=RA&background=C13535&color=fff&rounded=true'; }} />
               <span className="text-lg md:text-2xl font-black text-[#C13535] dark:text-[#DDDADB] tracking-tighter font-['Montserrat'] hidden sm:block">Estudio Radio América</span>
             </div>
-            <nav className="hidden md:flex items-center gap-6">
+            <nav className="hidden lg:flex items-center gap-6">
               <button onClick={() => navigate('/')} className="text-[#C13535] dark:text-[#DDDADB] hover:text-[#F07D00] transition-colors font-['Montserrat'] font-bold tracking-tight">Inicio</button>
               <button onClick={() => window.open('/programas', '_blank')} className="text-[#C13535] dark:text-[#DDDADB] hover:text-[#F07D00] transition-colors font-['Montserrat'] font-bold tracking-tight">Programas</button>
+              <button onClick={() => navigate('/contacto')} className="text-[#C13535] dark:text-[#DDDADB] hover:text-[#F07D00] transition-colors font-['Montserrat'] font-bold tracking-tight">Contacto</button>
             </nav>
           </div>
           <div className="flex items-center gap-4">
             <button onClick={toggleTheme} className="material-symbols-outlined text-[#C13535] dark:text-[#DDDADB] hover:scale-105 transition-transform">{isDarkMode ? 'light_mode' : 'dark_mode'}</button>
+            <button onClick={() => setIsMobileMenuOpen(!isMobileMenuOpen)} className="lg:hidden text-[#C13535] dark:text-[#DDDADB]">
+              <span className="material-symbols-outlined">{isMobileMenuOpen ? 'close' : 'menu'}</span>
+            </button>
           </div>
         </div>
+        
+        {/* Mobile Menu */}
+        {isMobileMenuOpen && (
+          <div className="absolute top-16 left-0 w-full bg-white dark:bg-[#131314] shadow-lg border-b border-zinc-200 dark:border-[#1c1b1c] lg:hidden flex flex-col font-['Montserrat'] tracking-tight font-bold animate-fade-in z-50">
+            <button onClick={() => { navigate('/'); setIsMobileMenuOpen(false); }} className="px-6 py-4 text-left text-[#C13535] dark:text-[#DDDADB] border-b border-zinc-100 dark:border-[#1c1b1c]">Inicio</button>
+            <button onClick={() => { navigate('/programas'); setIsMobileMenuOpen(false); }} className="px-6 py-4 text-left text-[#C13535] dark:text-[#DDDADB] border-b border-zinc-100 dark:border-[#1c1b1c]">Programas</button>
+            <button onClick={() => { navigate('/contacto'); setIsMobileMenuOpen(false); }} className="px-6 py-4 text-left text-[#C13535] dark:text-[#DDDADB]">Contacto</button>
+          </div>
+        )}
       </header>
 
       <main className="relative pt-16 flex-1">

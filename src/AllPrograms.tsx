@@ -9,6 +9,7 @@ export default function AllPrograms() {
   const navigate = useNavigate();
   const [searchQuery, setSearchQuery] = useState('');
   const [isSearchOpen, setIsSearchOpen] = useState(false);
+  const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
   const [isDarkMode, setIsDarkMode] = useState(() => {
     const savedTheme = localStorage.getItem('theme');
     if (savedTheme) return savedTheme === 'dark';
@@ -52,6 +53,11 @@ export default function AllPrograms() {
             <img src="/logo_blanco.png" alt="Logo" className="w-10 h-10 object-contain hidden dark:block" onError={(e) => { e.currentTarget.src = 'https://ui-avatars.com/api/?name=RA&background=C13535&color=fff&rounded=true'; }} />
             <span className="text-lg md:text-2xl font-black text-[#C13535] dark:text-[#DDDADB] tracking-tighter hidden sm:block">Estudio Radio América</span>
           </div>
+          <div className="hidden lg:flex gap-8 items-center font-['Montserrat'] tracking-tight font-bold">
+            <button onClick={() => navigate('/')} className="text-[#C13535] dark:text-[#DDDADB] hover:text-[#F07D00] transition-colors duration-300">Inicio</button>
+            <button onClick={() => navigate('/programas')} className="text-[#C13535] dark:text-[#DDDADB] hover:text-[#F07D00] transition-colors duration-300 border-b-2 border-[#C13535] dark:border-[#DDDADB] pb-1">Programas</button>
+            <button onClick={() => navigate('/contacto')} className="text-[#C13535] dark:text-[#DDDADB] hover:text-[#F07D00] transition-colors duration-300">Contacto</button>
+          </div>
         </div>
         <div className="flex items-center gap-6">
           <div className="relative">
@@ -61,14 +67,29 @@ export default function AllPrograms() {
               placeholder="Buscar..."
               className="bg-zinc-100 dark:bg-surface-container-low border-none rounded-full py-2 pl-10 pr-4 text-sm text-[#C13535] dark:text-[#DDDADB] w-32 sm:w-48 focus:ring-2 focus:ring-[#F07D00]/50 transition-all"
               onFocus={() => setIsSearchOpen(true)}
-              onChange={(e) => setSearchQuery(e.target.value)}
+              onChange={(e) => {
+                setSearchQuery(e.target.value);
+                setIsSearchOpen(true);
+              }}
             />
             {isSearchOpen && searchQuery && <SearchResults query={searchQuery} onClose={() => setIsSearchOpen(false)} />}
           </div>
           <button onClick={toggleTheme} className="hover:scale-105 transition-transform duration-200 text-[#C13535] dark:text-[#DDDADB]">
             <span className="material-symbols-outlined">{isDarkMode ? 'light_mode' : 'dark_mode'}</span>
           </button>
+          <button onClick={() => setIsMobileMenuOpen(!isMobileMenuOpen)} className="lg:hidden text-[#C13535] dark:text-[#DDDADB]">
+            <span className="material-symbols-outlined">{isMobileMenuOpen ? 'close' : 'menu'}</span>
+          </button>
         </div>
+        
+        {/* Mobile Menu */}
+        {isMobileMenuOpen && (
+          <div className="absolute top-20 left-0 w-full bg-white dark:bg-[#131314] shadow-lg border-b border-zinc-200 dark:border-[#1c1b1c] lg:hidden flex flex-col font-['Montserrat'] tracking-tight font-bold animate-fade-in z-50">
+            <button onClick={() => { navigate('/'); setIsMobileMenuOpen(false); }} className="px-6 py-4 text-left text-[#C13535] dark:text-[#DDDADB] border-b border-zinc-100 dark:border-[#1c1b1c]">Inicio</button>
+            <button onClick={() => { navigate('/programas'); setIsMobileMenuOpen(false); }} className="px-6 py-4 text-left text-[#C13535] dark:text-[#DDDADB] border-b border-zinc-100 dark:border-[#1c1b1c]">Programas</button>
+            <button onClick={() => { navigate('/contacto'); setIsMobileMenuOpen(false); }} className="px-6 py-4 text-left text-[#C13535] dark:text-[#DDDADB]">Contacto</button>
+          </div>
+        )}
       </nav>
 
       <main className="pt-32 pb-24 px-8 max-w-7xl mx-auto space-y-20">
