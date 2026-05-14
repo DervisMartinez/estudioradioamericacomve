@@ -66,6 +66,8 @@ interface VideoContextType {
   userProfile: UserProfile;
   updateUserProfile: (profile: UserProfile) => void;
   incrementView: (id: string) => void;
+  viewHistory: Video[];
+  addToHistory: (id: string) => void;
   isLoading: boolean;
   setIsLoading: (loading: boolean) => void;
 }
@@ -85,6 +87,8 @@ export const VideoContext = createContext<VideoContextType>({
   userProfile: { firstName: '', lastName: '', avatar: '', bio: '', twitter: '', instagram: '', youtube: '', facebook: '' },
   updateUserProfile: () => {},
   incrementView: () => {},
+  viewHistory: [],
+  addToHistory: () => {},
   isLoading: true,
   setIsLoading: () => {},
 });
@@ -139,6 +143,10 @@ export const VideoProvider = ({ children }: { children: ReactNode }) => {
     firstName: 'Admin', lastName: 'User', avatar: '', bio: '', twitter: '', instagram: '', youtube: '', facebook: ''
   });
   const [isLoading, setIsLoading] = useState(true);
+  const [viewHistoryIds, setViewHistoryIds] = useState<string[]>(() => {
+    const saved = localStorage.getItem('radioamerica_history');
+    return saved ? JSON.parse(saved) : [];
+  });
 
   useEffect(() => {
     // Inicializar el tema globalmente para que el loader responda al instante
@@ -333,8 +341,19 @@ export const VideoProvider = ({ children }: { children: ReactNode }) => {
     } catch (error) { console.error(error); }
   };
 
+  const addToHistory = (id: string) => {
+    setViewHistoryIds(prev => {
+      const filtered = prev.filter(vId => vId !== id);
+      const newHistory = [id, ...filtered].slice(0, 15); // Guardar los últimos 15
+      localStorage.setItem('radioamerica_history', JSON.stringify(newHistory));
+      return newHistory;
+    });
+  };
+
+  const viewHistory = viewHistoryIds.map(id => videos.find(v => v.id === id)).filter(v => v !== undefined) as Video[];
+
   return (
-    <VideoContext.Provider value={{ videos, addVideo, updateVideo, deleteVideo, programs, addProgram, updateProgram, deleteProgram, sponsors, addSponsor, deleteSponsor, userProfile, updateUserProfile, incrementView, isLoading, setIsLoading }}>
+    <VideoContext.Provider value={{ videos, addVideo, updateVideo, deleteVideo, programs, addProgram, updateProgram, deleteProgram, sponsors, addSponsor, deleteSponsor, userProfile, updateUserProfile, incrementView, viewHistory, addToHistory, isLoading, setIsLoading }}>
       {isLoading ? <RadioAmericaLoader fullScreen={true} /> : children}
     </VideoContext.Provider>
   );

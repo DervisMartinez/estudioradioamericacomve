@@ -46,7 +46,7 @@ const HlsVideoPlayer = ({ src, poster, className }: { src: string, poster: strin
 };
 
 function App() {
-  const { videos, programs, userProfile } = useContext(VideoContext);
+  const { videos, programs, userProfile, viewHistory } = useContext(VideoContext);
   const navigate = useNavigate();
   const [activeCategory, setActiveCategory] = useState('Todo');
 
@@ -54,6 +54,7 @@ function App() {
   const [searchQuery, setSearchQuery] = useState('');
   const [isSearchOpen, setIsSearchOpen] = useState(false);
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
+  const [isHistoryOpen, setIsHistoryOpen] = useState(false);
 
   // Theme State
   const [isDarkMode, setIsDarkMode] = useState(() => {
@@ -686,9 +687,47 @@ function App() {
             <button className="text-[#C13535]">
               <span className="material-symbols-outlined" style={{ fontVariationSettings: "'FILL' 1" }}>favorite</span>
             </button>
-            <button className="text-zinc-700 dark:text-[#DDDADB]">
-              <span className="material-symbols-outlined">list</span>
-            </button>
+            
+            {/* History Menu Toggle */}
+            <div className="relative">
+              <button onClick={() => setIsHistoryOpen(!isHistoryOpen)} className={`transition-colors ${isHistoryOpen ? 'text-[#F07D00]' : 'text-zinc-700 dark:text-[#DDDADB] hover:text-[#F07D00] dark:hover:text-[#F07D00]'}`} title="Historial de Reproducción">
+                <span className="material-symbols-outlined">list</span>
+              </button>
+              
+              {isHistoryOpen && (
+                <div className="absolute bottom-12 right-0 w-72 md:w-80 bg-white dark:bg-surface-container-high rounded-2xl shadow-[0_-10px_40px_rgba(0,0,0,0.2)] border border-zinc-200 dark:border-outline-variant/20 overflow-hidden z-50 animate-fade-in origin-bottom-right">
+                  <div className="p-4 border-b border-zinc-200 dark:border-outline-variant/20 flex justify-between items-center bg-zinc-50 dark:bg-surface-container">
+                    <h3 className="font-bold text-[#C13535] dark:text-[#DDDADB] text-sm">Escuchados Recientemente</h3>
+                    <button onClick={() => setIsHistoryOpen(false)} className="text-zinc-500 dark:text-[#DDDADB]/60 hover:text-[#C13535] dark:hover:text-[#F07D00]"><span className="material-symbols-outlined text-sm">close</span></button>
+                  </div>
+                  <div className="max-h-80 overflow-y-auto p-2 custom-scrollbar">
+                    {viewHistory.length === 0 ? (
+                      <div className="p-6 text-center text-zinc-500 dark:text-[#DDDADB]/40 text-xs">
+                        Aún no hay historial de reproducción.
+                      </div>
+                    ) : (
+                      viewHistory.map(video => (
+                        <div key={video.id} onClick={() => navigate(`/watch/${video.id}`)} className="flex items-center gap-3 p-2 hover:bg-zinc-100 dark:hover:bg-surface-container-highest rounded-xl cursor-pointer transition-colors group">
+                          <div className="relative w-16 h-12 rounded-lg overflow-hidden shrink-0 border border-zinc-200 dark:border-transparent">
+                            <img src={video.thumbnail || '/logo_blanco.png'} alt={video.title} className="w-full h-full object-cover group-hover:scale-110 transition-transform" onError={(e) => { e.currentTarget.src = '/logo_blanco.png'; }} />
+                            <div className="absolute inset-0 bg-black/30 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity">
+                              <span className="material-symbols-outlined text-white text-[16px]">{video.isAudio ? 'headphones' : 'play_arrow'}</span>
+                            </div>
+                          </div>
+                          <div className="flex-1 min-w-0">
+                            <p className="text-xs font-bold text-zinc-800 dark:text-[#DDDADB] truncate group-hover:text-[#F07D00] transition-colors">{video.title}</p>
+                            <p className="text-[10px] text-[#C13535] dark:text-[#DDDADB]/60 uppercase tracking-widest flex items-center gap-1 mt-0.5">
+                              <span className="material-symbols-outlined text-[10px]">{video.isAudio ? 'mic' : 'smart_display'}</span>
+                              {video.category}
+                            </p>
+                          </div>
+                        </div>
+                      ))
+                    )}
+                  </div>
+                </div>
+              )}
+            </div>
           </div>
         </div>
       </div>
