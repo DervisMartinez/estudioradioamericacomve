@@ -260,6 +260,7 @@ function App() {
           <div className="hidden lg:flex gap-8 items-center font-['Montserrat'] tracking-tight font-bold">
             <a className="text-[#C13535] dark:text-[#DDDADB] border-b-2 border-[#C13535] dark:border-[#DDDADB] pb-1" href="#">Inicio</a>
             <a className="text-[#C13535] dark:text-[#DDDADB] hover:text-[#F07D00] transition-colors duration-300" href="/programas" target="_blank" rel="noopener noreferrer">Programas Destacados</a>
+            <button onClick={() => navigate('/contacto')} className="text-[#C13535] dark:text-[#DDDADB] hover:text-[#F07D00] transition-colors duration-300">Contáctanos</button>
           </div>
         </div>
         <div className="flex items-center gap-6">
@@ -683,7 +684,7 @@ function App() {
           <div className="flex flex-wrap justify-center gap-8 font-['Montserrat'] text-sm text-[#C13535] dark:text-[#DDDADB]">
             <a className="text-[#C13535]/80 dark:text-[#DDDADB]/60 hover:text-[#C13535] transition-colors" href="#">Privacidad</a>
             <a className="text-[#C13535]/80 dark:text-[#DDDADB]/60 hover:text-[#C13535] transition-colors" href="#">Términos</a>
-            <a className="text-[#C13535]/80 dark:text-[#DDDADB]/60 hover:text-[#C13535] transition-colors" href="#">Contacto</a>
+            <button onClick={() => navigate('/contacto')} className="text-[#C13535]/80 dark:text-[#DDDADB]/60 hover:text-[#C13535] transition-colors">Contacto</button>
             <a className="text-[#C13535]/80 dark:text-[#DDDADB]/60 hover:text-[#C13535] transition-colors" href="https://radioamerica.com.ve/contrato-de-publicidad/">Contrato de Publicidad</a>
           </div>
           <div className="flex gap-6">
