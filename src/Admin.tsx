@@ -10,11 +10,11 @@ function Admin() {
   const [isProgramModalOpen, setIsProgramModalOpen] = useState(false);
   const [isSponsorModalOpen, setIsSponsorModalOpen] = useState(false);
   const [isSidebarOpen, setIsSidebarOpen] = useState(false);
-  const [activeTab, setActiveTab] = useState<'dashboard' | 'library' | 'programs' | 'sponsors' | 'analytics' | 'settings'>('dashboard');
+  const [activeTab, setActiveTab] = useState<'dashboard' | 'library' | 'programs' | 'sponsors' | 'analytics' | 'settings' | 'newsletter'>('dashboard');
   const [selectedProgramDetails, setSelectedProgramDetails] = useState<string | null>(null);
   const [editingId, setEditingId] = useState<string | null>(null);
   const [editingProgramId, setEditingProgramId] = useState<string | null>(null);
-  const [newVideo, setNewVideo] = useState({ title: '', category: 'Historia', thumbnail: '', url: '', description: '', isFeatured: false, isLive: false, isShort: false, isAudio: false, programId: '', releaseDate: '', duration: '', pressNoteUrl: '' });
+  const [newVideo, setNewVideo] = useState({ title: '', category: '', thumbnail: '', url: '', description: '', isFeatured: false, isLive: false, isShort: false, isAudio: false, programId: '', releaseDate: '', duration: '', pressNoteUrl: '' });
   const [newProgram, setNewProgram] = useState({ name: '', category: '', thumbnail: '', type: 'Programa' as 'Programa' | 'Podcast', description: '', schedule: '', host: '', coverImage: '' });
   const [newSponsorForm, setNewSponsorForm] = useState({ name: '', url: '', programId: '' });
   const [profileForm, setProfileForm] = useState(userProfile);
@@ -23,10 +23,11 @@ function Admin() {
   const [isSponsored, setIsSponsored] = useState(false);
   const [sponsorCount, setSponsorCount] = useState(1);
   const [sponsorUrls, setSponsorUrls] = useState<string[]>([]);
+  const [subscribers, setSubscribers] = useState<any[]>([]);
 
   const resetVideoForm = (overrides = {}) => {
     setEditingId(null);
-    setNewVideo({ title: '', category: 'Historia', thumbnail: '', url: '', description: '', isFeatured: false, isLive: false, isShort: false, isAudio: false, programId: '', releaseDate: '', duration: '', pressNoteUrl: '', ...overrides });
+    setNewVideo({ title: '', category: '', thumbnail: '', url: '', description: '', isFeatured: false, isLive: false, isShort: false, isAudio: false, programId: '', releaseDate: '', duration: '', pressNoteUrl: '', ...overrides });
     setIsSponsored(false);
     setSponsorCount(1);
     setSponsorUrls([]);
@@ -36,6 +37,12 @@ function Admin() {
     const isAuth = localStorage.getItem('admin_auth');
     if (isAuth !== 'true') {
       navigate('/login');
+    } else {
+      // Cargar lista de suscriptores al iniciar el panel
+      fetch(`${API_URL}/subscribers`)
+        .then(res => res.ok ? res.json() : [])
+        .then(data => { if (Array.isArray(data)) setSubscribers(data); })
+        .catch(e => console.error("Error cargando suscriptores:", e));
     }
   }, [navigate]);
 
@@ -324,6 +331,11 @@ function Admin() {
             <span className="text-sm">Estadisticas</span>
           </button>
 
+          <button onClick={() => { setActiveTab('newsletter'); setIsSidebarOpen(false); }} className={`w-full flex items-center gap-3 px-4 py-3 rounded-lg font-bold transition-all ${activeTab === 'newsletter' ? 'bg-[#C13535] text-[#DDDADB]' : 'text-[#DDDADB]/60 hover:text-[#DDDADB] hover:bg-[#1c1b1c]'}`}>
+            <span className="material-symbols-outlined" data-icon="mail">mail</span>
+            <span className="text-sm">Newsletter</span>
+          </button>
+
           <button onClick={() => { setActiveTab('settings'); setIsSidebarOpen(false); }} className={`w-full flex items-center gap-3 px-4 py-3 rounded-lg font-bold transition-all ${activeTab === 'settings' ? 'bg-[#C13535] text-[#DDDADB]' : 'text-[#DDDADB]/60 hover:text-[#DDDADB] hover:bg-[#1c1b1c]'}`}>
             <span className="material-symbols-outlined" data-icon="settings">settings</span>
             <span className="text-sm">Herramientas</span>
@@ -390,7 +402,7 @@ function Admin() {
           
           {/* DASHBOARD & LIBRARY TABS SHARE STATS */}
           {(activeTab === 'dashboard' || activeTab === 'library') && (
-          <section className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-8">
+          <section className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
             <div className="bg-surface-container-low p-6 rounded-2xl border border-outline-variant/10 group hover:border-[#C13535]/30 transition-all">
               <div className="flex justify-between items-start mb-4">
                 <div className="p-3 bg-[#C13535]/10 rounded-xl text-[#C13535]">
@@ -423,6 +435,16 @@ function Admin() {
               <div className="w-full bg-surface-container-highest h-1.5 rounded-full mt-4 overflow-hidden">
                 <div className="bg-[#FFB91F] h-full w-[100%]"></div>
               </div>
+            </div>
+            <div onClick={() => setActiveTab('newsletter')} className="bg-surface-container-low p-6 rounded-2xl border border-outline-variant/10 group hover:border-[#F07D00]/30 transition-all cursor-pointer">
+              <div className="flex justify-between items-start mb-4">
+                <div className="p-3 bg-[#F07D00]/10 rounded-xl text-[#F07D00]">
+                  <span className="material-symbols-outlined" data-icon="group">group</span>
+                </div>
+                <span className="text-[#F07D00] text-xs font-bold">Comunidad</span>
+              </div>
+              <p className="text-[#DDDADB]/60 text-xs font-bold uppercase tracking-wider">Suscriptores</p>
+              <h3 className="text-3xl font-black text-[#DDDADB] mt-1">{subscribers.length}</h3>
             </div>
           </section>
           )}
@@ -611,6 +633,42 @@ function Admin() {
             </section>
           )}
 
+          {/* NEWSLETTER TAB */}
+          {activeTab === 'newsletter' && (
+            <section className="bg-surface-container-low rounded-3xl p-8 border border-outline-variant/10">
+              <div className="flex flex-col md:flex-row justify-between items-end gap-6 mb-10">
+                <div>
+                  <h3 className="text-2xl font-bold text-[#DDDADB] mb-2">Comunidad y Newsletter</h3>
+                  <p className="text-[#DDDADB]/50 text-sm max-w-md">Lista de usuarios que se han suscrito para recibir correos con novedades.</p>
+                </div>
+                <button onClick={() => alert("Función en desarrollo: Apertura de creador de campañas masivas de correo.")} className="bg-[#C13535] text-white px-5 py-2.5 rounded-full text-sm font-bold hover:opacity-90 active:scale-95 transition-all flex items-center gap-2 shadow-lg">
+                  <span className="material-symbols-outlined text-sm" style={{ fontVariationSettings: "'FILL' 1" }}>send</span> Enviar Correo Masivo
+                </button>
+              </div>
+
+              <div className="overflow-x-auto border border-outline-variant/10 rounded-2xl">
+                <table className="w-full text-left border-collapse">
+                  <thead>
+                    <tr className="bg-surface-container-highest border-b border-outline-variant/20">
+                      <th className="p-4 text-xs font-bold text-[#DDDADB]/60 uppercase tracking-widest">Correo Electrónico (Email)</th>
+                      <th className="p-4 text-xs font-bold text-[#DDDADB]/60 uppercase tracking-widest text-right">Fecha de Suscripción</th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    {subscribers.length === 0 ? (
+                      <tr><td colSpan={2} className="p-8 text-center text-[#DDDADB]/40 text-sm">No hay suscriptores aún.</td></tr>
+                    ) : subscribers.map((sub, i) => (
+                      <tr key={i} className="border-b border-outline-variant/5 hover:bg-surface-container-highest transition-colors">
+                        <td className="p-4 text-sm text-[#DDDADB] font-bold"><a href={`mailto:${sub.email}`} className="hover:text-[#F07D00] transition-colors">{sub.email}</a></td>
+                        <td className="p-4 text-sm text-[#DDDADB]/60 text-right">{new Date(sub.subscribedAt).toLocaleString('es-VE')}</td>
+                      </tr>
+                    ))}
+                  </tbody>
+                </table>
+              </div>
+            </section>
+          )}
+
           {/* ANALYTICS TAB */}
           {activeTab === 'analytics' && (
             <div className="space-y-8">
@@ -763,16 +821,11 @@ function Admin() {
                 </select>
               </div>
               <div>
-                <label className="block text-xs font-bold text-[#DDDADB]/60 mb-1">Categoría</label>
-                <select value={newVideo.category} onChange={e => setNewVideo({...newVideo, category: e.target.value})} className="w-full bg-surface-container-lowest border-none rounded-lg p-3 text-sm text-[#DDDADB]">
-                  <option>Historia</option>
-                  <option>Personajes</option>
-                  <option>Documentales</option>
-                  <option>Sociedad</option>
-                  <option>Deportes</option>
-                  <option>Cultura</option>
-                  <option>Política</option>
-                </select>
+                <label className="block text-xs font-bold text-[#DDDADB]/60 mb-1">Categoría (Selecciona o escribe una nueva)</label>
+                <input required list="video-categories-list" value={newVideo.category} onChange={e => setNewVideo({...newVideo, category: e.target.value})} className="w-full bg-surface-container-lowest border-none rounded-lg p-3 text-sm text-[#DDDADB]" type="text" placeholder="Ej: Historia" />
+                <datalist id="video-categories-list">
+                  {allCategories.map(cat => <option key={`cat-${cat}`} value={cat} />)}
+                </datalist>
               </div>
               <div>
                 <label className="block text-xs font-bold text-[#DDDADB]/60 mb-1">Programa al que pertenece (Opcional)</label>
