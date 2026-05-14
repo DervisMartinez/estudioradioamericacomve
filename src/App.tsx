@@ -1,7 +1,7 @@
 import { useContext, useState, useRef, useEffect } from 'react'
 import { useNavigate } from 'react-router-dom'
 import type { FormEvent, ChangeEvent } from 'react'
-import '../App.css'
+import './App.css'
 import { VideoContext, API_URL } from './VideoContext'
 import SearchResults from './SearchResults';
 import { Helmet } from 'react-helmet-async';
