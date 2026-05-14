@@ -47,7 +47,7 @@ const HlsVideoPlayer = ({ src, poster, className }: { src: string, poster: strin
 export default function Watch() {
   const { id } = useParams();
   const navigate = useNavigate();
-  const { videos, programs, incrementView, addToHistory } = useContext(VideoContext);
+  const { videos, programs, incrementView } = useContext(VideoContext);
   
   const video = videos.find(v => v.id === id);
   const program = video?.programId ? programs.find(p => p.id === video.programId) : null;
@@ -171,9 +171,8 @@ export default function Watch() {
     // Cuando el componente se carga, incrementa la vista del video
     if (id) {
       incrementView(id);
-      addToHistory(id);
     }
-  }, [id, incrementView, addToHistory]);
+  }, [id, incrementView]);
 
   if (!video) {
     return (
@@ -649,7 +648,7 @@ export default function Watch() {
                    </a>
                 </div>
                 {ytId ? (
-                  <iframe className="w-full aspect-video max-h-full relative z-10" src={`https://www.youtube.com/embed/${ytId}?autoplay=1&rel=0`} title={video.title} frameBorder="0" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share" allowFullScreen></iframe>
+                  <iframe className="w-full aspect-video max-h-full relative z-10" src={`https://www.youtube.com/embed/${ytId}?autoplay=1&rel=0&origin=${window.location.origin}`} title={video.title} frameBorder="0" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share" allowFullScreen></iframe>
                 ) : igId ? (
                   <iframe className="w-full h-full max-h-full relative z-10 bg-white" src={`https://www.instagram.com/p/${igId}/embed`} title={video.title} frameBorder="0" scrolling="no" allowTransparency={true} allowFullScreen></iframe>
                 ) : isDirectVideo(video.url) ? (
