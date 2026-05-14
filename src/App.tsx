@@ -1,7 +1,7 @@
 import { useContext, useState, useRef, useEffect } from 'react'
 import { useNavigate } from 'react-router-dom'
 import type { FormEvent, ChangeEvent } from 'react'
-import './App.css'
+import '../App.css'
 import { VideoContext, API_URL } from './VideoContext'
 import SearchResults from './SearchResults';
 import { Helmet } from 'react-helmet-async';
@@ -53,6 +53,7 @@ function App() {
   // Search State
   const [searchQuery, setSearchQuery] = useState('');
   const [isSearchOpen, setIsSearchOpen] = useState(false);
+  const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
 
   // Theme State
   const [isDarkMode, setIsDarkMode] = useState(() => {
@@ -271,14 +272,29 @@ function App() {
               placeholder="Buscar..."
               className="bg-zinc-100 dark:bg-surface-container-low border-none rounded-full py-2 pl-10 pr-4 text-sm text-[#C13535] dark:text-[#DDDADB] w-32 sm:w-48 md:w-64 focus:ring-2 focus:ring-[#F07D00]/50 transition-all"
               onFocus={() => setIsSearchOpen(true)}
-              onChange={(e) => setSearchQuery(e.target.value)}
+              onChange={(e) => {
+                setSearchQuery(e.target.value);
+                setIsSearchOpen(true);
+              }}
             />
             {isSearchOpen && searchQuery && <SearchResults query={searchQuery} onClose={() => setIsSearchOpen(false)} />}
           </div>
           <button onClick={toggleTheme} className="hover:scale-105 transition-transform duration-200 text-[#C13535] dark:text-[#DDDADB]" title={isDarkMode ? "Cambiar a Modo Claro" : "Cambiar a Modo Oscuro"}>
             <span className="material-symbols-outlined">{isDarkMode ? 'light_mode' : 'dark_mode'}</span>
           </button>
+          <button onClick={() => setIsMobileMenuOpen(!isMobileMenuOpen)} className="lg:hidden text-[#C13535] dark:text-[#DDDADB]">
+            <span className="material-symbols-outlined">{isMobileMenuOpen ? 'close' : 'menu'}</span>
+          </button>
         </div>
+        
+        {/* Mobile Menu */}
+        {isMobileMenuOpen && (
+          <div className="absolute top-20 left-0 w-full bg-white dark:bg-[#131314] shadow-lg border-b border-zinc-200 dark:border-[#1c1b1c] lg:hidden flex flex-col font-['Montserrat'] tracking-tight font-bold animate-fade-in z-50">
+            <a href="/" className="px-6 py-4 text-[#C13535] dark:text-[#DDDADB] border-b border-zinc-100 dark:border-[#1c1b1c]" onClick={() => setIsMobileMenuOpen(false)}>Inicio</a>
+            <a href="/programas" className="px-6 py-4 text-[#C13535] dark:text-[#DDDADB] border-b border-zinc-100 dark:border-[#1c1b1c]" onClick={() => setIsMobileMenuOpen(false)}>Programas Destacados</a>
+            <button onClick={() => { navigate('/contacto'); setIsMobileMenuOpen(false); }} className="px-6 py-4 text-left text-[#C13535] dark:text-[#DDDADB]">Contáctanos</button>
+          </div>
+        )}
       </nav>
 
       <main className="pt-20">

@@ -9,6 +9,7 @@ export default function Contact() {
     if (savedTheme) return savedTheme === 'dark';
     return document.documentElement.classList.contains('dark');
   });
+  const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
 
   useEffect(() => {
     if (isDarkMode) {
@@ -38,10 +39,10 @@ export default function Contact() {
             <img src="/logo_colors.png" alt="Logo" className="w-8 h-8 object-contain dark:hidden" onError={(e) => { e.currentTarget.src = 'https://ui-avatars.com/api/?name=RA&background=C13535&color=fff&rounded=true'; }} />
             <img src="/logo_blanco.png" alt="Logo" className="w-8 h-8 object-contain hidden dark:block" onError={(e) => { e.currentTarget.src = 'https://ui-avatars.com/api/?name=RA&background=C13535&color=fff&rounded=true'; }} />
             <span className="text-xl md:text-2xl font-black text-[#C13535] dark:text-[#DDDADB] tracking-tighter font-['Montserrat'] hidden sm:block">
-              Radio América
+              Estudio Radio América
             </span>
           </div>
-          <div className="hidden md:flex gap-8 items-center">
+          <div className="hidden lg:flex gap-8 items-center">
             <button onClick={() => navigate('/')} className="font-['Montserrat'] font-bold tracking-tight text-[#C13535] dark:text-[#DDDADB] hover:text-[#F07D00] transition-colors hover:scale-105 duration-300">Inicio</button>
             <button onClick={() => navigate('/programas')} className="font-['Montserrat'] font-bold tracking-tight text-[#C13535] dark:text-[#DDDADB] hover:text-[#F07D00] transition-colors hover:scale-105 duration-300">Programas</button>
             <button onClick={() => navigate('/contacto')} className="font-['Montserrat'] font-bold tracking-tight text-[#F07D00] border-b-2 border-[#F07D00] pb-1">Contacto</button>
@@ -53,8 +54,20 @@ export default function Contact() {
             <button onClick={() => navigate('/')} className="bg-primary-container text-on-primary-container font-['Montserrat'] font-bold tracking-tight px-6 py-2 rounded-full hover:scale-105 transition-all duration-300 hidden md:block">
               Escuchar Ahora
             </button>
+            <button onClick={() => setIsMobileMenuOpen(!isMobileMenuOpen)} className="lg:hidden text-[#C13535] dark:text-[#DDDADB]">
+              <span className="material-symbols-outlined">{isMobileMenuOpen ? 'close' : 'menu'}</span>
+            </button>
           </div>
         </div>
+        
+        {/* Mobile Menu */}
+        {isMobileMenuOpen && (
+          <div className="absolute top-20 left-0 w-full bg-white dark:bg-[#131314] shadow-lg border-b border-zinc-200 dark:border-[#1c1b1c] lg:hidden flex flex-col font-['Montserrat'] tracking-tight font-bold animate-fade-in z-50">
+            <button onClick={() => { navigate('/'); setIsMobileMenuOpen(false); }} className="px-6 py-4 text-left text-[#C13535] dark:text-[#DDDADB] border-b border-zinc-100 dark:border-[#1c1b1c]">Inicio</button>
+            <button onClick={() => { navigate('/programas'); setIsMobileMenuOpen(false); }} className="px-6 py-4 text-left text-[#C13535] dark:text-[#DDDADB] border-b border-zinc-100 dark:border-[#1c1b1c]">Programas</button>
+            <button onClick={() => { navigate('/contacto'); setIsMobileMenuOpen(false); }} className="px-6 py-4 text-left text-[#C13535] dark:text-[#DDDADB]">Contacto</button>
+          </div>
+        )}
       </nav>
 
       {/* Main Content Canvas */}

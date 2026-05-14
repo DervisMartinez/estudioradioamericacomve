@@ -9,6 +9,7 @@ export default function NotFound() {
   
   // Estado para el modo oscuro
   const [isDarkMode, setIsDarkMode] = useState(() => document.documentElement.classList.contains('dark'));
+  const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
 
   useEffect(() => {
     if (isDarkMode) {
@@ -51,6 +52,7 @@ export default function NotFound() {
           <div className="hidden lg:flex gap-8 items-center font-['Montserrat'] tracking-tight font-bold">
             <button onClick={() => navigate('/')} className="text-[#C13535] dark:text-[#DDDADB] hover:text-[#F07D00] transition-colors duration-300">Inicio</button>
             <button onClick={() => navigate('/programas')} className="text-[#C13535] dark:text-[#DDDADB] hover:text-[#F07D00] transition-colors duration-300">Programas</button>
+            <button onClick={() => navigate('/contacto')} className="text-[#C13535] dark:text-[#DDDADB] hover:text-[#F07D00] transition-colors duration-300">Contacto</button>
           </div>
         </div>
         <div className="flex items-center gap-6">
@@ -60,7 +62,19 @@ export default function NotFound() {
           <button onClick={() => navigate('/')} className="hidden md:block bg-[#C13535] text-white px-6 py-2.5 rounded-full font-bold tracking-tight hover:scale-105 transition-all duration-300 shadow-lg shadow-[#C13535]/20">
             Escuchar Ahora
           </button>
+          <button onClick={() => setIsMobileMenuOpen(!isMobileMenuOpen)} className="lg:hidden text-[#C13535] dark:text-[#DDDADB]">
+            <span className="material-symbols-outlined">{isMobileMenuOpen ? 'close' : 'menu'}</span>
+          </button>
         </div>
+        
+        {/* Mobile Menu */}
+        {isMobileMenuOpen && (
+          <div className="absolute top-20 left-0 w-full bg-white dark:bg-[#131314] shadow-lg border-b border-zinc-200 dark:border-[#1c1b1c] lg:hidden flex flex-col font-['Montserrat'] tracking-tight font-bold animate-fade-in z-50">
+            <button onClick={() => { navigate('/'); setIsMobileMenuOpen(false); }} className="px-6 py-4 text-left text-[#C13535] dark:text-[#DDDADB] border-b border-zinc-100 dark:border-[#1c1b1c]">Inicio</button>
+            <button onClick={() => { navigate('/programas'); setIsMobileMenuOpen(false); }} className="px-6 py-4 text-left text-[#C13535] dark:text-[#DDDADB] border-b border-zinc-100 dark:border-[#1c1b1c]">Programas</button>
+            <button onClick={() => { navigate('/contacto'); setIsMobileMenuOpen(false); }} className="px-6 py-4 text-left text-[#C13535] dark:text-[#DDDADB]">Contacto</button>
+          </div>
+        )}
       </nav>
 
       <main className="relative pt-20 flex-1">
