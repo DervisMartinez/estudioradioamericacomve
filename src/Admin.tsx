@@ -39,7 +39,8 @@ function Admin() {
       navigate('/login');
     } else {
       // Cargar lista de suscriptores al iniciar el panel
-      fetch(`${API_URL}/subscribers`)
+      const cacheBuster = `?t=${new Date().getTime()}`;
+      fetch(`${API_URL}/subscribers${cacheBuster}`)
         .then(res => res.ok ? res.json() : [])
         .then(data => { if (Array.isArray(data)) setSubscribers(data); })
         .catch(e => console.error("Error cargando suscriptores:", e));
