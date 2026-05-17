@@ -293,6 +293,40 @@ function Admin() {
   // Extraer todas las categorías existentes para sugerirlas
   const allCategories = Array.from(new Set([...programs.map(p => p.category), ...videos.map(v => v.category)]));
 
+  // Función para Generar el PDF dinámicamente
+  const handleGeneratePDF = async () => {
+    // Cargar la librería dinámicamente si no existe
+    if (!(window as any).html2pdf) {
+      setIsUploading(true);
+      await new Promise((resolve, reject) => {
+        const script = document.createElement('script');
+        script.src = "https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.10.1/html2pdf.bundle.min.js";
+        script.onload = resolve;
+        script.onerror = reject;
+        document.head.appendChild(script);
+      });
+      setIsUploading(false);
+    }
+
+    const element = document.getElementById('pdf-report-template');
+    if (!element) return;
+
+    element.style.display = 'flex';
+
+    const opt = {
+      margin:       0,
+      filename:     `Reporte_Estadisticas_RadioAmerica_${new Date().toISOString().split('T')[0]}.pdf`,
+      image:        { type: 'jpeg', quality: 0.98 },
+      html2canvas:  { scale: 2, useCORS: true },
+      jsPDF:        { unit: 'in', format: 'a4', orientation: 'portrait' }
+    };
+
+    (window as any).html2pdf().set(opt).from(element).save().then(() => {
+      // Ocultar de nuevo tras generar
+      element.style.display = 'none';
+    });
+  };
+
   return (
     <div className="text-on-surface antialiased overflow-x-hidden">
       <audio ref={audioRef} id="radio" src="https://transmision.radioamerica.com.ve:8087/RA909FM" className="hidden" />
@@ -675,7 +709,7 @@ function Admin() {
             <div className="space-y-8">
               <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
                 <h3 className="text-2xl font-bold text-[#DDDADB]">Dashboard de Analíticas</h3>
-                <button onClick={() => alert("Generando reporte PDF detallado de estadísticas, ratings y programas...\n(Simulación)")} className="flex items-center gap-2 bg-[#F07D00]/20 hover:bg-[#F07D00]/30 text-[#F07D00] px-5 py-2 rounded-full text-sm font-bold border border-[#F07D00]/30 transition-all">
+                <button onClick={handleGeneratePDF} className="flex items-center gap-2 bg-[#F07D00]/20 hover:bg-[#F07D00]/30 text-[#F07D00] px-5 py-2 rounded-full text-sm font-bold border border-[#F07D00]/30 transition-all">
                   <span className="material-symbols-outlined text-sm">download</span>
                   Generar Reporte General
                 </button>
@@ -1051,6 +1085,130 @@ function Admin() {
           </div>
         </div>
       )}
+
+      {/* PLANTILLA OCULTA PARA EL REPORTE PDF BASADA EN EL DISEÑO EDITORIAL */}
+      <div style={{ display: 'none' }}>
+        <div id="pdf-report-template" className="w-[850px] min-h-[1100px] bg-white p-12 flex flex-col gap-10 relative overflow-hidden font-['Inter'] text-black" style={{ display: 'none' }}>
+            {/* Editorial Accent Corner */}
+            <div className="absolute top-0 right-0 w-64 h-64 bg-[#C13535]/10 -mr-16 -mt-16 rounded-full blur-3xl"></div>
+            
+            {/* Header Section */}
+            <header className="flex justify-between items-start border-b border-zinc-300 pb-6 relative z-10">
+              <div className="flex flex-col gap-4">
+                <div className="flex items-center gap-3">
+                  <div className="w-3 h-12 bg-[#C13535]"></div>
+                  <h1 className="font-['Montserrat'] text-4xl font-black text-black tracking-tighter uppercase leading-none">Reporte de Estadísticas Editoriales</h1>
+                </div>
+                <div className="grid grid-cols-2 gap-x-12 gap-y-2 font-['Inter'] text-sm uppercase tracking-widest text-zinc-600 mt-2">
+                  <div><span className="text-[#F07D00] font-bold">Fecha:</span> <span className="border-b-2 border-zinc-200 inline-block w-40 ml-2 text-black font-bold">{new Date().toLocaleDateString('es-VE')}</span></div>
+                  <div><span className="text-[#F07D00] font-bold">Autor:</span> <span className="border-b-2 border-zinc-200 inline-block w-40 ml-2 text-black font-bold">{userProfile.firstName} {userProfile.lastName}</span></div>
+                  <div className="col-span-2 mt-2"><span className="text-[#F07D00] font-bold">Departamento:</span> <span className="border-b-2 border-zinc-200 inline-block w-[80%] ml-2 text-black font-bold">Dirección General / Analíticas</span></div>
+                </div>
+              </div>
+              <div className="text-right flex flex-col items-end gap-2">
+                {/* Logo con ruta absoluta para forzar carga en html2canvas */}
+                <img src={`${window.location.origin}/logo_colors.png`} alt="Logo" className="w-16 h-16 object-contain mb-2" crossOrigin="anonymous" />
+                <span className="text-xl font-['Montserrat'] font-black tracking-tighter text-[#C13535]">RADIO AMÉRICA</span>
+                <p className="text-[10px] font-['Inter'] text-zinc-500 font-bold uppercase tracking-widest">CONFIDENCIAL / USO INTERNO</p>
+              </div>
+            </header>
+
+            {/* 1. Metrics Overview Section */}
+            <section className="flex flex-col gap-4 relative z-10">
+              <div className="flex items-center gap-4">
+                <span className="material-symbols-outlined text-[#F07D00]" style={{ fontVariationSettings: "'FILL' 1" }}>analytics</span>
+                <h2 className="font-['Montserrat'] text-xl font-bold uppercase tracking-widest text-black">Metrics Overview</h2>
+                <div className="flex-1 h-[1px] bg-zinc-200"></div>
+              </div>
+              <div className="grid grid-cols-4 gap-6">
+                <div className="p-5 bg-zinc-50 rounded-xl flex flex-col gap-3 border-l-4 border-[#C13535]">
+                  <span className="font-['Inter'] text-[10px] font-bold uppercase tracking-widest text-zinc-500">Total Audiencia</span>
+                  <div className="border-b-2 border-zinc-200 min-h-[2rem] flex items-end pb-1 text-2xl font-black text-black">{totalViews}</div>
+                </div>
+                <div className="p-5 bg-zinc-50 rounded-xl flex flex-col gap-3 border-l-4 border-[#F07D00]">
+                  <span className="font-['Inter'] text-[10px] font-bold uppercase tracking-widest text-zinc-500">Suscritos (Engagement)</span>
+                  <div className="border-b-2 border-zinc-200 min-h-[2rem] flex items-end pb-1 text-2xl font-black text-black">{subscribers.length}</div>
+                </div>
+                <div className="p-5 bg-zinc-50 rounded-xl flex flex-col gap-3 border-l-4 border-[#FFB91F]">
+                  <span className="font-['Inter'] text-[10px] font-bold uppercase tracking-widest text-zinc-500">Contenido (Episodios)</span>
+                  <div className="border-b-2 border-zinc-200 min-h-[2rem] flex items-end pb-1 text-2xl font-black text-black">{videos.length}</div>
+                </div>
+                <div className="p-5 bg-zinc-50 rounded-xl flex flex-col gap-3 border-l-4 border-zinc-400">
+                  <span className="font-['Inter'] text-[10px] font-bold uppercase tracking-widest text-zinc-500">Min. Reproducidos (Est.)</span>
+                  <div className="border-b-2 border-zinc-200 min-h-[2rem] flex items-end pb-1 text-2xl font-black text-black">{((totalViews * 15) / 60).toFixed(1)}h</div>
+                </div>
+              </div>
+            </section>
+
+            {/* 2. Performance Breakdown Section */}
+            <section className="flex flex-col gap-4 relative z-10">
+              <div className="flex items-center gap-4">
+                <span className="material-symbols-outlined text-[#F07D00]" style={{ fontVariationSettings: "'FILL' 1" }}>bar_chart</span>
+                <h2 className="font-['Montserrat'] text-xl font-bold uppercase tracking-widest text-black">Performance Breakdown</h2>
+                <div className="flex-1 h-[1px] bg-zinc-200"></div>
+              </div>
+              <div className="overflow-hidden rounded-xl bg-zinc-50 border border-zinc-200">
+                <table className="w-full text-left border-collapse">
+                  <thead>
+                    <tr className="bg-zinc-100 border-b border-zinc-200">
+                      <th className="px-6 py-3 font-['Inter'] text-[10px] uppercase font-bold text-[#F07D00]">Programa/Segmento</th>
+                      <th className="px-6 py-3 font-['Inter'] text-[10px] uppercase font-bold text-[#F07D00]">Plataforma/Formato</th>
+                      <th className="px-6 py-3 font-['Inter'] text-[10px] uppercase font-bold text-[#F07D00]">Métrica (Vistas)</th>
+                      <th className="px-6 py-3 font-['Inter'] text-[10px] uppercase font-bold text-[#F07D00] text-right">Categoría</th>
+                    </tr>
+                  </thead>
+                  <tbody className="divide-y divide-zinc-200">
+                    {mostViewed.slice(0, 4).map(v => (
+                      <tr key={v.id}>
+                        <td className="px-6 py-4 font-bold text-black text-sm border-b border-zinc-100">{v.title}</td>
+                        <td className="px-6 py-4 text-zinc-600 text-sm border-b border-zinc-100">{v.isAudio ? 'Audio / Podcast' : 'Video Web'}</td>
+                        <td className="px-6 py-4 font-bold text-[#C13535] text-sm border-b border-zinc-100">{v.views}</td>
+                        <td className="px-6 py-4 text-zinc-600 text-right uppercase text-[10px] font-bold tracking-widest border-b border-zinc-100">{v.category}</td>
+                      </tr>
+                    ))}
+                    {Array.from({ length: Math.max(0, 4 - mostViewed.length) }).map((_, i) => (
+                      <tr key={`empty-${i}`}>
+                        <td className="px-6 py-4"><div className="border-b-2 border-zinc-200/50 min-h-[1.5rem]"></div></td>
+                        <td className="px-6 py-4"><div className="border-b-2 border-zinc-200/50 min-h-[1.5rem]"></div></td>
+                        <td className="px-6 py-4"><div className="border-b-2 border-zinc-200/50 min-h-[1.5rem]"></div></td>
+                        <td className="px-6 py-4"><div className="border-b-2 border-zinc-200/50 min-h-[1.5rem]"></div></td>
+                      </tr>
+                    ))}
+                  </tbody>
+                </table>
+              </div>
+            </section>
+
+            {/* 3. Notes & Analysis Section */}
+            <section className="flex flex-col gap-4 flex-1 relative z-10">
+              <div className="flex items-center gap-4">
+                <span className="material-symbols-outlined text-[#F07D00]" style={{ fontVariationSettings: "'FILL' 1" }}>edit_note</span>
+                <h2 className="font-['Montserrat'] text-xl font-bold uppercase tracking-widest text-black">Notes & Analysis</h2>
+                <div className="flex-1 h-[1px] bg-zinc-200"></div>
+              </div>
+              <div className="flex-1 min-h-[180px] p-8 bg-white border-2 border-dashed border-zinc-300 rounded-xl relative">
+                <div className="space-y-8 mt-2">
+                  <div className="border-b-2 border-zinc-200/50 h-1"></div>
+                  <div className="border-b-2 border-zinc-200/50 h-1"></div>
+                  <div className="border-b-2 border-zinc-200/50 h-1"></div>
+                  <div className="border-b-2 border-zinc-200/50 h-1"></div>
+                </div>
+                <span className="absolute top-4 right-4 text-[10px] uppercase font-['Inter'] font-bold text-zinc-400">Manual entry area</span>
+              </div>
+            </section>
+
+            {/* Footer Page Meta */}
+            <footer className="flex justify-between items-center pt-6 border-t border-zinc-300 relative z-10 mt-auto">
+              <div className="flex gap-4 items-center">
+                <span className="text-[10px] font-['Inter'] font-bold uppercase tracking-widest text-zinc-500">© {new Date().getFullYear()} Radio América</span>
+                <span className="text-[10px] font-['Inter'] uppercase tracking-widest text-zinc-300">|</span>
+                <span className="text-[10px] font-['Inter'] font-bold uppercase tracking-widest text-zinc-500">Editorial Report Studio</span>
+              </div>
+              <div className="font-['Montserrat'] font-bold text-[#C13535] text-sm italic">Pág. 1 / 1</div>
+            </footer>
+        </div>
+      </div>
+
     </div>
   );
 }
