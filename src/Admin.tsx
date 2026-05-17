@@ -12,6 +12,7 @@ function Admin() {
   const [isSidebarOpen, setIsSidebarOpen] = useState(false);
   const [activeTab, setActiveTab] = useState<'dashboard' | 'library' | 'programs' | 'sponsors' | 'analytics' | 'settings' | 'newsletter'>('dashboard');
   const [analyticsSubTab, setAnalyticsSubTab] = useState<'overview' | 'live' | 'social' | 'audience'>('overview');
+  const [timeFilter, setTimeFilter] = useState<'all' | '7days' | '30days'>('all');
   const [selectedProgramDetails, setSelectedProgramDetails] = useState<string | null>(null);
   const [editingId, setEditingId] = useState<string | null>(null);
   const [editingProgramId, setEditingProgramId] = useState<string | null>(null);
@@ -283,9 +284,24 @@ function Admin() {
   };
 
   // Métricas calculadas en tiempo real basadas en el contexto
-  const totalViews = videos.reduce((acc, video) => acc + (video.views || 0), 0);
-  const sortedByViews = [...videos].sort((a, b) => b.views - a.views);
-  const mostViewed = sortedByViews.slice(0, 4); // Top 4
+  const globalTotalViews = videos.reduce((acc, video) => acc + (video.views || 0), 0);
+  const globalMostViewed = [...videos].sort((a, b) => b.views - a.views).slice(0, 4); // Top 4 global
+
+  const now = new Date();
+  const filteredVideos = videos.filter(video => {
+    if (timeFilter === 'all') return true;
+    const diffDays = (now.getTime() - new Date(video.createdAt).getTime()) / (1000 * 3600 * 24);
+    return timeFilter === '7days' ? diffDays <= 7 : diffDays <= 30;
+  });
+
+  const filteredSubscribers = subscribers.filter(sub => {
+    if (timeFilter === 'all') return true;
+    const diffDays = (now.getTime() - new Date(sub.subscribedAt).getTime()) / (1000 * 3600 * 24);
+    return timeFilter === '7days' ? diffDays <= 7 : diffDays <= 30;
+  });
+
+  const analyticsTotalViews = filteredVideos.reduce((acc, video) => acc + (video.views || 0), 0);
+  const analyticsMostViewed = [...filteredVideos].sort((a, b) => b.views - a.views);
 
   // Detalles del programa seleccionado
   const activeProgramData = selectedProgramDetails ? programs.find(p => p.id === selectedProgramDetails) : null;
@@ -437,7 +453,7 @@ function Admin() {
                 <span className="text-[#F07D00] text-xs font-bold">Global</span>
               </div>
               <p className="text-[#DDDADB]/60 text-xs font-bold uppercase tracking-wider">Vistas Totales</p>
-              <h3 className="text-3xl font-black text-[#DDDADB] mt-1">{(totalViews / 1000).toFixed(1)}k</h3>
+              <h3 className="text-3xl font-black text-[#DDDADB] mt-1">{(globalTotalViews / 1000).toFixed(1)}k</h3>
             </div>
             <div className="bg-surface-container-low p-6 rounded-2xl border border-outline-variant/10 group hover:border-[#FFB91F]/30 transition-all">
               <div className="flex justify-between items-start mb-4">
@@ -484,7 +500,7 @@ function Admin() {
             </div>
 
             <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-8">
-              {(activeTab === 'dashboard' ? mostViewed : videos).map(video => (
+              {(activeTab === 'dashboard' ? globalMostViewed : videos).map(video => (
                 <div key={video.id} className="group cursor-pointer">
                   <div className="relative aspect-video rounded-xl overflow-hidden mb-4 bg-surface-container-highest">
                     <img className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500" src={video.thumbnail || '/logo_blanco.png'} alt={video.title} onError={(e) => { e.currentTarget.src = '/logo_blanco.png'; }} />
@@ -695,10 +711,17 @@ function Admin() {
                   <div className="w-2 h-10 bg-[#C13535]"></div>
                   <h3 className="text-3xl font-black text-[#DDDADB] uppercase font-['Montserrat'] tracking-tighter">Estadísticas Editoriales</h3>
                 </div>
-                <button onClick={handleGeneratePDF} className="flex items-center gap-2 bg-[#C13535] hover:bg-[#a12b2b] text-white px-6 py-3 rounded-full text-sm font-bold transition-all shadow-lg">
-                  <span className="material-symbols-outlined text-sm">picture_as_pdf</span>
-                  Exportar Reporte PDF
-                </button>
+                <div className="flex items-center gap-3">
+                  <select value={timeFilter} onChange={(e) => setTimeFilter(e.target.value as any)} className="bg-surface-container-high border-none rounded-lg py-2.5 px-4 text-sm font-bold text-[#DDDADB] focus:ring-2 focus:ring-[#C13535] cursor-pointer">
+                    <option value="all">Histórico (Todo)</option>
+                    <option value="30days">Últimos 30 Días</option>
+                    <option value="7days">Últimos 7 Días</option>
+                  </select>
+                  <button onClick={handleGeneratePDF} className="flex items-center gap-2 bg-[#C13535] hover:bg-[#a12b2b] text-white px-6 py-3 rounded-full text-sm font-bold transition-all shadow-lg">
+                    <span className="material-symbols-outlined text-sm">picture_as_pdf</span>
+                    Exportar Reporte PDF
+                  </button>
+                </div>
               </div>
 
               {/* Analytics Sub-navigation */}
@@ -733,15 +756,15 @@ function Admin() {
                     <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
                       <div className="p-6 bg-surface-container-low rounded-xl flex flex-col gap-3 border-l-4 border-[#C13535] shadow-lg border border-outline-variant/10">
                         <span className="font-['Inter'] text-[10px] font-bold uppercase tracking-widest text-[#DDDADB]/60" title="Contadas desde el reproductor interno de la aplicación">Reproducciones Nativas (App)</span>
-                        <div className="border-b-2 border-outline-variant/20 min-h-[2.5rem] flex items-end pb-1 text-3xl font-black text-[#DDDADB]">{totalViews}</div>
+                        <div className="border-b-2 border-outline-variant/20 min-h-[2.5rem] flex items-end pb-1 text-3xl font-black text-[#DDDADB]">{analyticsTotalViews}</div>
                       </div>
                       <div className="p-6 bg-surface-container-low rounded-xl flex flex-col gap-3 border-l-4 border-[#F07D00] shadow-lg border border-outline-variant/10">
                         <span className="font-['Inter'] text-[10px] font-bold uppercase tracking-widest text-[#DDDADB]/60">Engagement (Suscritos)</span>
-                        <div className="border-b-2 border-outline-variant/20 min-h-[2.5rem] flex items-end pb-1 text-3xl font-black text-[#DDDADB]">{subscribers.length}</div>
+                        <div className="border-b-2 border-outline-variant/20 min-h-[2.5rem] flex items-end pb-1 text-3xl font-black text-[#DDDADB]">{filteredSubscribers.length}</div>
                       </div>
                       <div className="p-6 bg-surface-container-low rounded-xl flex flex-col gap-3 border-l-4 border-[#FFB91F] shadow-lg border border-outline-variant/10">
                         <span className="font-['Inter'] text-[10px] font-bold uppercase tracking-widest text-[#DDDADB]/60">Total Episodios</span>
-                        <div className="border-b-2 border-outline-variant/20 min-h-[2.5rem] flex items-end pb-1 text-3xl font-black text-[#DDDADB]">{videos.length}</div>
+                        <div className="border-b-2 border-outline-variant/20 min-h-[2.5rem] flex items-end pb-1 text-3xl font-black text-[#DDDADB]">{filteredVideos.length}</div>
                       </div>
                       <div className="p-6 bg-surface-container-low rounded-xl flex flex-col gap-3 border-l-4 border-zinc-600 shadow-lg border border-outline-variant/10">
                         <span className="font-['Inter'] text-[10px] font-bold uppercase tracking-widest text-[#DDDADB]/60">Vistas Externas (YT/IG)</span>
@@ -768,7 +791,7 @@ function Admin() {
                           </tr>
                         </thead>
                         <tbody className="divide-y divide-outline-variant/10">
-                          {mostViewed.slice(0, 4).map(v => (
+                            {analyticsMostViewed.slice(0, 4).map(v => (
                             <tr key={v.id} className="hover:bg-surface-container-highest transition-colors">
                               <td className="px-6 py-4 font-bold text-[#DDDADB] text-sm">{v.title}</td>
                               <td className="px-6 py-4 text-[#DDDADB]/60 text-sm">{v.isAudio ? 'Audio/Podcast' : 'Video/Reel'}</td>
@@ -783,11 +806,115 @@ function Admin() {
                 </div>
               )}
 
-              {analyticsSubTab !== 'overview' && (
-                <div className="py-20 text-center border-2 border-dashed border-outline-variant/20 rounded-2xl">
-                  <span className="material-symbols-outlined text-5xl text-[#DDDADB]/20 mb-4">construction</span>
-                  <h3 className="text-xl font-bold text-[#DDDADB]/60">Módulo en Desarrollo</h3>
-                  <p className="text-sm text-[#DDDADB]/40 mt-2">Esta sección de métricas avanzadas requerirá una futura integración de API.</p>
+              {analyticsSubTab === 'live' && (
+                <div className="space-y-6 animate-fade-in">
+                  <div className="p-6 bg-[#C13535]/10 border border-[#C13535]/30 rounded-xl">
+                    <h3 className="text-[#C13535] font-bold mb-2 flex items-center gap-2">
+                      <span className="material-symbols-outlined">sensors</span> Emisiones en Vivo (Live)
+                    </h3>
+                    <p className="text-sm text-[#DDDADB]/60">Rendimiento de los episodios marcados como transmisión en directo durante este periodo.</p>
+                  </div>
+                  <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
+                    {filteredVideos.filter(v => v.isLive).map(v => (
+                      <div key={v.id} className="p-4 bg-surface-container-low rounded-xl border border-outline-variant/10 shadow-lg group">
+                        <div className="relative aspect-video rounded-lg overflow-hidden mb-3">
+                          <img src={v.thumbnail || '/logo_blanco.png'} className="w-full h-full object-cover group-hover:scale-105 transition-transform" alt={v.title} onError={(e) => { e.currentTarget.src = '/logo_blanco.png'; }} />
+                          <div className="absolute top-2 left-2 bg-red-600 text-white text-[10px] font-bold px-2 py-1 rounded shadow-lg flex items-center gap-1">
+                            <span className="w-1.5 h-1.5 bg-white rounded-full animate-pulse"></span> LIVE
+                          </div>
+                        </div>
+                        <h4 className="font-bold text-[#DDDADB] text-sm line-clamp-1 mb-3">{v.title}</h4>
+                        <div className="flex justify-between items-center bg-surface-container p-2 rounded-lg">
+                          <span className="text-xs text-[#DDDADB]/60 uppercase tracking-widest font-bold">Vistas</span>
+                          <span className="text-sm font-black text-[#F07D00]">{v.views}</span>
+                        </div>
+                      </div>
+                    ))}
+                    {filteredVideos.filter(v => v.isLive).length === 0 && (
+                      <div className="col-span-full py-12 text-center text-[#DDDADB]/40">No hubo emisiones en vivo en este periodo.</div>
+                    )}
+                  </div>
+                </div>
+              )}
+
+              {analyticsSubTab === 'social' && (
+                <div className="space-y-6 animate-fade-in">
+                  <div className="p-6 bg-[#F07D00]/10 border border-[#F07D00]/30 rounded-xl">
+                    <h3 className="text-[#F07D00] font-bold mb-2 flex items-center gap-2">
+                      <span className="material-symbols-outlined">share</span> Impacto Social y Formatos Cortos
+                    </h3>
+                    <p className="text-sm text-[#DDDADB]/60">Alcance nativo de tus Reels, Shorts y contenido vinculado a plataformas externas.</p>
+                  </div>
+                  <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-6">
+                    {filteredVideos.filter(v => v.isShort || v.url.includes('youtube') || v.url.includes('instagram')).map(v => (
+                      <div key={v.id} className="p-4 bg-surface-container-low rounded-xl border border-outline-variant/10 shadow-lg flex gap-4">
+                        <div className="w-20 h-28 shrink-0 rounded-lg overflow-hidden relative">
+                          <img src={v.thumbnail || '/logo_blanco.png'} className="w-full h-full object-cover" alt={v.title} onError={(e) => { e.currentTarget.src = '/logo_blanco.png'; }} />
+                        </div>
+                        <div className="flex flex-col justify-center flex-1">
+                          <span className="text-[10px] uppercase tracking-widest text-[#F07D00] font-bold mb-1">
+                            {v.isShort ? 'Short/Reel' : 'Enlace Externo'}
+                          </span>
+                          <h4 className="font-bold text-[#DDDADB] text-sm line-clamp-2 mb-2">{v.title}</h4>
+                          <div className="flex items-center gap-1 text-xs text-[#DDDADB]/60 mt-auto">
+                            <span className="material-symbols-outlined text-[14px]">visibility</span>
+                            <span className="font-bold">{v.views} vistas (app)</span>
+                          </div>
+                        </div>
+                      </div>
+                    ))}
+                    {filteredVideos.filter(v => v.isShort || v.url.includes('youtube') || v.url.includes('instagram')).length === 0 && (
+                      <div className="col-span-full py-12 text-center text-[#DDDADB]/40">No hay contenido de impacto social en este periodo.</div>
+                    )}
+                  </div>
+                </div>
+              )}
+
+              {analyticsSubTab === 'audience' && (
+                <div className="space-y-6 animate-fade-in">
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                    <div className="p-6 bg-surface-container-low rounded-xl border-l-4 border-[#C13535] shadow-lg">
+                      <h3 className="text-[#DDDADB] font-bold mb-2">Crecimiento (Periodo)</h3>
+                      <div className="flex items-end gap-2">
+                        <p className="text-4xl font-black text-[#F07D00]">{filteredSubscribers.length}</p>
+                        <p className="text-sm text-[#DDDADB]/40 mb-1">nuevos registros</p>
+                      </div>
+                    </div>
+                    <div className="p-6 bg-surface-container-low rounded-xl border-l-4 border-zinc-600 shadow-lg">
+                      <h3 className="text-[#DDDADB] font-bold mb-2">Total Comunidad</h3>
+                      <div className="flex items-end gap-2">
+                        <p className="text-4xl font-black text-[#DDDADB]">{subscribers.length}</p>
+                        <p className="text-sm text-[#DDDADB]/40 mb-1">usuarios históricos</p>
+                      </div>
+                    </div>
+                  </div>
+                  
+                  <div className="overflow-hidden rounded-xl bg-surface-container-low border border-outline-variant/10 shadow-lg">
+                    <table className="w-full text-left border-collapse">
+                      <thead>
+                        <tr className="bg-surface-container-highest border-b border-outline-variant/20">
+                          <th className="px-6 py-4 font-['Inter'] text-xs font-bold text-[#F07D00] uppercase">Usuario (Email)</th>
+                          <th className="px-6 py-4 font-['Inter'] text-xs font-bold text-[#F07D00] uppercase text-right">Fecha de Suscripción</th>
+                        </tr>
+                      </thead>
+                      <tbody className="divide-y divide-outline-variant/10">
+                        {filteredSubscribers.slice(0, 10).map((sub, i) => (
+                          <tr key={i} className="hover:bg-surface-container-highest transition-colors">
+                            <td className="px-6 py-4 text-sm text-[#DDDADB] font-medium">{sub.email}</td>
+                            <td className="px-6 py-4 text-sm text-[#DDDADB]/60 text-right">{new Date(sub.subscribedAt).toLocaleDateString()}</td>
+                          </tr>
+                        ))}
+                        {filteredSubscribers.length === 0 && (
+                          <tr><td colSpan={2} className="px-6 py-8 text-center text-[#DDDADB]/40">No hay nuevos suscriptores en este periodo.</td></tr>
+                        )}
+                      </tbody>
+                    </table>
+                    {filteredSubscribers.length > 10 && (
+                      <div className="px-6 py-3 bg-surface-container-highest text-center text-xs text-[#DDDADB]/40 font-bold uppercase tracking-widest">
+                        Mostrando los 10 más recientes del periodo
+                      </div>
+                    )}
+                  </div>
                 </div>
               )}
 
@@ -1150,6 +1277,7 @@ function Admin() {
                   <div><span className="text-[#F07D00] font-bold">Fecha:</span> <span className="border-b-2 border-[#e4e4e7] inline-block w-40 ml-2 text-black font-bold">{new Date().toLocaleDateString('es-VE')}</span></div>
                   <div><span className="text-[#F07D00] font-bold">Autor:</span> <span className="border-b-2 border-[#e4e4e7] inline-block w-40 ml-2 text-black font-bold">{userProfile.firstName} {userProfile.lastName}</span></div>
                   <div className="col-span-2 mt-2"><span className="text-[#F07D00] font-bold">Departamento:</span> <span className="border-b-2 border-[#e4e4e7] inline-block w-[80%] ml-2 text-black font-bold">Dirección General / Analíticas</span></div>
+                  <div className="col-span-2 mt-2"><span className="text-[#F07D00] font-bold">Periodo:</span> <span className="border-b-2 border-[#e4e4e7] inline-block w-[80%] ml-2 text-black font-bold">{timeFilter === 'all' ? 'Histórico Completo' : timeFilter === '30days' ? 'Últimos 30 Días' : 'Últimos 7 Días'}</span></div>
                 </div>
               </div>
               <div className="text-right flex flex-col items-end gap-2">
@@ -1170,15 +1298,15 @@ function Admin() {
               <div className="grid grid-cols-4 gap-6">
                 <div className="p-5 bg-[#fafafa] rounded-xl flex flex-col gap-3 border-l-4 border-[#C13535]">
                   <span className="font-['Inter'] text-[10px] font-bold uppercase tracking-widest text-[#71717a]">Reproducciones Nativas</span>
-                  <div className="border-b-2 border-[#e4e4e7] min-h-[2rem] flex items-end pb-1 text-2xl font-black text-black">{totalViews}</div>
+                  <div className="border-b-2 border-[#e4e4e7] min-h-[2rem] flex items-end pb-1 text-2xl font-black text-black">{analyticsTotalViews}</div>
                 </div>
                 <div className="p-5 bg-[#fafafa] rounded-xl flex flex-col gap-3 border-l-4 border-[#F07D00]">
                   <span className="font-['Inter'] text-[10px] font-bold uppercase tracking-widest text-[#71717a]">Suscritos (Engagement)</span>
-                  <div className="border-b-2 border-[#e4e4e7] min-h-[2rem] flex items-end pb-1 text-2xl font-black text-black">{subscribers.length}</div>
+                  <div className="border-b-2 border-[#e4e4e7] min-h-[2rem] flex items-end pb-1 text-2xl font-black text-black">{filteredSubscribers.length}</div>
                 </div>
                 <div className="p-5 bg-[#fafafa] rounded-xl flex flex-col gap-3 border-l-4 border-[#FFB91F]">
                   <span className="font-['Inter'] text-[10px] font-bold uppercase tracking-widest text-[#71717a]">Contenido (Episodios)</span>
-                  <div className="border-b-2 border-[#e4e4e7] min-h-[2rem] flex items-end pb-1 text-2xl font-black text-black">{videos.length}</div>
+                  <div className="border-b-2 border-[#e4e4e7] min-h-[2rem] flex items-end pb-1 text-2xl font-black text-black">{filteredVideos.length}</div>
                 </div>
                 <div className="p-5 bg-[#fafafa] rounded-xl flex flex-col gap-3 border-l-4 border-[#a1a1aa]">
                   <span className="font-['Inter'] text-[10px] font-bold uppercase tracking-widest text-[#71717a]">Vistas Externas (YT/IG)</span>
@@ -1205,7 +1333,7 @@ function Admin() {
                     </tr>
                   </thead>
                   <tbody className="divide-y divide-[#e4e4e7]">
-                    {mostViewed.slice(0, 4).map(v => (
+                    {analyticsMostViewed.slice(0, 4).map(v => (
                       <tr key={v.id}>
                         <td className="px-6 py-4 font-bold text-black text-sm border-b border-[#f4f4f5]">{v.title}</td>
                         <td className="px-6 py-4 text-[#52525b] text-sm border-b border-[#f4f4f5]">{v.isAudio ? 'Audio / Podcast' : 'Video Web'}</td>
@@ -1213,7 +1341,7 @@ function Admin() {
                         <td className="px-6 py-4 text-[#52525b] text-right uppercase text-[10px] font-bold tracking-widest border-b border-[#f4f4f5]">{v.category}</td>
                       </tr>
                     ))}
-                    {Array.from({ length: Math.max(0, 4 - mostViewed.length) }).map((_, i) => (
+                    {Array.from({ length: Math.max(0, 4 - analyticsMostViewed.length) }).map((_, i) => (
                       <tr key={`empty-${i}`}>
                         <td className="px-6 py-4"><div className="border-b-2 border-[#e4e4e7] min-h-[1.5rem]"></div></td>
                         <td className="px-6 py-4"><div className="border-b-2 border-[#e4e4e7] min-h-[1.5rem]"></div></td>
