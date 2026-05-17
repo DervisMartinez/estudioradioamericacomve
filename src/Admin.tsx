@@ -295,36 +295,36 @@ function Admin() {
 
   // Función para Generar el PDF dinámicamente
   const handleGeneratePDF = async () => {
-    // Cargar la librería dinámicamente si no existe
-    if (!(window as any).html2pdf) {
-      setIsUploading(true);
-      await new Promise((resolve, reject) => {
-        const script = document.createElement('script');
-        script.src = "https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.10.1/html2pdf.bundle.min.js";
-        script.onload = resolve;
-        script.onerror = reject;
-        document.head.appendChild(script);
-      });
-      setIsUploading(false);
+    setIsUploading(true); // Bloquea la pantalla
+    try {
+      if (!(window as any).html2pdf) {
+        await new Promise((resolve, reject) => {
+          const script = document.createElement('script');
+          script.src = "https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.10.1/html2pdf.bundle.min.js";
+          script.onload = resolve;
+          script.onerror = reject;
+          document.head.appendChild(script);
+        });
+      }
+
+      const element = document.getElementById('pdf-report-template');
+      if (!element) throw new Error("Plantilla no encontrada en el DOM");
+
+      const opt = {
+        margin:       0,
+        filename:     `Reporte_Estadisticas_RadioAmerica_${new Date().toISOString().split('T')[0]}.pdf`,
+        image:        { type: 'jpeg', quality: 0.98 },
+        html2canvas:  { scale: 2, useCORS: true, logging: false },
+        jsPDF:        { unit: 'in', format: 'a4', orientation: 'portrait' }
+      };
+
+      await (window as any).html2pdf().set(opt).from(element).save();
+    } catch (error) {
+      console.error("Error al generar PDF:", error);
+      alert("Ocurrió un error al generar el PDF. Verifica tu conexión.");
+    } finally {
+      setIsUploading(false); // Siempre libera la pantalla, pase lo que pase
     }
-
-    const element = document.getElementById('pdf-report-template');
-    if (!element) return;
-
-    element.style.display = 'flex';
-
-    const opt = {
-      margin:       0,
-      filename:     `Reporte_Estadisticas_RadioAmerica_${new Date().toISOString().split('T')[0]}.pdf`,
-      image:        { type: 'jpeg', quality: 0.98 },
-      html2canvas:  { scale: 2, useCORS: true },
-      jsPDF:        { unit: 'in', format: 'a4', orientation: 'portrait' }
-    };
-
-    (window as any).html2pdf().set(opt).from(element).save().then(() => {
-      // Ocultar de nuevo tras generar
-      element.style.display = 'none';
-    });
   };
 
   return (
@@ -706,44 +706,78 @@ function Admin() {
 
           {/* ANALYTICS TAB */}
           {activeTab === 'analytics' && (
-            <div className="space-y-8">
+            <div className="space-y-10 animate-fade-in">
+              
+              {/* Header Tab */}
               <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
-                <h3 className="text-2xl font-bold text-[#DDDADB]">Dashboard de Analíticas</h3>
-                <button onClick={handleGeneratePDF} className="flex items-center gap-2 bg-[#F07D00]/20 hover:bg-[#F07D00]/30 text-[#F07D00] px-5 py-2 rounded-full text-sm font-bold border border-[#F07D00]/30 transition-all">
-                  <span className="material-symbols-outlined text-sm">download</span>
-                  Generar Reporte General
+                <div className="flex items-center gap-3">
+                  <div className="w-2 h-10 bg-[#C13535]"></div>
+                  <h3 className="text-3xl font-black text-[#DDDADB] uppercase font-['Montserrat'] tracking-tighter">Estadísticas Editoriales</h3>
+                </div>
+                <button onClick={handleGeneratePDF} className="flex items-center gap-2 bg-[#C13535] hover:bg-[#a12b2b] text-white px-6 py-3 rounded-full text-sm font-bold transition-all shadow-lg">
+                  <span className="material-symbols-outlined text-sm">picture_as_pdf</span>
+                  Exportar Reporte PDF
                 </button>
               </div>
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
-               {/* ... (el resto del código de Analytics se mantiene igual) */}
-                <div className="bg-surface-container-low rounded-3xl p-8 border border-outline-variant/10">
-                  <h4 className="text-[#F07D00] font-bold mb-6">Tiempo de Reproducción Total</h4>
-                  <div className="text-5xl font-black text-[#DDDADB] mb-2">{((totalViews * 15) / 60).toFixed(1)} <span className="text-xl text-[#DDDADB]/40">Horas</span></div>
-                  <p className="text-xs text-[#DDDADB]/60">+4.2% respecto al mes pasado</p>
+
+              {/* Section 1: Metrics Overview (Diseño Editorial) */}
+              <section className="flex flex-col gap-4">
+                <div className="flex items-center gap-4">
+                  <span className="material-symbols-outlined text-[#F07D00]" style={{ fontVariationSettings: "'FILL' 1" }}>analytics</span>
+                  <h2 className="font-['Montserrat'] text-xl font-bold uppercase tracking-widest text-[#DDDADB]">Metrics Overview</h2>
+                  <div className="flex-1 h-[1px] bg-outline-variant/20"></div>
                 </div>
-                <div className="bg-surface-container-low rounded-3xl p-8 border border-outline-variant/10">
-                  <h4 className="text-[#FFB91F] font-bold mb-6">Visitas al Mes</h4>
-                  <div className="text-5xl font-black text-[#DDDADB] mb-2">{(totalViews / 1000).toFixed(1)}k</div>
-                  <p className="text-xs text-[#DDDADB]/60">Promedio de {Math.floor(totalViews / 30)} visitas diarias</p>
+                <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
+                  <div className="p-6 bg-surface-container-low rounded-xl flex flex-col gap-3 border-l-4 border-[#C13535] shadow-lg border border-outline-variant/10">
+                    <span className="font-['Inter'] text-[10px] font-bold uppercase tracking-widest text-[#DDDADB]/60">Total Audiencia</span>
+                    <div className="border-b-2 border-outline-variant/20 min-h-[2.5rem] flex items-end pb-1 text-3xl font-black text-[#DDDADB]">{totalViews}</div>
+                  </div>
+                  <div className="p-6 bg-surface-container-low rounded-xl flex flex-col gap-3 border-l-4 border-[#F07D00] shadow-lg border border-outline-variant/10">
+                    <span className="font-['Inter'] text-[10px] font-bold uppercase tracking-widest text-[#DDDADB]/60">Engagement (Suscritos)</span>
+                    <div className="border-b-2 border-outline-variant/20 min-h-[2.5rem] flex items-end pb-1 text-3xl font-black text-[#DDDADB]">{subscribers.length}</div>
+                  </div>
+                  <div className="p-6 bg-surface-container-low rounded-xl flex flex-col gap-3 border-l-4 border-[#FFB91F] shadow-lg border border-outline-variant/10">
+                    <span className="font-['Inter'] text-[10px] font-bold uppercase tracking-widest text-[#DDDADB]/60">Total Episodios</span>
+                    <div className="border-b-2 border-outline-variant/20 min-h-[2.5rem] flex items-end pb-1 text-3xl font-black text-[#DDDADB]">{videos.length}</div>
+                  </div>
+                  <div className="p-6 bg-surface-container-low rounded-xl flex flex-col gap-3 border-l-4 border-zinc-600 shadow-lg border border-outline-variant/10">
+                    <span className="font-['Inter'] text-[10px] font-bold uppercase tracking-widest text-[#DDDADB]/60">Minutos Reproducidos</span>
+                    <div className="border-b-2 border-outline-variant/20 min-h-[2.5rem] flex items-end pb-1 text-3xl font-black text-[#DDDADB]">{((totalViews * 15)).toFixed(0)} min</div>
+                  </div>
                 </div>
-              </div>
-              <div className="bg-surface-container-low rounded-3xl p-8 border border-outline-variant/10 mt-8">
-                <h4 className="text-[#C13535] font-bold mb-6">Contenido Más Consumido (Top 3)</h4>
-                <div className="space-y-4">
-                  {mostViewed.slice(0,3).map((v, i) => (
-                    <div key={v.id} className="flex justify-between items-center border-b border-outline-variant/10 pb-4">
-                      <div className="flex items-center gap-4">
-                        <span className="text-2xl font-black text-[#DDDADB]/20">0{i+1}</span>
-                        <div>
-                          <div className="font-bold text-[#DDDADB]">{v.title}</div>
-                          <div className="text-xs text-[#DDDADB]/40">{v.category}</div>
-                        </div>
-                      </div>
-                      <div className="font-bold text-[#F07D00]">{(v.views/1000).toFixed(1)}k vistas</div>
-                    </div>
-                  ))}
+              </section>
+
+              {/* Section 2: Performance Breakdown (Tabla de Top) */}
+              <section className="flex flex-col gap-4">
+                <div className="flex items-center gap-4">
+                  <span className="material-symbols-outlined text-[#F07D00]" style={{ fontVariationSettings: "'FILL' 1" }}>bar_chart</span>
+                  <h2 className="font-['Montserrat'] text-xl font-bold uppercase tracking-widest text-[#DDDADB]">Performance Breakdown</h2>
+                  <div className="flex-1 h-[1px] bg-outline-variant/20"></div>
                 </div>
-              </div>
+                <div className="overflow-hidden rounded-xl bg-surface-container-low border border-outline-variant/10 shadow-lg">
+                  <table className="w-full text-left border-collapse">
+                    <thead>
+                      <tr className="bg-surface-container-highest border-b border-outline-variant/20">
+                        <th className="px-6 py-4 font-['Inter'] text-xs uppercase font-bold text-[#F07D00]">Programa/Segmento</th>
+                        <th className="px-6 py-4 font-['Inter'] text-xs uppercase font-bold text-[#F07D00]">Formato</th>
+                        <th className="px-6 py-4 font-['Inter'] text-xs uppercase font-bold text-[#F07D00]">Vistas</th>
+                        <th className="px-6 py-4 font-['Inter'] text-xs uppercase font-bold text-[#F07D00] text-right">Categoría</th>
+                      </tr>
+                    </thead>
+                    <tbody className="divide-y divide-outline-variant/10">
+                      {mostViewed.slice(0, 4).map(v => (
+                        <tr key={v.id} className="hover:bg-surface-container-highest transition-colors">
+                          <td className="px-6 py-4 font-bold text-[#DDDADB] text-sm">{v.title}</td>
+                          <td className="px-6 py-4 text-[#DDDADB]/60 text-sm">{v.isAudio ? 'Audio/Podcast' : 'Video/Reel'}</td>
+                          <td className="px-6 py-4 font-black text-[#C13535] text-sm">{v.views}</td>
+                          <td className="px-6 py-4 text-[#DDDADB]/60 text-right uppercase text-[10px] tracking-widest">{v.category}</td>
+                        </tr>
+                      ))}
+                    </tbody>
+                  </table>
+                </div>
+              </section>
+
             </div>
           )}
 
@@ -1086,9 +1120,9 @@ function Admin() {
         </div>
       )}
 
-      {/* PLANTILLA OCULTA PARA EL REPORTE PDF BASADA EN EL DISEÑO EDITORIAL */}
-      <div style={{ display: 'none' }}>
-        <div id="pdf-report-template" className="w-[850px] min-h-[1100px] bg-white p-12 flex flex-col gap-10 relative overflow-hidden font-['Inter'] text-black" style={{ display: 'none' }}>
+      {/* PLANTILLA FÍSICA A4 PARA EL REPORTE PDF - POSICIONADA FUERA DE LA PANTALLA */}
+      <div className="absolute left-[-9999px] top-[-9999px] overflow-hidden pointer-events-none">
+        <div id="pdf-report-template" className="w-[850px] min-h-[1100px] bg-white p-12 flex flex-col gap-10 relative font-['Inter'] text-black">
             {/* Editorial Accent Corner */}
             <div className="absolute top-0 right-0 w-64 h-64 bg-[#C13535]/10 -mr-16 -mt-16 rounded-full blur-3xl"></div>
             
