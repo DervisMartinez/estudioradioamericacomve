@@ -12,6 +12,7 @@ function Admin() {
   const [isSidebarOpen, setIsSidebarOpen] = useState(false);
   const [activeTab, setActiveTab] = useState<'dashboard' | 'library' | 'programs' | 'sponsors' | 'analytics' | 'settings' | 'newsletter'>('dashboard');
   const [analyticsSubTab, setAnalyticsSubTab] = useState<'overview' | 'live' | 'social' | 'audience'>('overview');
+  const [libraryFilter, setLibraryFilter] = useState('Todos');
   const [timeFilter, setTimeFilter] = useState<'all' | '7days' | '30days'>('all');
   const [selectedProgramDetails, setSelectedProgramDetails] = useState<string | null>(null);
   const [editingId, setEditingId] = useState<string | null>(null);
@@ -310,6 +311,10 @@ function Admin() {
   // Extraer todas las categorías existentes para sugerirlas
   const allCategories = Array.from(new Set([...programs.map(p => p.category), ...videos.map(v => v.category)]));
 
+  // Filtro de videos para la librería
+  const libraryCategories = Array.from(new Set(videos.map(v => v.category)));
+  const displayedVideos = activeTab === 'dashboard' ? globalMostViewed : (libraryFilter === 'Todos' ? videos : videos.filter(v => v.category === libraryFilter));
+
   // Función para Generar el PDF dinámicamente
   const handleGeneratePDF = () => {
     // Usamos el motor nativo del navegador: Evita el error 'oklab' y crea PDFs vectoriales perfectos.
@@ -483,24 +488,29 @@ function Admin() {
 
           {/* LIBRARY / DASHBOARD CONTENT */}
           {(activeTab === 'dashboard' || activeTab === 'library') && (
-          <section className="bg-surface-container-low rounded-3xl p-8 border border-outline-variant/10">
-            <div className="flex flex-col md:flex-row justify-between items-end gap-6 mb-10">
+          <section className="bg-surface-container-low rounded-3xl p-4 sm:p-8 border border-outline-variant/10">
+            <div className="flex flex-col md:flex-row justify-between items-start md:items-end gap-6 mb-10">
               <div>
                 <h3 className="text-2xl font-bold text-[#DDDADB] mb-2">{activeTab === 'dashboard' ? 'Videos Más Vistos' : 'Video Library'}</h3>
                 <p className="text-[#DDDADB]/50 text-sm max-w-md">Manage your cinematic archives, interviews, and historical documentaries for the Estudio Radio América network.</p>
               </div>
               {/* Tab Filter Bar */}
               {activeTab === 'library' && (
-                <div className="flex bg-surface-container-lowest p-1 rounded-full border border-outline-variant/10">
-                  <button className="px-6 py-2 rounded-full text-xs font-bold bg-[#C13535] text-white">Todos</button>
-                  <button className="px-6 py-2 rounded-full text-xs font-bold text-[#DDDADB]/60 hover:text-[#DDDADB] transition-colors">Historia</button>
-                  <button className="px-6 py-2 rounded-full text-xs font-bold text-[#DDDADB]/60 hover:text-[#DDDADB] transition-colors">Personajes</button>
+                <div className="w-full md:w-auto flex bg-surface-container-lowest p-1 rounded-full border border-outline-variant/10 overflow-x-auto hide-scrollbar snap-x">
+                  <button onClick={() => setLibraryFilter('Todos')} className={`px-6 py-2 rounded-full text-xs font-bold whitespace-nowrap transition-colors snap-start ${libraryFilter === 'Todos' ? 'bg-[#C13535] text-white' : 'text-[#DDDADB]/60 hover:text-[#DDDADB]'}`}>
+                    Todos
+                  </button>
+                  {libraryCategories.map(cat => (
+                    <button key={cat} onClick={() => setLibraryFilter(cat)} className={`px-6 py-2 rounded-full text-xs font-bold whitespace-nowrap transition-colors snap-start ${libraryFilter === cat ? 'bg-[#C13535] text-white' : 'text-[#DDDADB]/60 hover:text-[#DDDADB]'}`}>
+                      {cat}
+                    </button>
+                  ))}
                 </div>
               )}
             </div>
 
             <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-8">
-              {(activeTab === 'dashboard' ? globalMostViewed : videos).map(video => (
+              {displayedVideos.map(video => (
                 <div key={video.id} className="group cursor-pointer">
                   <div className="relative aspect-video rounded-xl overflow-hidden mb-4 bg-surface-container-highest">
                     <img className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500" src={video.thumbnail || '/logo_blanco.png'} alt={video.title} onError={(e) => { e.currentTarget.src = '/logo_blanco.png'; }} />
@@ -532,21 +542,18 @@ function Admin() {
               ))}
             </div>
 
-            {activeTab === 'library' && (
-            <div className="mt-12 flex justify-center">
-              <button className="flex items-center gap-2 text-[#DDDADB]/60 hover:text-[#F07D00] font-bold text-sm transition-colors">
-                Ver Todos los Videos
-                <span className="material-symbols-outlined text-sm" data-icon="arrow_forward">arrow_forward</span>
-              </button>
-            </div>
+            {activeTab === 'library' && displayedVideos.length === 0 && (
+              <div className="py-16 text-center text-[#DDDADB]/40 text-sm font-bold uppercase tracking-widest">
+                No hay contenido en esta categoría
+              </div>
             )}
           </section>
           )}
 
           {/* PROGRAMS TAB */}
           {activeTab === 'programs' && !selectedProgramDetails && (
-          <section className="bg-surface-container-low rounded-3xl p-8 border border-outline-variant/10">
-            <div className="flex flex-col md:flex-row justify-between items-end gap-6 mb-10">
+          <section className="bg-surface-container-low rounded-3xl p-4 sm:p-8 border border-outline-variant/10">
+            <div className="flex flex-col md:flex-row justify-between items-start md:items-end gap-6 mb-10">
               <div>
                 <h3 className="text-2xl font-bold text-[#DDDADB] mb-2">Programas y Podcasts</h3>
                 <p className="text-[#DDDADB]/50 text-sm max-w-md">Administra los programas en los que se agrupan los videos.</p>
@@ -588,7 +595,7 @@ function Admin() {
                 <img src={activeProgramData.thumbnail || '/logo_blanco.png'} alt={activeProgramData.name} className="w-32 h-32 md:w-48 md:h-48 object-cover rounded-2xl shadow-xl" onError={(e) => { e.currentTarget.src = '/logo_blanco.png'; }} />
                 <div className="flex-1 space-y-4">
                   <span className="bg-[#F07D00]/20 text-[#F07D00] px-3 py-1 rounded text-xs font-bold uppercase tracking-widest">{activeProgramData.type}</span>
-                  <h2 className="text-4xl font-black text-[#DDDADB]">{activeProgramData.name}</h2>
+                  <h2 className="text-3xl sm:text-4xl font-black text-[#DDDADB] leading-none">{activeProgramData.name}</h2>
                   <p className="text-[#DDDADB]/60 text-sm max-w-2xl">{activeProgramData.description || 'Sin descripción.'}</p>
                   <div className="flex items-center gap-4 text-xs font-bold text-[#DDDADB]/40">
                     <span>Host: {activeProgramData.host || 'N/A'}</span> • <span>Horario: {activeProgramData.schedule || 'N/A'}</span>
@@ -630,8 +637,8 @@ function Admin() {
 
           {/* SPONSORS (CUÑAS) TAB */}
           {activeTab === 'sponsors' && (
-            <section className="bg-surface-container-low rounded-3xl p-8 border border-outline-variant/10">
-              <div className="flex flex-col md:flex-row justify-between items-end gap-6 mb-10">
+            <section className="bg-surface-container-low rounded-3xl p-4 sm:p-8 border border-outline-variant/10">
+              <div className="flex flex-col md:flex-row justify-between items-start md:items-end gap-6 mb-10">
                 <div>
                   <h3 className="text-2xl font-bold text-[#DDDADB] mb-2">Biblioteca de Cuñas y Anuncios</h3>
                   <p className="text-[#DDDADB]/50 text-sm max-w-md">Gestiona los audios publicitarios centralizados. Se pueden reutilizar en múltiples episodios.</p>
@@ -667,8 +674,8 @@ function Admin() {
 
           {/* NEWSLETTER TAB */}
           {activeTab === 'newsletter' && (
-            <section className="bg-surface-container-low rounded-3xl p-8 border border-outline-variant/10">
-              <div className="flex flex-col md:flex-row justify-between items-end gap-6 mb-10">
+            <section className="bg-surface-container-low rounded-3xl p-4 sm:p-8 border border-outline-variant/10">
+              <div className="flex flex-col md:flex-row justify-between items-start md:items-end gap-6 mb-10">
                 <div>
                   <h3 className="text-2xl font-bold text-[#DDDADB] mb-2">Comunidad y Newsletter</h3>
                   <p className="text-[#DDDADB]/50 text-sm max-w-md">Lista de usuarios que se han suscrito para recibir correos con novedades.</p>
@@ -709,9 +716,9 @@ function Admin() {
               <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
                 <div className="flex items-center gap-3">
                   <div className="w-2 h-10 bg-[#C13535]"></div>
-                  <h3 className="text-3xl font-black text-[#DDDADB] uppercase font-['Montserrat'] tracking-tighter">Estadísticas Editoriales</h3>
+                  <h3 className="text-2xl sm:text-3xl font-black text-[#DDDADB] uppercase font-['Montserrat'] tracking-tighter">Estadísticas Editoriales</h3>
                 </div>
-                <div className="flex items-center gap-3">
+                <div className="flex flex-wrap items-center gap-3 mt-2 sm:mt-0">
                   <select value={timeFilter} onChange={(e) => setTimeFilter(e.target.value as any)} className="bg-surface-container-high border-none rounded-lg py-2.5 px-4 text-sm font-bold text-[#DDDADB] focus:ring-2 focus:ring-[#C13535] cursor-pointer">
                     <option value="all">Histórico (Todo)</option>
                     <option value="30days">Últimos 30 Días</option>
@@ -725,7 +732,7 @@ function Admin() {
               </div>
 
               {/* Analytics Sub-navigation */}
-              <div className="flex flex-wrap items-center gap-2 border-b border-outline-variant/10 pb-4">
+              <div className="flex overflow-x-auto hide-scrollbar items-center gap-2 border-b border-outline-variant/10 pb-4">
                 <button onClick={() => setAnalyticsSubTab('overview')} className={`px-5 py-2.5 rounded-lg font-bold text-sm flex items-center gap-2 transition-all ${analyticsSubTab === 'overview' ? 'bg-[#C13535]/10 text-[#C13535] border-b-2 border-[#C13535]' : 'text-[#DDDADB]/60 hover:bg-surface-container'}`}>
                   <span className="material-symbols-outlined text-sm">dashboard</span>
                   Overview (Métricas)
