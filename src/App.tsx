@@ -300,7 +300,7 @@ function App() {
 
       <main className="pt-20">
         {/* Hero Section: Cinematic Style */}
-        <section className="relative min-h-[600px] md:h-[700px] lg:h-[870px] w-full flex items-center overflow-hidden bg-white dark:bg-transparent py-12 md:py-0">
+        <section className="relative min-h-[85vh] sm:min-h-[600px] md:h-[700px] lg:h-[870px] w-full flex items-center overflow-hidden bg-white dark:bg-transparent py-12 md:py-0">
           <div className="absolute inset-0 z-0">
             <img alt="Radio Interview" className={`w-full h-full object-cover transition-opacity duration-1000 ${fadeClass}`} src={featuredVideo ? (featuredVideo.thumbnail || '/logo_blanco.png') : "media/enconexion_pureba.webp"} onError={(e) => { e.currentTarget.src = '/logo_blanco.png'; }} />
             <div className="absolute inset-0 bg-gradient-to-r from-white dark:from-surface via-white/80 dark:via-surface/80 to-transparent"></div>
@@ -322,7 +322,7 @@ function App() {
                   {featuredVideo?.isLive ? 'EN VIVO - DESTACADO' : 'ENTREVISTA DESTACADA'}
                 </span>
               </div>
-              <h1 className="text-4xl sm:text-5xl md:text-6xl lg:text-7xl font-black tracking-tighter text-[#C13535] dark:text-white leading-[1.1] text-shadow-editorial break-words text-balance line-clamp-3">
+              <h1 className="text-3xl sm:text-5xl md:text-6xl lg:text-7xl font-black tracking-tighter text-[#C13535] dark:text-white leading-[1.1] text-shadow-editorial break-words text-balance line-clamp-3">
                 {featuredVideo ? (
                   featuredVideo.title
                 ) : (

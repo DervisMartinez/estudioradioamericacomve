@@ -605,7 +605,7 @@ export default function Watch() {
               <span className="px-2 py-0.5 bg-primary-container text-on-primary-container text-[10px] font-bold tracking-widest uppercase rounded-sm">Premium Archive</span>
               <span className="text-tertiary text-sm font-semibold tracking-wide">● {new Date(video.createdAt).getFullYear()} Remastered</span>
             </div>
-            <h1 className="text-3xl sm:text-4xl md:text-5xl font-black leading-tight mb-6 tracking-tight text-[#C13535] dark:text-white font-['Montserrat'] break-words">
+            <h1 className="text-2xl sm:text-3xl md:text-5xl font-black leading-tight mb-6 tracking-tight text-[#C13535] dark:text-white font-['Montserrat'] break-words">
               {video.title}
             </h1>
             <div className="flex items-center gap-4 text-xs font-bold text-[#C13535]/80 dark:text-[#DDDADB]/60 uppercase tracking-widest mb-6">
@@ -636,7 +636,7 @@ export default function Watch() {
           </div>
 
           {/* Right Side: Video Reproductor */}
-          <div className="relative w-full md:w-[65%] min-h-[400px] md:min-h-full bg-zinc-200 dark:bg-surface-container-lowest">
+          <div className="relative w-full md:w-[65%] aspect-video md:aspect-auto md:min-h-full bg-zinc-200 dark:bg-surface-container-lowest flex items-center justify-center">
             <div className="absolute inset-0 z-10 bg-gradient-to-r from-white dark:from-[#131314] to-transparent hidden md:block pointer-events-none"></div>
             
             {isVideoPlaying ? (
