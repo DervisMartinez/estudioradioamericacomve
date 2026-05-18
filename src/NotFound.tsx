@@ -7,21 +7,7 @@ export default function NotFound() {
   const navigate = useNavigate();
   const { videos } = useContext(VideoContext);
   
-  // Estado para el modo oscuro
-  const [isDarkMode, setIsDarkMode] = useState(() => document.documentElement.classList.contains('dark'));
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
-
-  useEffect(() => {
-    if (isDarkMode) {
-      document.documentElement.classList.add('dark');
-      localStorage.setItem('theme', 'dark');
-    } else {
-      document.documentElement.classList.remove('dark');
-      localStorage.setItem('theme', 'light');
-    }
-  }, [isDarkMode]);
-
-  const toggleTheme = () => setIsDarkMode(!isDarkMode);
 
   // Obtenemos los 3 videos más recientes para la sección "Lo más buscado"
   const recommendedVideos = videos
@@ -56,9 +42,6 @@ export default function NotFound() {
           </div>
         </div>
         <div className="flex items-center gap-6">
-          <button onClick={toggleTheme} className="hover:scale-105 transition-transform duration-200 text-[#C13535] dark:text-[#DDDADB]">
-            <span className="material-symbols-outlined">{isDarkMode ? 'light_mode' : 'dark_mode'}</span>
-          </button>
           <button onClick={() => navigate('/')} className="hidden md:block bg-[#C13535] text-white px-6 py-2.5 rounded-full font-bold tracking-tight hover:scale-105 transition-all duration-300 shadow-lg shadow-[#C13535]/20">
             Escuchar Ahora
           </button>

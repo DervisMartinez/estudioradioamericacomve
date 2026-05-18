@@ -56,13 +56,6 @@ function App() {
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
   const [isHistoryOpen, setIsHistoryOpen] = useState(false);
 
-  // Theme State
-  const [isDarkMode, setIsDarkMode] = useState(() => {
-    const savedTheme = localStorage.getItem('theme');
-    if (savedTheme) return savedTheme === 'dark';
-    return document.documentElement.classList.contains('dark');
-  });
-
   // Radio Player Logic
   const audioRef = useRef<HTMLAudioElement>(null);
   const [isPlaying, setIsPlaying] = useState(false);
@@ -82,20 +75,6 @@ function App() {
     if (audioRef.current) {
       audioRef.current.volume = newVolume;
     }
-  };
-
-  useEffect(() => {
-    if (isDarkMode) {
-      document.documentElement.classList.add('dark');
-      localStorage.setItem('theme', 'dark');
-    } else {
-      document.documentElement.classList.remove('dark');
-      localStorage.setItem('theme', 'light');
-    }
-  }, [isDarkMode]);
-
-  const toggleTheme = () => {
-    setIsDarkMode(!isDarkMode);
   };
 
   // Estado para reproducir shorts en línea
@@ -280,9 +259,6 @@ function App() {
             />
             {isSearchOpen && searchQuery && <SearchResults query={searchQuery} onClose={() => setIsSearchOpen(false)} />}
           </div>
-          <button onClick={toggleTheme} className="hover:scale-105 transition-transform duration-200 text-[#C13535] dark:text-[#DDDADB]" title={isDarkMode ? "Cambiar a Modo Claro" : "Cambiar a Modo Oscuro"}>
-            <span className="material-symbols-outlined">{isDarkMode ? 'light_mode' : 'dark_mode'}</span>
-          </button>
           <button onClick={() => setIsMobileMenuOpen(!isMobileMenuOpen)} className="lg:hidden text-[#C13535] dark:text-[#DDDADB]">
             <span className="material-symbols-outlined">{isMobileMenuOpen ? 'close' : 'menu'}</span>
           </button>
@@ -392,7 +368,7 @@ function App() {
                     <div className="absolute inset-0 bg-gradient-to-t from-black via-transparent to-transparent opacity-80 group-hover:opacity-100 transition-opacity"></div>
                     <div className="absolute bottom-4 left-4 right-4">
                       <p className="text-xs font-bold text-[#FFB91F] uppercase tracking-wider mb-1">{program.category}</p>
-                      <h3 className="font-bold text-lg leading-tight">{program.name}</h3>
+                      <h3 className="font-bold text-lg leading-tight line-clamp-2">{program.name}</h3>
                     </div>
                   </div>
                 </div>
@@ -402,7 +378,7 @@ function App() {
         </section>
 
         {/* Welcome / Benefits Cinematic Section */}
-        <section className="relative h-[600px] w-full flex items-center justify-center overflow-hidden">
+        <section className="relative min-h-[600px] h-auto py-24 w-full flex items-center justify-center overflow-hidden">
           {/* Video Background with Faded Edges */}
           <div className="absolute inset-0 z-0">
             <img alt="Atmospheric Broadcast Studio" className="w-full h-full object-cover" src="https://lh3.googleusercontent.com/aida-public/AB6AXuD98o0BwOnd0ZlR0NIn8Zt4yP7N9-o3XWb2G_D_5n-n0r7-xKz9u4N8H7qJ9m7-fX_yG_4v_9q8z8n_0m9v_8-7q5q5w5z5_4-0-9-8-7-6-5-4-3-2-1" onError={(e) => { e.currentTarget.src = '/logo_blanco.png'; }} />
@@ -418,7 +394,7 @@ function App() {
                 LA EXPERIENCIA <span className="text-[#C13535]">PREMIUM</span> <br/>DEL PERIODISMO SONORO
               </h2>
             </div>
-            <div className="grid md:grid-cols-3 gap-8 pt-6">
+            <div className="grid grid-cols-1 md:grid-cols-3 gap-10 md:gap-8 pt-10">
               <div className="space-y-3 group cursor-default">
                 <div className="w-12 h-12 mx-auto rounded-full bg-[#C13535]/10 border border-[#C13535]/30 flex items-center justify-center group-hover:bg-[#C13535]/20 transition-colors duration-500">
                   <span className="material-symbols-outlined text-[#C13535]" style={{ fontVariationSettings: "'FILL' 1" }}>high_quality</span>
@@ -695,7 +671,7 @@ function App() {
               </button>
               
               {isHistoryOpen && (
-                <div className="absolute bottom-12 right-0 w-72 md:w-80 bg-white dark:bg-surface-container-high rounded-2xl shadow-[0_-10px_40px_rgba(0,0,0,0.2)] border border-zinc-200 dark:border-outline-variant/20 overflow-hidden z-50 animate-fade-in origin-bottom-right">
+                <div className="absolute bottom-[calc(100%+1rem)] right-[-10px] sm:right-0 w-[85vw] max-w-[340px] sm:w-80 bg-white dark:bg-surface-container-high rounded-2xl shadow-[0_-10px_40px_rgba(0,0,0,0.3)] border border-zinc-200 dark:border-outline-variant/20 overflow-hidden z-[100] animate-fade-in origin-bottom-right">
                   <div className="p-4 border-b border-zinc-200 dark:border-outline-variant/20 flex justify-between items-center bg-zinc-50 dark:bg-surface-container">
                     <h3 className="font-bold text-[#C13535] dark:text-[#DDDADB] text-sm">Escuchados Recientemente</h3>
                     <button onClick={() => setIsHistoryOpen(false)} className="text-zinc-500 dark:text-[#DDDADB]/60 hover:text-[#C13535] dark:hover:text-[#F07D00]"><span className="material-symbols-outlined text-sm">close</span></button>

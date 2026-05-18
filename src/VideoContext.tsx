@@ -149,13 +149,18 @@ export const VideoProvider = ({ children }: { children: ReactNode }) => {
   });
 
   useEffect(() => {
-    // Inicializar el tema globalmente para que el loader responda al instante
-    const savedTheme = localStorage.getItem('theme');
-    if (savedTheme === 'dark' || (!savedTheme && document.documentElement.classList.contains('dark'))) {
-      document.documentElement.classList.add('dark');
-    } else {
-      document.documentElement.classList.remove('dark');
-    }
+    // Detección automática del tema del dispositivo (OS) en tiempo real
+    const mediaQuery = window.matchMedia('(prefers-color-scheme: dark)');
+    const applyTheme = (e: MediaQueryListEvent | MediaQueryList) => {
+      if (e.matches) document.documentElement.classList.add('dark');
+      else document.documentElement.classList.remove('dark');
+    };
+
+    // Aplicar al inicio
+    applyTheme(mediaQuery);
+    
+    // Escuchar cambios (por si el usuario cambia el tema del teléfono mientras navega)
+    mediaQuery.addEventListener('change', applyTheme);
 
     const fetchData = async () => {
       setIsLoading(true);
@@ -183,6 +188,9 @@ export const VideoProvider = ({ children }: { children: ReactNode }) => {
       }
     };
     fetchData();
+
+    // Limpiar listener
+    return () => mediaQuery.removeEventListener('change', applyTheme);
   }, []);
 
   // Función auxiliar para manejar respuestas y notificar al usuario

@@ -4,24 +4,7 @@ import { Helmet } from 'react-helmet-async';
 
 export default function Contact() {
   const navigate = useNavigate();
-  const [isDarkMode, setIsDarkMode] = useState(() => {
-    const savedTheme = localStorage.getItem('theme');
-    if (savedTheme) return savedTheme === 'dark';
-    return document.documentElement.classList.contains('dark');
-  });
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
-
-  useEffect(() => {
-    if (isDarkMode) {
-      document.documentElement.classList.add('dark');
-      localStorage.setItem('theme', 'dark');
-    } else {
-      document.documentElement.classList.remove('dark');
-      localStorage.setItem('theme', 'light');
-    }
-  }, [isDarkMode]);
-
-  const toggleTheme = () => setIsDarkMode(!isDarkMode);
 
   return (
     <div className="bg-surface text-on-surface font-body antialiased selection:bg-primary-container selection:text-on-primary-container flex flex-col min-h-screen transition-colors duration-300">
@@ -48,9 +31,6 @@ export default function Contact() {
             <button onClick={() => navigate('/contacto')} className="font-['Montserrat'] font-bold tracking-tight text-[#F07D00] border-b-2 border-[#F07D00] pb-1">Contacto</button>
           </div>
           <div className="flex items-center gap-4">
-            <button onClick={toggleTheme} className="hover:scale-105 transition-transform duration-200 text-[#C13535] dark:text-[#DDDADB]">
-              <span className="material-symbols-outlined">{isDarkMode ? 'light_mode' : 'dark_mode'}</span>
-            </button>
             <button onClick={() => navigate('/')} className="bg-primary-container text-on-primary-container font-['Montserrat'] font-bold tracking-tight px-6 py-2 rounded-full hover:scale-105 transition-all duration-300 hidden md:block">
               Escuchar Ahora
             </button>

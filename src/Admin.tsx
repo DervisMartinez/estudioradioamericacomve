@@ -1391,6 +1391,27 @@ function Admin() {
         </div>
       </div>
 
+      {/* Botón Flotante para Añadir (Solo Móvil) */}
+      <button
+        onClick={() => {
+          setIsSidebarOpen(false); // Cierra menú si está abierto
+          if (activeTab === 'programs') {
+            setEditingProgramId(null);
+            setNewProgram({ name: '', category: '', thumbnail: '', type: 'Programa', description: '', schedule: '', host: '', coverImage: '' });
+            setIsProgramModalOpen(true);
+          } else if (activeTab === 'sponsors') {
+            setNewSponsorForm({ name: '', url: '', programId: '' });
+            setIsSponsorModalOpen(true);
+          } else {
+            resetVideoForm({ programId: selectedProgramDetails || '' });
+            setIsModalOpen(true);
+          }
+        }}
+        className="md:hidden print:hidden fixed bottom-24 right-6 z-40 w-14 h-14 bg-[#C13535] rounded-full flex items-center justify-center text-white shadow-[0_4px_20px_rgba(193,53,53,0.6)] hover:scale-105 active:scale-95 transition-all"
+      >
+        <span className="material-symbols-outlined text-3xl">add</span>
+      </button>
+
     </div>
   );
 }
