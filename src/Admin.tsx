@@ -17,7 +17,7 @@ function Admin() {
   const [selectedProgramDetails, setSelectedProgramDetails] = useState<string | null>(null);
   const [editingId, setEditingId] = useState<string | null>(null);
   const [editingProgramId, setEditingProgramId] = useState<string | null>(null);
-  const [newVideo, setNewVideo] = useState({ title: '', category: '', thumbnail: '', url: '', description: '', isFeatured: false, isLive: false, isShort: false, isAudio: false, programId: '', releaseDate: '', duration: '', pressNoteUrl: '' });
+  const [newVideo, setNewVideo] = useState({ title: '', category: '', thumbnail: '', url: '', description: '', isFeatured: false, isLive: false, isShort: false, isAudio: false, programId: '', releaseDate: '', duration: '', pressNoteUrl: '', sendNewsletter: false });
   const [newProgram, setNewProgram] = useState({ name: '', category: '', thumbnail: '', type: 'Programa' as 'Programa' | 'Podcast', description: '', schedule: '', host: '', coverImage: '' });
   const [newSponsorForm, setNewSponsorForm] = useState({ name: '', url: '', programId: '' });
   const [profileForm, setProfileForm] = useState(userProfile);
@@ -30,7 +30,7 @@ function Admin() {
 
   const resetVideoForm = (overrides = {}) => {
     setEditingId(null);
-    setNewVideo({ title: '', category: '', thumbnail: '', url: '', description: '', isFeatured: false, isLive: false, isShort: false, isAudio: false, programId: '', releaseDate: '', duration: '', pressNoteUrl: '', ...overrides });
+    setNewVideo({ title: '', category: '', thumbnail: '', url: '', description: '', isFeatured: false, isLive: false, isShort: false, isAudio: false, programId: '', releaseDate: '', duration: '', pressNoteUrl: '', sendNewsletter: false, ...overrides });
     setIsSponsored(false);
     setSponsorCount(1);
     setSponsorUrls([]);
@@ -205,7 +205,8 @@ function Admin() {
     const videoData = {
       title: newVideo.title, category: newVideo.category, description: newVideo.description,
       isFeatured: newVideo.isFeatured, isLive: newVideo.isLive, isShort: newVideo.isShort, isAudio: newVideo.isAudio, thumbnail: newVideo.thumbnail, 
-      url: finalUrl, programId: newVideo.programId, duration: newVideo.duration || '00:00', releaseDate: newVideo.releaseDate, pressNoteUrl: newVideo.pressNoteUrl
+      url: finalUrl, programId: newVideo.programId, duration: newVideo.duration || '00:00', releaseDate: newVideo.releaseDate, pressNoteUrl: newVideo.pressNoteUrl,
+      sendNewsletter: newVideo.sendNewsletter
     };
 
     if (editingId) {
@@ -272,7 +273,8 @@ function Admin() {
         programId: video.programId || '',
         releaseDate: video.releaseDate ? new Date(video.releaseDate).toISOString().split('T')[0] : '',
         duration: video.duration || '',
-        pressNoteUrl: video.pressNoteUrl || ''
+        pressNoteUrl: video.pressNoteUrl || '',
+        sendNewsletter: false // Nunca marcamos notificar por defecto al editar, para no enviar spam accidental
     });
     setEditingId(video.id);
     setIsModalOpen(true);

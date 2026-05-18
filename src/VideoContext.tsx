@@ -18,6 +18,7 @@ export interface Video {
   programId?: string;
   releaseDate?: string;
   pressNoteUrl?: string;
+  sendNewsletter?: boolean;
 }
 
 export interface Program {
