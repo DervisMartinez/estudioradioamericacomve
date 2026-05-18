@@ -336,12 +336,12 @@ function Admin() {
       {/* Side Navigation Shell */}
       <aside className={`print:hidden h-screen w-64 fixed left-0 top-0 overflow-y-auto bg-[#131314] flex flex-col p-4 border-r border-[#59413f]/15 shadow-2xl shadow-red-900/5 z-50 transition-transform transform ${isSidebarOpen ? 'translate-x-0' : '-translate-x-full'} md:translate-x-0`}>
         <div className="mb-10 px-2">
-          <div className="flex items-center gap-3 mb-1">
-            <img src="/logo_colors.png" alt="Logo" className="w-8 h-8 object-contain dark:hidden" onError={(e) => { e.currentTarget.src = 'https://ui-avatars.com/api/?name=RA&background=C13535&color=fff&rounded=true'; }} />
-            <img src="/logo_blanco.png" alt="Logo" className="w-8 h-8 object-contain hidden dark:block" onError={(e) => { e.currentTarget.src = 'https://ui-avatars.com/api/?name=RA&background=C13535&color=fff&rounded=true'; }} />
-            <h1 className="text-2xl font-black tracking-tighter text-[#C13535]">Estudio Radio América <span className="text-[10px] text-[#F07D00] align-top bg-[#F07D00]/10 px-2 py-0.5 rounded-full ml-2">v2.0</span></h1>
+          <div className="flex items-center justify-center md:justify-start gap-3 mb-1 mt-4 md:mt-0">
+            <img src="/logo_colors.png" alt="Logo" className="w-16 h-16 md:w-8 md:h-8 object-contain dark:hidden" onError={(e) => { e.currentTarget.src = 'https://ui-avatars.com/api/?name=RA&background=C13535&color=fff&rounded=true'; }} />
+            <img src="/logo_blanco.png" alt="Logo" className="w-16 h-16 md:w-8 md:h-8 object-contain hidden dark:block" onError={(e) => { e.currentTarget.src = 'https://ui-avatars.com/api/?name=RA&background=C13535&color=fff&rounded=true'; }} />
+            <h1 className="text-2xl font-black tracking-tighter text-[#C13535] hidden md:block">Estudio Radio América <span className="text-[10px] text-[#F07D00] align-top bg-[#F07D00]/10 px-2 py-0.5 rounded-full ml-2">v2.0</span></h1>
           </div>
-          <p className="text-[10px] uppercase tracking-[0.2em] text-[#DDDADB]/40 font-bold mt-1">Admin Dashboard</p>
+          <p className="text-[10px] uppercase tracking-[0.2em] text-[#DDDADB]/40 font-bold mt-1 hidden md:block">Admin Dashboard</p>
         </div>
         <nav className="flex-1 space-y-2">
           <button onClick={() => { setActiveTab('dashboard'); setSelectedProgramDetails(null); setIsSidebarOpen(false); }} className={`w-full flex items-center gap-3 px-4 py-3 rounded-lg font-bold transition-all ${activeTab === 'dashboard' ? 'bg-[#C13535] text-[#DDDADB]' : 'text-[#DDDADB]/60 hover:text-[#DDDADB] hover:bg-[#1c1b1c]'}`}>
@@ -379,7 +379,7 @@ function Admin() {
           </button>
         </nav>
         <div className="mt-auto pt-6 border-t border-[#59413f]/15">
-          <button onClick={() => { resetVideoForm(); setIsModalOpen(true); }} className="w-full bg-[#C13535] text-white py-3 rounded-xl font-bold text-sm flex items-center justify-center gap-2 hover:opacity-90 transition-opacity editorial-shadow">
+          <button onClick={() => { resetVideoForm(); setIsModalOpen(true); }} className="hidden md:flex w-full bg-[#C13535] text-white py-3 rounded-xl font-bold text-sm items-center justify-center gap-2 hover:opacity-90 transition-opacity editorial-shadow">
             <span className="material-symbols-outlined text-sm" data-icon="upload">upload</span>
             Upload Video
           </button>
@@ -426,7 +426,7 @@ function Admin() {
                 <button className="hover:text-[#DDDADB] transition-colors">
                   <span className="material-symbols-outlined" data-icon="help_outline">help_outline</span>
                 </button>
-                <button onClick={() => { resetVideoForm({ programId: selectedProgramDetails || '' }); setIsModalOpen(true); }} className="bg-[#C13535] text-white px-5 py-2 rounded-full text-sm font-bold hover:opacity-90 active:scale-95 transition-all">
+                <button onClick={() => { resetVideoForm({ programId: selectedProgramDetails || '' }); setIsModalOpen(true); }} className="hidden md:block bg-[#C13535] text-white px-5 py-2 rounded-full text-sm font-bold hover:opacity-90 active:scale-95 transition-all">
                   Añadir
                 </button>
               </div>
@@ -994,7 +994,7 @@ function Admin() {
       </main>
 
       {/* Floating Live Status */}
-      <div className="fixed bottom-6 right-6 z-50">
+      <div className="hidden md:block fixed bottom-6 right-6 z-50">
         <div className="glass-panel border border-[#C13535]/20 px-4 py-2 rounded-full flex items-center gap-3 shadow-2xl">
           <span className="flex h-2 w-2">
             <span className="animate-ping absolute inline-flex h-2 w-2 rounded-full bg-[#C13535] opacity-75"></span>
