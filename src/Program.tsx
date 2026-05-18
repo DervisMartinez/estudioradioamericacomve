@@ -19,7 +19,6 @@ export default function ProgramView() {
   const latestVideo = videoEpisodes.length > 0 ? videoEpisodes[0] : null;
   const latestAudio = audioEpisodes.length > 0 ? audioEpisodes[0] : null;
 
-  const [isDarkMode, setIsDarkMode] = useState(() => document.documentElement.classList.contains('dark'));
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
 
   // Lógica del reproductor de Podcast
@@ -97,16 +96,6 @@ export default function ProgramView() {
     }
   };
 
-  const toggleTheme = () => {
-    const html = document.documentElement;
-    if (isDarkMode) {
-      html.classList.remove('dark');
-      setIsDarkMode(false);
-    } else {
-      html.classList.add('dark');
-      setIsDarkMode(true);
-    }
-  };
 
   if (!program) {
     return (
@@ -152,7 +141,6 @@ export default function ProgramView() {
             </nav>
           </div>
           <div className="flex items-center gap-4">
-            <button onClick={toggleTheme} className="material-symbols-outlined text-[#C13535] dark:text-[#DDDADB] hover:scale-105 transition-transform">{isDarkMode ? 'light_mode' : 'dark_mode'}</button>
             <button onClick={() => setIsMobileMenuOpen(!isMobileMenuOpen)} className="lg:hidden text-[#C13535] dark:text-[#DDDADB]">
               <span className="material-symbols-outlined">{isMobileMenuOpen ? 'close' : 'menu'}</span>
             </button>
