@@ -27,8 +27,6 @@ function Admin() {
   const [sponsorCount, setSponsorCount] = useState(1);
   const [sponsorUrls, setSponsorUrls] = useState<string[]>([]);
   const [subscribers, setSubscribers] = useState<any[]>([]);
-  const [newUserEmail, setNewUserEmail] = useState('');
-  const [newUserPassword, setNewUserPassword] = useState('');
 
   const resetVideoForm = (overrides = {}) => {
     setEditingId(null);
@@ -243,27 +241,6 @@ function Admin() {
   const handleLogout = () => {
     localStorage.removeItem('admin_auth');
     navigate('/login');
-  };
-
-  const handleCreateUser = async (e: FormEvent) => {
-    e.preventDefault();
-    try {
-      const res = await fetch(`${API_URL}/users`, {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ email: newUserEmail, password: newUserPassword })
-      });
-      const data = await res.json();
-      if (res.ok) {
-        alert(`✅ ${data.message}`);
-        setNewUserEmail('');
-        setNewUserPassword('');
-      } else {
-        alert(`❌ Error: ${data.error}`);
-      }
-    } catch (err) {
-      alert('❌ Fallo de red al intentar crear usuario.');
-    }
   };
 
   const openEditModal = (video: any) => {
@@ -1008,22 +985,6 @@ function Admin() {
                 </div>
               </form>
 
-              <h3 className="text-2xl font-bold text-[#DDDADB] mb-6 mt-12 border-t border-outline-variant/10 pt-8">Gestión de Administradores</h3>
-              <form onSubmit={handleCreateUser} className="space-y-6">
-                <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-                  <div>
-                    <label className="block text-xs font-bold text-[#DDDADB]/60 mb-1">Nuevo Correo Electrónico</label>
-                    <input required value={newUserEmail} onChange={e => setNewUserEmail(e.target.value)} className="w-full bg-surface-container-lowest border-none rounded-lg p-3 text-sm text-[#DDDADB]" type="email" placeholder="nuevo@admin.com" />
-                  </div>
-                  <div>
-                    <label className="block text-xs font-bold text-[#DDDADB]/60 mb-1">Contraseña de acceso</label>
-                    <input required value={newUserPassword} onChange={e => setNewUserPassword(e.target.value)} className="w-full bg-surface-container-lowest border-none rounded-lg p-3 text-sm text-[#DDDADB]" type="password" placeholder="••••••••" />
-                  </div>
-                </div>
-                <div className="flex justify-end mt-4">
-                  <button type="submit" className="bg-[#F07D00] text-black px-8 py-3 rounded-lg font-bold hover:opacity-90 transition-all shadow-lg">Registrar Administrador</button>
-                </div>
-              </form>
             </div>
           )}
         </div>

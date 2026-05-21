@@ -1,38 +1,26 @@
 import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { API_URL } from './VideoContext';
 
 export default function Login() {
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [showPassword, setShowPassword] = useState(false);
   const [error, setError] = useState('');
-  const [isLoading, setIsLoading] = useState(false);
   const navigate = useNavigate();
 
-  const handleLogin = async (e: React.FormEvent) => {
+  const handleLogin = (e: React.FormEvent) => {
     e.preventDefault();
-    setError('');
-    setIsLoading(true);
+    // Validación directa, sin riesgos y a prueba de espacios accidentales
+    const cleanEmail = email.trim().toLowerCase();
+    const isValidEmail = cleanEmail === 'estudio@radiomerica.com.ve' || cleanEmail === 'estudio@radioamerica.com.ve';
+    const isValidPassword = password.trim() === 'america909.estudio';
 
-    try {
-      const res = await fetch(`${API_URL}/login`, {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ email, password })
-      });
-      const data = await res.json();
-
-      if (res.ok && data.success) {
-        localStorage.setItem('admin_auth', 'true');
-        navigate('/admin');
-      } else {
-        setError(data.error || 'Usuario o contraseña incorrectos.');
-      }
-    } catch (err) {
-      setError('Error de conexión con el servidor. Verifica que esté en línea.');
+    if (isValidEmail && isValidPassword) {
+      localStorage.setItem('admin_auth', 'true');
+      navigate('/admin');
+    } else {
+      setError('Usuario o contraseña incorrectos.');
     }
-    setIsLoading(false);
   };
 
   return (
@@ -104,8 +92,8 @@ export default function Login() {
               </div>
 
               {/* Submit Button */}
-              <button disabled={isLoading} className={`w-full bg-[#C13535] text-white font-['Montserrat'] font-extrabold text-sm py-5 rounded-full uppercase tracking-[0.15em] transition-all duration-200 shadow-lg shadow-[#C13535]/20 mt-4 ${isLoading ? 'opacity-50 cursor-not-allowed' : 'hover:bg-[#a32b2b] active:scale-[0.98]'}`} type="submit">
-                {isLoading ? 'VERIFICANDO...' : 'INGRESAR AL PANEL'}
+              <button className="w-full bg-[#C13535] text-white font-['Montserrat'] font-extrabold text-sm py-5 rounded-full uppercase tracking-[0.15em] hover:bg-[#a32b2b] active:scale-[0.98] transition-all duration-200 shadow-lg shadow-[#C13535]/20 mt-4" type="submit">
+                INGRESAR AL PANEL
               </button>
             </form>
           </div>
