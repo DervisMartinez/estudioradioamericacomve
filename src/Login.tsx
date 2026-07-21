@@ -8,9 +8,38 @@ export default function Login() {
   const [error, setError] = useState('');
   const navigate = useNavigate();
 
-  const handleLogin = (e: React.FormEvent) => {
+  const handleLogin = async (e: React.FormEvent) => {
     e.preventDefault();
-    // Validación directa, sin riesgos y a prueba de espacios accidentales
+    
+    // 1. Intento de Login con Base de Datos
+    try {
+      // API_URL fallback to localhost or domain
+      const API_URL = import.meta.env.VITE_API_URL || (window.location.hostname === 'localhost' ? 'http://localhost:3005/api' : '/api');
+      
+      const response = await fetch(`${API_URL}/login`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ email: email.trim(), password })
+      });
+
+      if (response.ok) {
+        const data = await response.json();
+        localStorage.setItem('admin_token', data.token);
+        localStorage.setItem('admin_auth', 'true');
+        navigate('/admin');
+        return;
+      }
+      
+      // Si el login falla por credenciales incorrectas (401), pero el backend responde, mostramos error
+      if (response.status === 401) {
+        setError('Usuario o contraseña incorrectos.');
+        return;
+      }
+    } catch (err) {
+      console.warn("Backend no disponible o error de red, intentando fallback...");
+    }
+
+    // 2. Fallback de Emergencia (Si la DB o Backend fallan)
     const cleanEmail = email.trim().toLowerCase();
     const isValidEmail = cleanEmail === 'estudio@radiomerica.com.ve' || cleanEmail === 'estudio@radioamerica.com.ve';
     const isValidPassword = password.trim() === 'america909.estudio';

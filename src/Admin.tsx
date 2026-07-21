@@ -10,8 +10,11 @@ function Admin() {
   const [isProgramModalOpen, setIsProgramModalOpen] = useState(false);
   const [isSponsorModalOpen, setIsSponsorModalOpen] = useState(false);
   const [isSidebarOpen, setIsSidebarOpen] = useState(false);
-  const [activeTab, setActiveTab] = useState<'dashboard' | 'library' | 'programs' | 'sponsors' | 'analytics' | 'settings' | 'newsletter'>('dashboard');
+  const [activeTab, setActiveTab] = useState<'dashboard' | 'library' | 'programs' | 'sponsors' | 'analytics' | 'settings' | 'newsletter' | 'users'>('dashboard');
   const [analyticsSubTab, setAnalyticsSubTab] = useState<'overview' | 'live' | 'social' | 'audience'>('overview');
+  const [adminUsers, setAdminUsers] = useState<any[]>([]);
+  const [newAdminUser, setNewAdminUser] = useState({ email: '', password: '', role: 'admin' });
+  const [isUsersLoading, setIsUsersLoading] = useState(false);
   const [libraryFilter, setLibraryFilter] = useState('Todos');
   const [timeFilter, setTimeFilter] = useState<'all' | '7days' | '30days'>('all');
   const [selectedProgramDetails, setSelectedProgramDetails] = useState<string | null>(null);
@@ -323,6 +326,52 @@ function Admin() {
     window.print();
   };
 
+  useEffect(() => {
+    if (activeTab === 'users') {
+      setIsUsersLoading(true);
+      fetch(`${API_URL}/users`)
+        .then(res => res.json())
+        .then(data => { setAdminUsers(data); setIsUsersLoading(false); })
+        .catch(e => { console.error("Error fetching users:", e); setIsUsersLoading(false); });
+    }
+  }, [activeTab]);
+
+  const handleCreateUser = async (e: FormEvent) => {
+    e.preventDefault();
+    try {
+      const res = await fetch(`${API_URL}/register`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(newAdminUser)
+      });
+      if (res.ok) {
+        alert("✅ Usuario creado exitosamente");
+        setNewAdminUser({ email: '', password: '', role: 'admin' });
+        fetch(`${API_URL}/users`).then(r => r.json()).then(setAdminUsers);
+      } else {
+        const data = await res.json();
+        alert(`❌ Error: ${data.error}`);
+      }
+    } catch(err: any) {
+      alert(`❌ Error: ${err.message}`);
+    }
+  };
+
+  const handleDeleteUser = async (id: string) => {
+    if(!confirm("¿Estás seguro de que quieres eliminar a este usuario?")) return;
+    try {
+      const res = await fetch(`${API_URL}/users/${id}`, { method: 'DELETE' });
+      if (res.ok) {
+        setAdminUsers(adminUsers.filter(u => u.id !== id));
+      } else {
+        const data = await res.json();
+        alert(`❌ Error: ${data.error}`);
+      }
+    } catch(err: any) {
+      alert(`❌ Error: ${err.message}`);
+    }
+  };
+
   return (
     <div className="text-on-surface antialiased overflow-x-hidden print:bg-white print:text-black">
       {/* Inyección de estilos para impresión nativa */}
@@ -373,6 +422,11 @@ function Admin() {
           <button onClick={() => { setActiveTab('newsletter'); setIsSidebarOpen(false); }} className={`w-full flex items-center gap-3 px-4 py-3 rounded-lg font-bold transition-all ${activeTab === 'newsletter' ? 'bg-[#C13535] text-[#DDDADB]' : 'text-[#DDDADB]/60 hover:text-[#DDDADB] hover:bg-[#1c1b1c]'}`}>
             <span className="material-symbols-outlined" data-icon="mail">mail</span>
             <span className="text-sm">Newsletter</span>
+          </button>
+
+          <button onClick={() => { setActiveTab('users'); setIsSidebarOpen(false); }} className={`w-full flex items-center gap-3 px-4 py-3 rounded-lg font-bold transition-all ${activeTab === 'users' ? 'bg-[#C13535] text-[#DDDADB]' : 'text-[#DDDADB]/60 hover:text-[#DDDADB] hover:bg-[#1c1b1c]'}`}>
+            <span className="material-symbols-outlined" data-icon="manage_accounts">manage_accounts</span>
+            <span className="text-sm">Usuarios</span>
           </button>
 
           <button onClick={() => { setActiveTab('settings'); setIsSidebarOpen(false); }} className={`w-full flex items-center gap-3 px-4 py-3 rounded-lg font-bold transition-all ${activeTab === 'settings' ? 'bg-[#C13535] text-[#DDDADB]' : 'text-[#DDDADB]/60 hover:text-[#DDDADB] hover:bg-[#1c1b1c]'}`}>
@@ -706,6 +760,73 @@ function Admin() {
                     ))}
                   </tbody>
                 </table>
+              </div>
+            </section>
+          )}
+
+          {/* USERS TAB */}
+          {activeTab === 'users' && (
+            <section className="bg-surface-container-low rounded-3xl p-4 sm:p-8 border border-outline-variant/10">
+              <div className="flex flex-col md:flex-row justify-between items-start md:items-end gap-6 mb-10">
+                <div>
+                  <h3 className="text-2xl font-bold text-[#DDDADB] mb-2">Administración de Usuarios</h3>
+                  <p className="text-[#DDDADB]/50 text-sm max-w-md">Gestiona quién tiene acceso a este panel de administración.</p>
+                </div>
+              </div>
+
+              <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
+                {/* Formulario de Creación */}
+                <div className="col-span-1 bg-surface-container-highest p-6 rounded-2xl border border-outline-variant/10 h-fit">
+                  <h4 className="text-lg font-bold text-[#DDDADB] mb-4">Añadir Nuevo Administrador</h4>
+                  <form onSubmit={handleCreateUser} className="space-y-4">
+                    <div>
+                      <label className="block text-xs font-bold text-[#DDDADB]/60 mb-1">Email</label>
+                      <input required type="email" value={newAdminUser.email} onChange={e => setNewAdminUser({...newAdminUser, email: e.target.value})} className="w-full bg-[#0e0e0f] border-none rounded-lg p-3 text-[#DDDADB] focus:ring-2 focus:ring-[#C13535]" placeholder="admin@radioamerica.com.ve" />
+                    </div>
+                    <div>
+                      <label className="block text-xs font-bold text-[#DDDADB]/60 mb-1">Contraseña</label>
+                      <input required type="password" value={newAdminUser.password} onChange={e => setNewAdminUser({...newAdminUser, password: e.target.value})} className="w-full bg-[#0e0e0f] border-none rounded-lg p-3 text-[#DDDADB] focus:ring-2 focus:ring-[#C13535]" placeholder="••••••••" />
+                    </div>
+                    <div>
+                      <label className="block text-xs font-bold text-[#DDDADB]/60 mb-1">Rol</label>
+                      <select value={newAdminUser.role} onChange={e => setNewAdminUser({...newAdminUser, role: e.target.value})} className="w-full bg-[#0e0e0f] border-none rounded-lg p-3 text-[#DDDADB] focus:ring-2 focus:ring-[#C13535]">
+                        <option value="admin">Administrador (Normal)</option>
+                        <option value="superadmin">Super Administrador</option>
+                      </select>
+                    </div>
+                    <button type="submit" className="w-full bg-[#C13535] text-white py-3 rounded-lg font-bold text-sm hover:opacity-90 transition-all">Crear Usuario</button>
+                  </form>
+                </div>
+
+                {/* Lista de Usuarios */}
+                <div className="col-span-1 md:col-span-2 overflow-x-auto border border-outline-variant/10 rounded-2xl bg-surface-container-highest">
+                  <table className="w-full text-left border-collapse">
+                    <thead>
+                      <tr className="border-b border-outline-variant/20">
+                        <th className="p-4 text-xs font-bold text-[#DDDADB]/60 uppercase">Email</th>
+                        <th className="p-4 text-xs font-bold text-[#DDDADB]/60 uppercase">Rol</th>
+                        <th className="p-4 text-xs font-bold text-[#DDDADB]/60 uppercase text-right">Acciones</th>
+                      </tr>
+                    </thead>
+                    <tbody>
+                      {isUsersLoading ? (
+                        <tr><td colSpan={3} className="p-8 text-center text-[#DDDADB]/40 text-sm">Cargando...</td></tr>
+                      ) : adminUsers.length === 0 ? (
+                        <tr><td colSpan={3} className="p-8 text-center text-[#DDDADB]/40 text-sm">No hay usuarios.</td></tr>
+                      ) : adminUsers.map((u, i) => (
+                        <tr key={i} className="border-b border-outline-variant/5 hover:bg-surface-container-low transition-colors">
+                          <td className="p-4 text-sm text-[#DDDADB] font-bold">{u.email}</td>
+                          <td className="p-4 text-sm text-[#DDDADB]">
+                             <span className={`px-2 py-1 rounded text-xs font-bold ${u.role === 'superadmin' ? 'bg-[#F07D00]/20 text-[#F07D00]' : 'bg-[#DDDADB]/10 text-[#DDDADB]/80'}`}>{u.role}</span>
+                          </td>
+                          <td className="p-4 text-right">
+                             <button onClick={() => handleDeleteUser(u.id)} className="text-[#C13535] hover:text-white p-2 rounded hover:bg-[#C13535] transition-colors"><span className="material-symbols-outlined text-sm">delete</span></button>
+                          </td>
+                        </tr>
+                      ))}
+                    </tbody>
+                  </table>
+                </div>
               </div>
             </section>
           )}
