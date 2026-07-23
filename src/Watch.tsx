@@ -45,6 +45,44 @@ const HlsVideoPlayer = ({ src, poster, className, onEnded }: { src: string, post
   );
 };
 
+// CARRUSEL ESTILO DISNEY+
+const DisneyCarousel = ({ programs }: { programs: any[] }) => {
+  return (
+    <section className="px-4 sm:px-8 md:px-16 py-12">
+      <div className="flex flex-col gap-2 mb-8">
+        <h2 className="text-2xl font-bold tracking-tight text-[#C13535] dark:text-[#DDDADB] font-['Montserrat']">
+          Nuestros Programas
+        </h2>
+        <div className="h-1 w-20 bg-[#F07D00]"></div>
+      </div>
+      
+      <div className="flex gap-4 overflow-x-auto hide-scrollbar pb-8 snap-x">
+        {programs.map(prog => (
+          <div key={prog.id} className="min-w-[280px] w-[280px] md:min-w-[340px] md:w-[340px] shrink-0 snap-start relative group rounded-[4px] md:rounded-[8px] overflow-hidden cursor-pointer shadow-[0_10px_20px_rgba(0,0,0,0.3)] hover:shadow-[0_20px_40px_rgba(0,0,0,0.5)] border-[3px] border-transparent hover:border-white/50 transition-all duration-300" style={{ aspectRatio: '16/9' }}>
+            <img src={prog.coverImage || '/logo_blanco.png'} alt={prog.name} className="absolute inset-0 w-full h-full object-cover transition-transform duration-500" />
+            
+            {/* Sombra interna tipo Disney+ */}
+            <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-transparent to-transparent opacity-80 pointer-events-none"></div>
+
+            {/* Hover overlay */}
+            <div className="absolute inset-0 bg-black/0 group-hover:bg-black/40 transition-colors duration-300 z-10 flex flex-col justify-end p-4 text-white">
+               {/* Imagen difuminada del póster por detrás en hover */}
+               <img src={prog.thumbnail || '/logo_blanco.png'} alt="bg" className="absolute inset-0 w-full h-full object-cover opacity-0 group-hover:opacity-30 blur-md -z-10 transition-opacity duration-300" />
+               <h3 className="font-bold text-lg leading-tight translate-y-4 group-hover:translate-y-0 opacity-0 group-hover:opacity-100 transition-all duration-300">{prog.name}</h3>
+               <p className="text-xs text-zinc-300 mt-1 translate-y-4 group-hover:translate-y-0 opacity-0 group-hover:opacity-100 transition-all duration-300 delay-75">{prog.host}</p>
+            </div>
+            
+            {/* Default logo placement like Disney+ en la esquina inferior derecha */}
+            <div className="absolute bottom-2 right-2 z-20 transition-opacity duration-300">
+               <img src="/logo_blanco.png" alt="RA" className="w-8 h-8 opacity-80 drop-shadow-lg" />
+            </div>
+          </div>
+        ))}
+      </div>
+    </section>
+  );
+};
+
 export default function Watch() {
   const { id } = useParams();
   const navigate = useNavigate();
@@ -60,8 +98,11 @@ export default function Watch() {
 
   const toggleRadio = () => {
     if (audioRef.current) {
-      if (isRadioPlaying) audioRef.current.pause(); 
-      else audioRef.current.play();
+      if (isRadioPlaying) {
+        audioRef.current.pause();
+      } else {
+        audioRef.current.play();
+      }
       setIsRadioPlaying(!isRadioPlaying);
     }
   };
@@ -69,10 +110,8 @@ export default function Watch() {
   // --- Helper functions for embeds ---
   const getSpotifyEmbedUrl = (url: string) => {
     if (!url) return null;
-    // e.g., https://open.spotify.com/episode/3x245sZ2d42L5q6sZ4p8a9
     const match = url.match(/open\.spotify\.com\/(track|episode|show|playlist)\/([a-zA-Z0-9]+)/);
     if (match) {
-      // The embed URL is slightly different
       return `https://open.spotify.com/embed/${match[1]}/${match[2]}`;
     }
     return null;
@@ -80,7 +119,6 @@ export default function Watch() {
 
   const getZenoEmbedUrl = (url: string) => {
     if (!url) return null;
-    // e.g., https://zeno.fm/podcast/some-show/
     const match = url.match(/zeno\.fm\/(?:podcast|show)\/([^/]+)/);
     if (match && match[1]) {
       return `https://zeno.fm/player/${match[1]}`;
@@ -88,7 +126,6 @@ export default function Watch() {
     return null;
   };
 
-  // Episode Audio Player Logic (Para el formato Podcast/Audio)
   const episodeAudioRef = useRef<HTMLAudioElement>(null);
   const [isEpisodePlaying, setIsEpisodePlaying] = useState(false);
   const [currentTime, setCurrentTime] = useState(0);
@@ -96,7 +133,6 @@ export default function Watch() {
   const [audioVolume, setAudioVolume] = useState(0.8);
   const [isFullscreen, setIsFullscreen] = useState(false);
 
-  // --- LÓGICA DE LISTA DE REPRODUCCIÓN (PATROCINADORES) ---
   const playlist = useMemo(() => {
     if (!video?.url) return [];
     try {
@@ -110,13 +146,11 @@ export default function Watch() {
   const isAdPlaying = playlist.length > 1 && currentTrackIndex < playlist.length - 1;
   const currentSrc = playlist[currentTrackIndex] || '';
 
-  // Resetear la pista si cambias de video
   useEffect(() => {
     setCurrentTrackIndex(0);
     setIsEpisodePlaying(false);
   }, [id]);
 
-  // Auto-play cuando avanza a la siguiente pista de forma nativa
   useEffect(() => {
     if (currentTrackIndex > 0 && episodeAudioRef.current) {
       episodeAudioRef.current.play().catch(() => console.warn("Autoplay bloqueado por el navegador"));
@@ -149,7 +183,7 @@ export default function Watch() {
   };
 
   const handleSeek = (e: React.ChangeEvent<HTMLInputElement>) => {
-    if (isAdPlaying) return; // Bloquea la barra si es publicidad
+    if (isAdPlaying) return;
     const newTime = Number(e.target.value);
     if (episodeAudioRef.current) episodeAudioRef.current.currentTime = newTime;
     setCurrentTime(newTime);
@@ -169,7 +203,6 @@ export default function Watch() {
   };
 
   useEffect(() => {
-    // Cuando el componente se carga, incrementa la vista del video
     if (id) {
       incrementView(id);
     }
@@ -189,7 +222,6 @@ export default function Watch() {
     );
   }
 
-  // Extrae el ID de YouTube (Mejorado para soportar múltiples formatos)
   const getYoutubeId = (url: string) => {
     if (!url) return null;
     const regExp = /(?:youtube\.com\/(?:[^\/]+\/.+\/|(?:v|e(?:mbed)?|live)\/|.*[?&]v=)|youtu\.be\/|youtube\.com\/(?:shorts|live)\/)([^"&?\/\s]{11})/i;
@@ -197,14 +229,12 @@ export default function Watch() {
     return match ? match[1] : null;
   };
 
-  // Extrae el ID de Instagram
   const getInstagramId = (url: string) => {
     if (!url) return null;
     const match = url.match(/(?:instagram\.com|instagr\.am)\/(?:p|reel|tv)\/([a-zA-Z0-9_-]+)/i);
     return match ? match[1] : null;
   };
 
-  // Detecta si es un archivo de video directo (mp4) o una carga local
   const isDirectVideo = (url: string) => {
     if (!url) return false;
     return url.startsWith('data:video/') || url.match(/\.(mp4|webm|ogg|m3u8)$/i);
@@ -214,21 +244,20 @@ export default function Watch() {
   const igId = getInstagramId(video.url);
   const relatedVideos = videos.filter(v => v.id !== id).slice(0, 6);
 
-  // --- RENDERIZADO DEL REPRODUCTOR DE AUDIO (PODCAST) ---
   if (video.isAudio) {
     const spotifyEmbedUrl = getSpotifyEmbedUrl(video.url);
     const zenoEmbedUrl = getZenoEmbedUrl(video.url);
     const embedUrl = spotifyEmbedUrl || zenoEmbedUrl;
 
     return (
-      <div className="bg-white dark:bg-[#131314] text-zinc-800 dark:text-[#e5e2e3] font-['Inter'] selection:bg-[#c13535] selection:text-white min-h-screen antialiased transition-colors duration-300">
+      <div className="bg-white dark:bg-[#131314] text-zinc-800 dark:text-[#e5e2e3] font-['Inter'] min-h-screen transition-colors duration-300">
         <style>{`
           .wave-bar { width: 4px; border-radius: 2px; background-color: #F07D00; }
           @keyframes spin { from { transform: rotate(0deg); } to { transform: rotate(360deg); } }
           .vinyl-animation { animation: spin 12s linear infinite; }
           .glass-player { background: rgba(19, 19, 20, 0.8); backdrop-filter: blur(20px); }
-          .editorial-shadow { text-shadow: 0 4px 12px rgba(0,0,0,0.5); }
         `}</style>
+
         <Helmet>
           <title>{video.title} | Estudio Radio América</title>
           <meta name="description" content={video.description || `Escucha ${video.title} en Estudio Radio América`} />
@@ -395,7 +424,6 @@ export default function Watch() {
             </div>
           </div>
           
-          {/* ... Aquí reutilizamos la misma "Section de Relacionados" del final ... */}
           {/* Related Content Section */}
           <section className="px-4 sm:px-8 md:px-16 py-12 md:py-20 mt-10">
             <div className="flex flex-col gap-2 mb-10">
@@ -696,47 +724,7 @@ export default function Watch() {
 
         {/* Carousel Promocional Estilo Disney+ */}
         {programs && programs.length > 0 && (
-          <section className="px-4 sm:px-8 md:px-16 py-12 md:py-16">
-            <div className="flex flex-col gap-2 mb-8">
-              <h2 className="text-2xl font-bold tracking-tight text-[#C13535] dark:text-[#DDDADB] font-['Montserrat']">
-                Programas y Eventos Exclusivos
-              </h2>
-              <div className="h-1 w-20 bg-[#F07D00]"></div>
-            </div>
-            
-            <div className="flex gap-4 overflow-x-auto pb-6 snap-x" style={{ scrollbarWidth: 'none', msOverflowStyle: 'none' }}>
-              {/* @ts-ignore - Tailwind hide-scrollbar util may not exist, inline styles used for fallback */}
-              <style dangerouslySetInnerHTML={{__html: `
-                .hide-scrollbar::-webkit-scrollbar { display: none; }
-              `}} />
-              <div className="flex gap-4 hide-scrollbar">
-                {programs.map(p => (
-                  <div 
-                    key={p.id} 
-                    onClick={() => { navigate(`/?program=${p.id}`); window.scrollTo(0,0); }}
-                    className="min-w-[280px] md:min-w-[320px] h-44 rounded-xl relative overflow-hidden group cursor-pointer snap-start shadow-xl border border-zinc-200 dark:border-outline-variant/20 flex-shrink-0 bg-[#131314]"
-                  >
-                    <img 
-                      src={p.coverImage || '/logo_colors.png'} 
-                      alt={p.name}
-                      className="absolute inset-0 w-full h-full object-cover transition-transform duration-700 group-hover:scale-110 opacity-70 group-hover:opacity-50" 
-                      onError={(e) => { e.currentTarget.src = '/logo_colors.png'; }}
-                    />
-                    <div className="absolute inset-0 bg-gradient-to-t from-black/90 via-black/40 to-transparent pointer-events-none"></div>
-                    
-                    <div className="absolute inset-0 flex items-center justify-center p-6 pointer-events-none">
-                      <img 
-                        src={p.thumbnail || '/logo_blanco.png'} 
-                        alt={`Logo ${p.name}`}
-                        className="max-w-full max-h-full object-contain drop-shadow-[0_10px_20px_rgba(0,0,0,0.8)] transition-transform duration-500 group-hover:scale-110 group-hover:-translate-y-2" 
-                        onError={(e) => { e.currentTarget.src = '/logo_blanco.png'; }}
-                      />
-                    </div>
-                  </div>
-                ))}
-              </div>
-            </div>
-          </section>
+          <DisneyCarousel programs={programs} />
         )}
 
         {/* Related Content Section */}
