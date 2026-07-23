@@ -6,7 +6,7 @@ import PressNoteButton from './PressNoteButton';
 import Hls from 'hls.js';
 
 // COMPONENTE EXTERNO PARA REPRODUCTOR HLS Y MP4
-const HlsVideoPlayer = ({ src, poster, className }: { src: string, poster: string, className: string }) => {
+const HlsVideoPlayer = ({ src, poster, className, onEnded }: { src: string, poster: string, className: string, onEnded?: () => void }) => {
   const videoRef = useRef<HTMLVideoElement>(null);
   
   useEffect(() => {
@@ -39,7 +39,8 @@ const HlsVideoPlayer = ({ src, poster, className }: { src: string, poster: strin
   return (
     <video ref={videoRef} className={className} poster={poster} controls autoPlay playsInline preload="metadata" 
       controlsList={isProtected ? "nodownload" : undefined} 
-      onContextMenu={isProtected ? (e) => e.preventDefault() : undefined}>
+      onContextMenu={isProtected ? (e) => e.preventDefault() : undefined}
+      onEnded={onEnded}>
     </video>
   );
 };
@@ -651,8 +652,8 @@ export default function Watch() {
                   <iframe className="w-full aspect-video max-h-full relative z-10" src={`https://www.youtube.com/embed/${ytId}?autoplay=1&rel=0&origin=${window.location.origin}`} title={video.title} frameBorder="0" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share" allowFullScreen></iframe>
                 ) : igId ? (
                   <iframe className="w-full h-full max-h-full relative z-10 bg-white" src={`https://www.instagram.com/p/${igId}/embed`} title={video.title} frameBorder="0" scrolling="no" allowTransparency={true} allowFullScreen></iframe>
-                ) : isDirectVideo(video.url) ? (
-                  <HlsVideoPlayer className="w-full aspect-video max-h-full relative z-10 bg-black" src={video.url} poster={video.thumbnail || '/logo_blanco.png'} />
+                ) : isDirectVideo(currentSrc) ? (
+                  <HlsVideoPlayer className="w-full aspect-video max-h-full relative z-10 bg-black" src={currentSrc} poster={video.thumbnail || '/logo_blanco.png'} onEnded={handleEpisodeEnded} />
                 ) : (
                   <div className="w-full h-full relative z-10 flex flex-col items-center justify-center bg-surface-container-highest p-8 text-center">
                      <span className="material-symbols-outlined text-6xl text-[#F07D00] mb-4">dynamic_feed</span>
@@ -692,6 +693,51 @@ export default function Watch() {
             )}
           </div>
         </section>
+
+        {/* Carousel Promocional Estilo Disney+ */}
+        {programs && programs.length > 0 && (
+          <section className="px-4 sm:px-8 md:px-16 py-12 md:py-16">
+            <div className="flex flex-col gap-2 mb-8">
+              <h2 className="text-2xl font-bold tracking-tight text-[#C13535] dark:text-[#DDDADB] font-['Montserrat']">
+                Programas y Eventos Exclusivos
+              </h2>
+              <div className="h-1 w-20 bg-[#F07D00]"></div>
+            </div>
+            
+            <div className="flex gap-4 overflow-x-auto pb-6 snap-x" style={{ scrollbarWidth: 'none', msOverflowStyle: 'none' }}>
+              {/* @ts-ignore - Tailwind hide-scrollbar util may not exist, inline styles used for fallback */}
+              <style dangerouslySetInnerHTML={{__html: `
+                .hide-scrollbar::-webkit-scrollbar { display: none; }
+              `}} />
+              <div className="flex gap-4 hide-scrollbar">
+                {programs.map(p => (
+                  <div 
+                    key={p.id} 
+                    onClick={() => { navigate(`/?program=${p.id}`); window.scrollTo(0,0); }}
+                    className="min-w-[280px] md:min-w-[320px] h-44 rounded-xl relative overflow-hidden group cursor-pointer snap-start shadow-xl border border-zinc-200 dark:border-outline-variant/20 flex-shrink-0 bg-[#131314]"
+                  >
+                    <img 
+                      src={p.coverImage || '/logo_colors.png'} 
+                      alt={p.name}
+                      className="absolute inset-0 w-full h-full object-cover transition-transform duration-700 group-hover:scale-110 opacity-70 group-hover:opacity-50" 
+                      onError={(e) => { e.currentTarget.src = '/logo_colors.png'; }}
+                    />
+                    <div className="absolute inset-0 bg-gradient-to-t from-black/90 via-black/40 to-transparent pointer-events-none"></div>
+                    
+                    <div className="absolute inset-0 flex items-center justify-center p-6 pointer-events-none">
+                      <img 
+                        src={p.thumbnail || '/logo_blanco.png'} 
+                        alt={`Logo ${p.name}`}
+                        className="max-w-full max-h-full object-contain drop-shadow-[0_10px_20px_rgba(0,0,0,0.8)] transition-transform duration-500 group-hover:scale-110 group-hover:-translate-y-2" 
+                        onError={(e) => { e.currentTarget.src = '/logo_blanco.png'; }}
+                      />
+                    </div>
+                  </div>
+                ))}
+              </div>
+            </div>
+          </section>
+        )}
 
         {/* Related Content Section */}
         <section className="px-4 sm:px-8 md:px-16 py-12 md:py-20">

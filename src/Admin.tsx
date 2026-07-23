@@ -353,7 +353,9 @@ function Admin() {
   useEffect(() => {
     if (activeTab === 'users') {
       setIsUsersLoading(true);
-      fetch(`${API_URL}/users`)
+      const token = localStorage.getItem('admin_token');
+      const headers: Record<string, string> = token ? { 'Authorization': `Bearer ${token}` } : {};
+      fetch(`${API_URL}/users`, { headers })
         .then(res => res.json())
         .then(data => { setAdminUsers(data); setIsUsersLoading(false); })
         .catch(e => { console.error("Error fetching users:", e); setIsUsersLoading(false); });
@@ -363,15 +365,20 @@ function Admin() {
   const handleCreateUser = async (e: FormEvent) => {
     e.preventDefault();
     try {
+      const token = localStorage.getItem('admin_token');
+      const requestHeaders: Record<string, string> = { 'Content-Type': 'application/json' };
+      if (token) requestHeaders['Authorization'] = `Bearer ${token}`;
+      
       const res = await fetch(`${API_URL}/register`, {
         method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
+        headers: requestHeaders,
         body: JSON.stringify(newAdminUser)
       });
       if (res.ok) {
         alert("✅ Usuario creado exitosamente");
         setNewAdminUser({ email: '', password: '', role: 'admin' });
-        fetch(`${API_URL}/users`).then(r => r.json()).then(setAdminUsers);
+        const fetchHeaders: Record<string, string> = token ? { 'Authorization': `Bearer ${token}` } : {};
+        fetch(`${API_URL}/users`, { headers: fetchHeaders }).then(r => r.json()).then(setAdminUsers);
       } else {
         const data = await res.json();
         alert(`❌ Error: ${data.error}`);
@@ -384,7 +391,12 @@ function Admin() {
   const handleDeleteUser = async (id: string) => {
     if(!confirm("¿Estás seguro de que quieres eliminar a este usuario?")) return;
     try {
-      const res = await fetch(`${API_URL}/users/${id}`, { method: 'DELETE' });
+      const token = localStorage.getItem('admin_token');
+      const headers: Record<string, string> = token ? { 'Authorization': `Bearer ${token}` } : {};
+      const res = await fetch(`${API_URL}/users/${id}`, { 
+        method: 'DELETE',
+        headers
+      });
       if (res.ok) {
         setAdminUsers(adminUsers.filter(u => u.id !== id));
       } else {
@@ -874,6 +886,7 @@ function Admin() {
                       <select value={newAdminUser.role} onChange={e => setNewAdminUser({...newAdminUser, role: e.target.value})} className="w-full bg-[#0e0e0f] border-none rounded-lg p-3 text-[#DDDADB] focus:ring-2 focus:ring-[#C13535]">
                         <option value="admin">Administrador (Normal)</option>
                         <option value="superadmin">Super Administrador</option>
+                        <option value="producer">Productor (Cuñas y Estadísticas)</option>
                       </select>
                     </div>
                     <button type="submit" className="w-full bg-[#C13535] text-white py-3 rounded-lg font-bold text-sm hover:opacity-90 transition-all">Crear Usuario</button>
