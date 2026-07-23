@@ -38,7 +38,9 @@ export interface Sponsor {
   name: string;
   url: string;
   programId?: string;
-  createdAt: string;
+  type?: 'audio' | 'video';
+  assignedEntities?: string[];
+  createdAt?: string;
 }
 
 export interface UserProfile {
@@ -63,6 +65,7 @@ interface VideoContextType {
   deleteProgram: (id: string) => void;
   sponsors: Sponsor[];
   addSponsor: (sponsor: Sponsor) => Promise<boolean>;
+  updateSponsor: (sponsor: Sponsor) => Promise<boolean>;
   deleteSponsor: (id: string) => void;
   userProfile: UserProfile;
   updateUserProfile: (profile: UserProfile) => void;
@@ -84,6 +87,7 @@ export const VideoContext = createContext<VideoContextType>({
   deleteProgram: () => {},
   sponsors: [],
   addSponsor: async () => false,
+  updateSponsor: async () => false,
   deleteSponsor: () => {},
   userProfile: { firstName: '', lastName: '', avatar: '', bio: '', twitter: '', instagram: '', youtube: '', facebook: '' },
   updateUserProfile: () => {},
@@ -167,11 +171,14 @@ export const VideoProvider = ({ children }: { children: ReactNode }) => {
       setIsLoading(true);
       try {
         const cacheBuster = `?t=${new Date().getTime()}`;
+        const adminToken = localStorage.getItem('admin_token') || '';
+        const authHeaders: Record<string, string> = adminToken ? { 'Authorization': `Bearer ${adminToken}` } : {};
+
         const [videosRes, programsRes, sponsorsRes, profileRes] = await Promise.all([
           fetch(`${API_URL}/videos${cacheBuster}`),
           fetch(`${API_URL}/programs${cacheBuster}`),
           fetch(`${API_URL}/sponsors${cacheBuster}`),
-          fetch(`${API_URL}/profile${cacheBuster}`)
+          fetch(`${API_URL}/profile${cacheBuster}`, { headers: authHeaders })
         ]);
 
         if (videosRes.ok) setVideos(await videosRes.json());
@@ -316,6 +323,23 @@ export const VideoProvider = ({ children }: { children: ReactNode }) => {
     }
   };
 
+  const updateSponsor = async (sponsor: Sponsor) => {
+    try {
+      const res = await fetch(`${API_URL}/sponsors/${sponsor.id}`, {
+        method: 'PUT', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(sponsor)
+      });
+      if (await handleResponse(res, 'Cuña actualizada exitosamente')) {
+        setSponsors(sponsors.map(s => s.id === sponsor.id ? sponsor : s));
+        return true;
+      }
+      return false;
+    } catch (error) { 
+      console.error(error); 
+      alert("❌ Fallo de conexión con el servidor.");
+      return false;
+    }
+  };
+
   const deleteSponsor = async (id: string) => {
     if(window.confirm("¿Estás seguro de que deseas eliminar esta cuña? Esto no la borrará de los episodios donde ya esté incrustada.")) {
       try {
@@ -331,8 +355,12 @@ export const VideoProvider = ({ children }: { children: ReactNode }) => {
 
   const updateUserProfile = async (profile: UserProfile) => {
     try {
+      const adminToken = localStorage.getItem('admin_token') || '';
+      const authHeaders: any = { 'Content-Type': 'application/json' };
+      if (adminToken) authHeaders['Authorization'] = `Bearer ${adminToken}`;
+
       const res = await fetch(`${API_URL}/profile`, {
-        method: 'PUT', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(profile)
+        method: 'PUT', headers: authHeaders, body: JSON.stringify(profile)
       });
       if (await handleResponse(res, 'Perfil guardado con éxito')) {
         setUserProfile(profile);
@@ -362,7 +390,7 @@ export const VideoProvider = ({ children }: { children: ReactNode }) => {
   const viewHistory = viewHistoryIds.map(id => videos.find(v => v.id === id)).filter(v => v !== undefined) as Video[];
 
   return (
-    <VideoContext.Provider value={{ videos, addVideo, updateVideo, deleteVideo, programs, addProgram, updateProgram, deleteProgram, sponsors, addSponsor, deleteSponsor, userProfile, updateUserProfile, incrementView, viewHistory, addToHistory, isLoading, setIsLoading }}>
+    <VideoContext.Provider value={{ videos, addVideo, updateVideo, deleteVideo, programs, addProgram, updateProgram, deleteProgram, sponsors, addSponsor, updateSponsor, deleteSponsor, userProfile, updateUserProfile, incrementView, viewHistory, addToHistory, isLoading, setIsLoading }}>
       {isLoading ? <RadioAmericaLoader fullScreen={true} /> : children}
     </VideoContext.Provider>
   );
