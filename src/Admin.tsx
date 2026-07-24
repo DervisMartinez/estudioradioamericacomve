@@ -28,10 +28,11 @@ function Admin() {
   const token = localStorage.getItem('admin_token');
   const userPayload = token ? decodeJWT(token) : null;
   const userRole = userPayload?.role || 'superadmin';
+  const userName = userPayload?.name || 'Administrador';
 
   const [analyticsSubTab, setAnalyticsSubTab] = useState<'overview' | 'live' | 'social' | 'audience'>('overview');
   const [adminUsers, setAdminUsers] = useState<any[]>([]);
-  const [newAdminUser, setNewAdminUser] = useState({ email: '', password: '', role: 'admin' });
+  const [newAdminUser, setNewAdminUser] = useState({ name: '', email: '', password: '', role: 'admin' });
   const [isUsersLoading, setIsUsersLoading] = useState(false);
   const [libraryFilter, setLibraryFilter] = useState('Todos');
   const [timeFilter, setTimeFilter] = useState<'all' | '7days' | '30days'>('all');
@@ -376,7 +377,7 @@ function Admin() {
       });
       if (res.ok) {
         alert("✅ Usuario creado exitosamente");
-        setNewAdminUser({ email: '', password: '', role: 'admin' });
+        setNewAdminUser({ name: '', email: '', password: '', role: 'admin' });
         const fetchHeaders: Record<string, string> = token ? { 'Authorization': `Bearer ${token}` } : {};
         fetch(`${API_URL}/users`, { headers: fetchHeaders }).then(r => r.json()).then(setAdminUsers);
       } else {
@@ -484,8 +485,8 @@ function Admin() {
               <img className="w-full h-full object-cover" alt="Profile" src={userProfile.avatar || '/logo_blanco.png'} onError={(e) => { e.currentTarget.src = '/logo_blanco.png'; }} />
             </div>
             <div className="flex flex-col">
-              <span className="text-xs font-bold text-[#DDDADB]">{userProfile.firstName} {userProfile.lastName}</span>
-              <span className="text-[10px] text-[#DDDADB]/40">Super Admin</span>
+              <span className="text-xs font-bold text-[#DDDADB]">{userName}</span>
+              <span className="text-[10px] text-[#DDDADB]/40 capitalize">{userRole}</span>
             </div>
             <button onClick={handleLogout} className="ml-auto text-[#DDDADB]/40 hover:text-[#C13535] transition-colors" title="Cerrar Sesión">
               <span className="material-symbols-outlined">logout</span>
@@ -505,7 +506,9 @@ function Admin() {
               <button onClick={() => setIsSidebarOpen(!isSidebarOpen)} className="md:hidden text-[#DDDADB]">
                 <span className="material-symbols-outlined">menu</span>
               </button>
-              <h2 className="text-xl font-bold text-[#DDDADB] capitalize">{activeTab.replace('_', ' ')}</h2>
+              <h2 className="text-xl font-bold text-[#DDDADB] capitalize">
+                {activeTab === 'dashboard' ? `Bienvenido, ${userName}` : activeTab.replace('_', ' ')}
+              </h2>
             </div>
             <div className="flex items-center gap-6">
               <div className="relative group">
@@ -873,6 +876,10 @@ function Admin() {
                 <div className="col-span-1 bg-surface-container-highest p-6 rounded-2xl border border-outline-variant/10 h-fit">
                   <h4 className="text-lg font-bold text-[#DDDADB] mb-4">Añadir Nuevo Administrador</h4>
                   <form onSubmit={handleCreateUser} className="space-y-4">
+                    <div>
+                      <label className="block text-xs font-bold text-[#DDDADB]/60 mb-1">Nombre</label>
+                      <input required type="text" value={newAdminUser.name} onChange={e => setNewAdminUser({...newAdminUser, name: e.target.value})} className="w-full bg-[#0e0e0f] border-none rounded-lg p-3 text-[#DDDADB] focus:ring-2 focus:ring-[#C13535]" placeholder="Nombre del usuario" />
+                    </div>
                     <div>
                       <label className="block text-xs font-bold text-[#DDDADB]/60 mb-1">Email</label>
                       <input required type="email" value={newAdminUser.email} onChange={e => setNewAdminUser({...newAdminUser, email: e.target.value})} className="w-full bg-[#0e0e0f] border-none rounded-lg p-3 text-[#DDDADB] focus:ring-2 focus:ring-[#C13535]" placeholder="admin@radioamerica.com.ve" />

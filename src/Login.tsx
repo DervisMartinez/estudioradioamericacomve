@@ -36,19 +36,8 @@ export default function Login() {
         return;
       }
     } catch (err) {
-      console.warn("Backend no disponible o error de red, intentando fallback...");
-    }
-
-    // 2. Fallback de Emergencia (Si la DB o Backend fallan)
-    const cleanEmail = email.trim().toLowerCase();
-    const isValidEmail = cleanEmail === 'estudio@radiomerica.com.ve' || cleanEmail === 'estudio@radioamerica.com.ve';
-    const isValidPassword = password.trim() === 'america909.estudio';
-
-    if (isValidEmail && isValidPassword) {
-      localStorage.setItem('admin_auth', 'true');
-      navigate('/admin');
-    } else {
-      setError('Usuario o contraseña incorrectos.');
+      console.error("Backend no disponible o error de red:", err);
+      setError('Error de conexión con el servidor. Intente más tarde.');
     }
   };
 

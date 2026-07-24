@@ -20,12 +20,19 @@ const HlsVideoPlayer = ({ src, poster, className, onEnded }: { src: string, post
         hls = new Hls();
         hls.loadSource(src);
         hls.attachMedia(video);
+        hls.on(Hls.Events.MANIFEST_PARSED, () => {
+          video.play().catch(e => console.warn("HLS play failed:", e));
+        });
       } else if (video.canPlayType('application/vnd.apple.mpegurl')) {
         video.src = src; // Soporte nativo para Safari/iOS
+        video.addEventListener('loadedmetadata', () => {
+          video.play().catch(e => console.warn("HLS Safari play failed:", e));
+        });
       }
     } else {
-      // MP4 normal (local o externo)
+      // MP4 normal (local o externo) o Audio como Cuña
       video.src = src;
+      video.play().catch(e => console.warn("Native video play failed:", e));
     }
 
     return () => {
@@ -237,7 +244,7 @@ export default function Watch() {
 
   const isDirectVideo = (url: string) => {
     if (!url) return false;
-    return url.startsWith('data:video/') || url.match(/\.(mp4|webm|ogg|m3u8)$/i);
+    return url.startsWith('data:video/') || url.match(/\.(mp4|webm|ogg|m3u8|mp3|wav|m4a|aac)$/i);
   };
 
   const ytId = getYoutubeId(video.url);
