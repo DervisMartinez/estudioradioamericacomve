@@ -28,7 +28,7 @@ function Admin() {
   const token = localStorage.getItem('admin_token');
   const userPayload = token ? decodeJWT(token) : null;
   const userRole = userPayload?.role || 'superadmin';
-  const userName = userPayload?.name || 'Administrador';
+  const userName = userPayload?.name || (userPayload?.email ? userPayload.email.split('@')[0] : 'Usuario');
 
   const [analyticsSubTab, setAnalyticsSubTab] = useState<'overview' | 'live' | 'social' | 'audience'>('overview');
   const [adminUsers, setAdminUsers] = useState<any[]>([]);
@@ -275,14 +275,22 @@ function Admin() {
     let parsedUrl = video.url;
     let sUrls: string[] = [];
     
-    // Intenta detectar si el archivo guardado es una lista de reproducción (Patrocinado)
-    try {
-      const arr = JSON.parse(video.url);
-      if (Array.isArray(arr) && video.isAudio) {
-        parsedUrl = arr[arr.length - 1]; // El último siempre es el episodio
-        sUrls = arr.slice(0, -1); // El resto son las cuñas
+    // Intenta detectar si el archivo guardado es una lista de reproducción (Patrocinado) y desanida si hubo errores de guardado previos
+    let currentUrl = video.url;
+    while(true) {
+      try {
+        const arr = JSON.parse(currentUrl);
+        if (Array.isArray(arr)) {
+          sUrls = [...sUrls, ...arr.slice(0, -1)];
+          currentUrl = arr[arr.length - 1]; // El último siempre es el episodio o el siguiente nivel anidado
+        } else {
+          break;
+        }
+      } catch(e) {
+        break; // Cuando JSON.parse falla, significa que currentUrl ya es un string normal (la URL del video)
       }
-    } catch(e) {}
+    }
+    parsedUrl = currentUrl;
 
     setIsSponsored(sUrls.length > 0);
     setSponsorCount(sUrls.length > 0 ? sUrls.length : 1);
