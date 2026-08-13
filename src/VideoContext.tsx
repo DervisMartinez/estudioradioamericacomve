@@ -1,5 +1,6 @@
 import { createContext, useState, useEffect } from 'react';
 import type { ReactNode } from 'react';
+import { apiService } from './services/api';
 
 export interface Video {
   id: string;
@@ -98,7 +99,6 @@ export const VideoContext = createContext<VideoContextType>({
   setIsLoading: () => {},
 });
 
-// --- LOADER GLOBAL DE LA APP ---
 export const RadioAmericaLoader = ({ fullScreen = true }: { fullScreen?: boolean }) => {
   return (
     <div className={`${fullScreen ? 'fixed inset-0 z-[10000]' : 'w-full h-48'} flex flex-col items-center justify-center bg-white dark:bg-[#131314] transition-colors duration-300`}>
@@ -115,11 +115,8 @@ export const RadioAmericaLoader = ({ fullScreen = true }: { fullScreen?: boolean
         }
       `}</style>
       <div className="relative w-24 h-24 md:w-32 md:h-32 flex items-center justify-center">
-        {/* Silueta Base */}
         <img src="/logo_colors.png" className="absolute w-full h-full object-contain opacity-10 dark:hidden grayscale" alt="Loading" />
         <img src="/logo_blanco.png" className="absolute w-full h-full object-contain opacity-10 hidden dark:block grayscale" alt="Loading" />
-        
-        {/* Llenado animado */}
         <img src="/logo_colors.png" className="absolute w-full h-full object-contain dark:hidden animate-fill-logo" alt="Loading" />
         <img src="/logo_blanco.png" className="absolute w-full h-full object-contain hidden dark:block animate-fill-logo" alt="Loading" />
       </div>
@@ -137,7 +134,6 @@ export const RadioAmericaLoader = ({ fullScreen = true }: { fullScreen?: boolean
   );
 }
 
-// URL base de tu API. Usa ruta relativa en producción para aprovechar el Reverse Proxy de Nginx.
 export const API_URL = import.meta.env.VITE_API_URL || (import.meta.env.MODE === 'production' ? '/api' : 'http://localhost:3005/api');
 
 export const VideoProvider = ({ children }: { children: ReactNode }) => {
@@ -154,39 +150,30 @@ export const VideoProvider = ({ children }: { children: ReactNode }) => {
   });
 
   useEffect(() => {
-    // Detección automática del tema del dispositivo (OS) en tiempo real
     const mediaQuery = window.matchMedia('(prefers-color-scheme: dark)');
     const applyTheme = (e: MediaQueryListEvent | MediaQueryList) => {
       if (e.matches) document.documentElement.classList.add('dark');
       else document.documentElement.classList.remove('dark');
     };
-
-    // Aplicar al inicio
     applyTheme(mediaQuery);
-    
-    // Escuchar cambios (por si el usuario cambia el tema del teléfono mientras navega)
     mediaQuery.addEventListener('change', applyTheme);
 
     const fetchData = async () => {
       setIsLoading(true);
       try {
-        const cacheBuster = `?t=${new Date().getTime()}`;
         const adminToken = localStorage.getItem('admin_token') || '';
-        const authHeaders: Record<string, string> = adminToken ? { 'Authorization': `Bearer ${adminToken}` } : {};
-
-        const [videosRes, programsRes, sponsorsRes, profileRes] = await Promise.all([
-          fetch(`${API_URL}/videos${cacheBuster}`),
-          fetch(`${API_URL}/programs${cacheBuster}`),
-          fetch(`${API_URL}/sponsors${cacheBuster}`),
-          fetch(`${API_URL}/profile${cacheBuster}`, { headers: authHeaders })
+        const [videosRes, programsRes, sponsorsRes, profileRes] = await Promise.allSettled([
+          apiService.fetchVideos(),
+          apiService.fetchPrograms(),
+          apiService.fetchSponsors(),
+          adminToken ? apiService.fetchProfile(adminToken) : Promise.resolve(null)
         ]);
 
-        if (videosRes.ok) setVideos(await videosRes.json());
-        if (programsRes.ok) setPrograms(await programsRes.json());
-        if (sponsorsRes.ok) setSponsors(await sponsorsRes.json());
-        if (profileRes.ok) {
-          const profileData = await profileRes.json();
-          if (profileData && profileData.firstName) setUserProfile(profileData);
+        if (videosRes.status === 'fulfilled') setVideos(videosRes.value);
+        if (programsRes.status === 'fulfilled') setPrograms(programsRes.value);
+        if (sponsorsRes.status === 'fulfilled') setSponsors(sponsorsRes.value);
+        if (profileRes.status === 'fulfilled' && profileRes.value?.firstName) {
+          setUserProfile(profileRes.value);
         }
       } catch (error) {
         console.error("Error al conectar con la base de datos:", error);
@@ -197,145 +184,88 @@ export const VideoProvider = ({ children }: { children: ReactNode }) => {
     };
     fetchData();
 
-    // Limpiar listener
     return () => mediaQuery.removeEventListener('change', applyTheme);
   }, []);
 
-  // Función auxiliar para manejar respuestas y notificar al usuario
-  const handleResponse = async (res: Response, successMsg: string) => {
-    if (res.ok) {
-      alert(`✅ ${successMsg}`);
+  const handleAlerts = (success: boolean, msg: string) => {
+    if (success) {
+      alert(`✅ ${msg}`);
       return true;
     }
-    if (res.status === 413) {
-      alert(" Error: El archivo es demasiado pesado. Pídele al administrador del servidor que aumente el 'client_max_body_size' en Nginx.");
-    } else {
-      const text = await res.text();
-      let errData: any = {};
-      try {
-        errData = JSON.parse(text);
-      } catch(e) {
-        console.error("Respuesta cruda del servidor:", text);
-      }
-      alert(` Error HTTP ${res.status}: ${errData.error || res.statusText || 'Ruta no encontrada. Por favor, reinicia el servidor Node.js'}`);
-    }
+    alert("❌ Fallo de conexión con el servidor.");
     return false;
   };
 
   const addVideo = async (video: Video) => {
     try {
-      const res = await fetch(`${API_URL}/videos`, {
-        method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(video)
-      });
-      if (await handleResponse(res, 'Episodio guardado exitosamente')) {
-        setVideos([video, ...videos]);
-      }
-    } catch (error) { 
-      console.error(error); 
-      alert("❌ Fallo de conexión con el servidor.");
-    }
+      const success = await apiService.createVideo(video, false);
+      if (handleAlerts(success, 'Episodio guardado exitosamente')) setVideos([video, ...videos]);
+    } catch (e) { handleAlerts(false, ''); }
   };
 
   const updateVideo = async (updatedVideo: Video) => {
     try {
-      const res = await fetch(`${API_URL}/videos/${updatedVideo.id}`, {
-        method: 'PUT', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(updatedVideo)
-      });
-      if (await handleResponse(res, 'Episodio actualizado exitosamente')) {
-        setVideos(videos.map(v => v.id === updatedVideo.id ? updatedVideo : v));
-      }
-    } catch (error) { 
-      console.error(error); 
-      alert("❌ Fallo de conexión con el servidor.");
-    }
+      const success = await apiService.updateVideo(updatedVideo);
+      if (handleAlerts(success, 'Episodio actualizado exitosamente')) setVideos(videos.map(v => v.id === updatedVideo.id ? updatedVideo : v));
+    } catch (e) { handleAlerts(false, ''); }
   };
 
   const deleteVideo = async (id: string) => {
     if(window.confirm("¿Estás seguro de que deseas eliminar este video?")) {
       try {
-        const res = await fetch(`${API_URL}/videos/${id}`, { method: 'DELETE' });
-        if (await handleResponse(res, 'Episodio eliminado')) {
-          setVideos(videos.filter(v => v.id !== id));
-        }
-      } catch (error) { 
-        console.error(error); 
-        alert("❌ Fallo de conexión con el servidor.");
-      }
+        const success = await apiService.deleteVideo(id);
+        if (handleAlerts(success, 'Episodio eliminado')) setVideos(videos.filter(v => v.id !== id));
+      } catch (e) { handleAlerts(false, ''); }
     }
   };
 
   const addProgram = async (program: Program) => {
     try {
-      const res = await fetch(`${API_URL}/programs`, {
-        method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(program)
-      });
-      if (await handleResponse(res, 'Programa creado exitosamente')) {
-        setPrograms([program, ...programs]);
-      }
-    } catch (error) { 
-      console.error(error); 
-      alert("❌ Fallo de conexión con el servidor.");
-    }
+      const success = await apiService.createProgram(program);
+      if (handleAlerts(success, 'Programa creado exitosamente')) setPrograms([program, ...programs]);
+    } catch (e) { handleAlerts(false, ''); }
   };
 
   const updateProgram = async (updatedProgram: Program) => {
     try {
-      const res = await fetch(`${API_URL}/programs/${updatedProgram.id}`, {
-        method: 'PUT', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(updatedProgram)
-      });
-      if (await handleResponse(res, 'Programa actualizado')) {
-        setPrograms(programs.map(p => p.id === updatedProgram.id ? updatedProgram : p));
-      }
-    } catch (error) { 
-      console.error(error); 
-      alert("❌ Fallo de conexión con el servidor.");
-    }
+      const success = await apiService.updateProgram(updatedProgram);
+      if (handleAlerts(success, 'Programa actualizado')) setPrograms(programs.map(p => p.id === updatedProgram.id ? updatedProgram : p));
+    } catch (e) { handleAlerts(false, ''); }
   };
 
   const deleteProgram = async (id: string) => {
     if(window.confirm("¿Estás seguro de que deseas eliminar este programa?")) {
       try {
-        const res = await fetch(`${API_URL}/programs/${id}`, { method: 'DELETE' });
-        if (await handleResponse(res, 'Programa eliminado')) {
-          setPrograms(programs.filter(p => p.id !== id));
-        }
-      } catch (error) { 
-        console.error(error); 
-        alert("❌ Fallo de conexión con el servidor.");
-      }
+        const success = await apiService.deleteProgram(id);
+        if (handleAlerts(success, 'Programa eliminado')) setPrograms(programs.filter(p => p.id !== id));
+      } catch (e) { handleAlerts(false, ''); }
     }
   };
 
   const addSponsor = async (sponsor: Sponsor) => {
     try {
-      const res = await fetch(`${API_URL}/sponsors`, {
-        method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(sponsor)
-      });
-      if (await handleResponse(res, 'Cuña registrada exitosamente')) {
+      const success = await apiService.createSponsor(sponsor);
+      if (handleAlerts(success, 'Cuña registrada exitosamente')) {
         setSponsors([sponsor, ...sponsors]);
         return true;
       }
       return false;
-    } catch (error) { 
-      console.error(error); 
-      alert("❌ Fallo de conexión con el servidor al registrar la cuña.");
+    } catch (e) { 
+      handleAlerts(false, ''); 
       return false;
     }
   };
 
   const updateSponsor = async (sponsor: Sponsor) => {
     try {
-      const res = await fetch(`${API_URL}/sponsors/${sponsor.id}`, {
-        method: 'PUT', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(sponsor)
-      });
-      if (await handleResponse(res, 'Cuña actualizada exitosamente')) {
+      const success = await apiService.updateSponsor(sponsor);
+      if (handleAlerts(success, 'Cuña actualizada exitosamente')) {
         setSponsors(sponsors.map(s => s.id === sponsor.id ? sponsor : s));
         return true;
       }
       return false;
-    } catch (error) { 
-      console.error(error); 
-      alert("❌ Fallo de conexión con el servidor.");
+    } catch (e) { 
+      handleAlerts(false, ''); 
       return false;
     }
   };
@@ -343,45 +273,28 @@ export const VideoProvider = ({ children }: { children: ReactNode }) => {
   const deleteSponsor = async (id: string) => {
     if(window.confirm("¿Estás seguro de que deseas eliminar esta cuña? Esto no la borrará de los episodios donde ya esté incrustada.")) {
       try {
-        const res = await fetch(`${API_URL}/sponsors/${id}`, { method: 'DELETE' });
-        if (await handleResponse(res, 'Cuña eliminada')) {
-          setSponsors(sponsors.filter(s => s.id !== id));
-        }
-      } catch (error) { 
-        console.error(error); 
-      }
+        const success = await apiService.deleteSponsor(id);
+        if (handleAlerts(success, 'Cuña eliminada')) setSponsors(sponsors.filter(s => s.id !== id));
+      } catch (e) { }
     }
   };
 
   const updateUserProfile = async (profile: UserProfile) => {
     try {
       const adminToken = localStorage.getItem('admin_token') || '';
-      const authHeaders: any = { 'Content-Type': 'application/json' };
-      if (adminToken) authHeaders['Authorization'] = `Bearer ${adminToken}`;
-
-      const res = await fetch(`${API_URL}/profile`, {
-        method: 'PUT', headers: authHeaders, body: JSON.stringify(profile)
-      });
-      if (await handleResponse(res, 'Perfil guardado con éxito')) {
-        setUserProfile(profile);
-      }
-    } catch (error) { 
-      console.error(error); 
-      alert("❌ Fallo de conexión con el servidor.");
-    }
+      const success = await apiService.updateProfile(profile, adminToken);
+      if (handleAlerts(success, 'Perfil guardado con éxito')) setUserProfile(profile);
+    } catch (e) { handleAlerts(false, ''); }
   };
 
   const incrementView = async (id: string) => {
-    try {
-      // No necesitamos esperar la respuesta, es una acción de "dispara y olvida"
-      fetch(`${API_URL}/videos/${id}/view`, { method: 'POST' });
-    } catch (error) { console.error(error); }
+    try { apiService.incrementView(id); } catch (e) {}
   };
 
   const addToHistory = (id: string) => {
     setViewHistoryIds(prev => {
       const filtered = prev.filter(vId => vId !== id);
-      const newHistory = [id, ...filtered].slice(0, 15); // Guardar los últimos 15
+      const newHistory = [id, ...filtered].slice(0, 15);
       localStorage.setItem('radioamerica_history', JSON.stringify(newHistory));
       return newHistory;
     });
