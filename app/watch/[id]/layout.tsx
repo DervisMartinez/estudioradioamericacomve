@@ -9,8 +9,8 @@ type Props = {
 export async function generateMetadata(props: Props): Promise<Metadata> {
   const params = await props.params;
   try {
-    // En Docker SSR, debe conectarse al contenedor backend o usar la URL externa
-    const apiUrl = process.env.INTERNAL_API_URL || process.env.NEXT_PUBLIC_API_URL || 'http://estudio-backend:3005/api';
+    // En Docker host network, el backend está en localhost:3005
+    const apiUrl = process.env.INTERNAL_API_URL || process.env.NEXT_PUBLIC_API_URL || 'http://localhost:3005/api';
     const res = await fetch(`${apiUrl}/videos/${params.id}`, { cache: 'no-store' });
     if (!res.ok) throw new Error('Video no encontrado');
     const video = await res.json();

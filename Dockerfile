@@ -26,9 +26,9 @@ COPY --from=builder /app/public ./public
 COPY --from=builder /app/.next/standalone ./
 COPY --from=builder /app/.next/static ./.next/static
 
-# Next.js usa por defecto el puerto 3000
-EXPOSE 3000
-ENV PORT=3000
+# Configuramos el puerto 8084 para que coincida con aaPanel
+ENV PORT=8084
+EXPOSE 8084
 ENV HOSTNAME="0.0.0.0"
 
 CMD ["node", "server.js"]
