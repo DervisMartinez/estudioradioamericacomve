@@ -9,6 +9,14 @@ const nextConfig = {
       { protocol: 'http', hostname: '**' },
     ],
   },
+  async rewrites() {
+    return [
+      {
+        source: '/api/:path*',
+        destination: 'http://estudio-backend:3005/api/:path*'
+      }
+    ];
+  }
 };
 
 export default nextConfig;
