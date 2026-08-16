@@ -135,6 +135,8 @@ export const RadioAmericaLoader = ({ fullScreen = true }: { fullScreen?: boolean
   );
 }
 
+// El cliente asume que Nginx redirige /api hacia el backend en producción.
+// Si no, puedes forzar la URL absoluta: https://estudio.radioamerica.com.ve/api
 export const API_URL = process.env.NEXT_PUBLIC_API_URL || (process.env.NODE_ENV === 'production' ? '/api' : 'http://localhost:3005/api');
 
 export const VideoProvider = ({ children }: { children: ReactNode }) => {
