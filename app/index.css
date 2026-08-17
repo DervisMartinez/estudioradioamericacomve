@@ -52,13 +52,16 @@
 
   /* Fuentes */
   --font-headline: "Montserrat", sans-serif;
-  --font-body: "Inter", sans-serif;
-  --font-label: "Inter", sans-serif;
+  --font-body: "Montserrat", sans-serif;
+  --font-label: "Montserrat", sans-serif;
 }
 
 @layer base {
+  *, ::before, ::after {
+    font-family: 'Montserrat', sans-serif !important;
+  }
   body { 
-    font-family: 'Montserrat', sans-serif; 
+    font-family: 'Montserrat', sans-serif !important; 
     background-color: #131314; 
     color: #DDDADB;
     -webkit-font-smoothing: antialiased;
