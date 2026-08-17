@@ -61,6 +61,34 @@ export const apiService = {
     return res.ok;
   },
 
+  // Banners
+  fetchBanners: async () => {
+    const cacheBuster = `?t=${new Date().getTime()}`;
+    const res = await fetch(`${API_URL}/banners${cacheBuster}`);
+    if (!res.ok) throw new Error('Error fetching banners');
+    return res.json();
+  },
+  createBanner: async (banner: any) => {
+    const res = await fetch(`${API_URL}/banners`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify(banner)
+    });
+    return res.ok;
+  },
+  updateBanner: async (banner: any) => {
+    const res = await fetch(`${API_URL}/banners/${banner.id}`, {
+      method: 'PUT',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify(banner)
+    });
+    return res.ok;
+  },
+  deleteBanner: async (id: string) => {
+    const res = await fetch(`${API_URL}/banners/${id}`, { method: 'DELETE' });
+    return res.ok;
+  },
+
   // Sponsors
   fetchSponsors: async () => {
     const cacheBuster = `?t=${new Date().getTime()}`;
@@ -87,6 +115,11 @@ export const apiService = {
   deleteSponsor: async (id: string) => {
     const res = await fetch(`${API_URL}/sponsors/${id}`, { method: 'DELETE' });
     return res.ok;
+  },
+
+  // Likes
+  incrementLike: async (id: string) => {
+    fetch(`${API_URL}/videos/${id}/like`, { method: 'POST' }).catch(console.error);
   },
 
   // Profile

@@ -2,7 +2,7 @@
 import { useState, useContext, useRef, useEffect } from 'react';
 import { useRouter } from "next/navigation";
 import type { ChangeEvent, FormEvent } from 'react';
-import { VideoContext, RadioAmericaLoader, API_URL } from "@/components/VideoContext";
+import { VideoContext, RadioAmericaLoader, API_URL, Banner } from "@/components/VideoContext";
 
 const decodeJWT = (token: string) => {
   try {
@@ -18,13 +18,14 @@ const decodeJWT = (token: string) => {
 };
 
 function Admin() {
-  const { videos, addVideo, updateVideo, deleteVideo, programs, addProgram, updateProgram, deleteProgram, sponsors, addSponsor, updateSponsor, deleteSponsor, userProfile, updateUserProfile } = useContext(VideoContext);
+  const { videos, addVideo, updateVideo, deleteVideo, programs, addProgram, updateProgram, deleteProgram, banners, addBanner, updateBanner, deleteBanner, sponsors, addSponsor, updateSponsor, deleteSponsor, userProfile, updateUserProfile } = useContext(VideoContext);
   const router = useRouter();
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [isProgramModalOpen, setIsProgramModalOpen] = useState(false);
   const [isSponsorModalOpen, setIsSponsorModalOpen] = useState(false);
+  const [isBannerModalOpen, setIsBannerModalOpen] = useState(false);
   const [isSidebarOpen, setIsSidebarOpen] = useState(false);
-  const [activeTab, setActiveTab] = useState<'dashboard' | 'library' | 'programs' | 'sponsors' | 'analytics' | 'settings' | 'newsletter' | 'users'>('dashboard');
+  const [activeTab, setActiveTab] = useState<'dashboard' | 'library' | 'programs' | 'banners' | 'sponsors' | 'analytics' | 'settings' | 'newsletter' | 'users'>('dashboard');
   
   const token = (typeof window !== 'undefined' ? localStorage.getItem('admin_token') : null);
   const userPayload = token ? decodeJWT(token) : null;
@@ -40,8 +41,10 @@ function Admin() {
   const [selectedProgramDetails, setSelectedProgramDetails] = useState<string | null>(null);
   const [editingId, setEditingId] = useState<string | null>(null);
   const [editingProgramId, setEditingProgramId] = useState<string | null>(null);
+  const [editingBannerId, setEditingBannerId] = useState<string | null>(null);
   const [newVideo, setNewVideo] = useState({ title: '', category: '', thumbnail: '', url: '', description: '', isFeatured: false, isLive: false, isShort: false, isAudio: false, programId: '', releaseDate: '', duration: '', pressNoteUrl: '', sendNewsletter: false });
-  const [newProgram, setNewProgram] = useState({ name: '', category: '', thumbnail: '', type: 'Programa' as 'Programa' | 'Podcast', description: '', schedule: '', host: '', coverImage: '' });
+  const [newProgram, setNewProgram] = useState({ name: '', category: '', thumbnail: '', type: 'Programa' as 'Programa' | 'Podcast', description: '', schedule: '', host: '', coverImage: '', hostImage: '' });
+  const [newBanner, setNewBanner] = useState({ title: '', imageUrl: '', url: '' });
   const [newSponsorForm, setNewSponsorForm] = useState({ name: '', url: '', type: 'audio' as 'audio' | 'video', assignedEntities: [] as string[] });
   const [editingSponsorId, setEditingSponsorId] = useState<string | null>(null);
   const [profileForm, setProfileForm] = useState(userProfile);
@@ -51,6 +54,11 @@ function Admin() {
   const [sponsorCount, setSponsorCount] = useState(1);
   const [sponsorUrls, setSponsorUrls] = useState<string[]>([]);
   const [subscribers, setSubscribers] = useState<any[]>([]);
+
+  const resetBannerForm = () => {
+    setEditingBannerId(null);
+    setNewBanner({ title: '', imageUrl: '', url: '' });
+  };
 
   const resetVideoForm = (overrides = {}) => {
     setEditingId(null);
@@ -86,7 +94,7 @@ function Admin() {
     }
   };
 
-  const handleFileUpload = (e: ChangeEvent<HTMLInputElement>, field: 'thumbnail' | 'avatar' | 'url' | 'program_thumbnail' | 'program_cover' | 'sponsor_url') => {
+  const handleFileUpload = (e: ChangeEvent<HTMLInputElement>, field: 'thumbnail' | 'avatar' | 'url' | 'program_thumbnail' | 'program_cover' | 'program_host' | 'sponsor_url' | 'banner_image') => {
     const file = e.target.files?.[0];
     if (!file) return;
 
@@ -109,6 +117,8 @@ function Admin() {
           else if (field === 'avatar') setProfileForm({ ...profileForm, avatar: compressedDataUrl });
           else if (field === 'program_thumbnail') setNewProgram({ ...newProgram, thumbnail: compressedDataUrl });
           else if (field === 'program_cover') setNewProgram({ ...newProgram, coverImage: compressedDataUrl });
+          else if (field === 'program_host') setNewProgram({ ...newProgram, hostImage: compressedDataUrl });
+          else if (field === 'banner_image') setNewBanner({ ...newBanner, imageUrl: compressedDataUrl });
         };
         img.src = event.target?.result as string;
       };
@@ -252,7 +262,7 @@ function Admin() {
       addProgram({ id: Date.now().toString(), ...newProgram });
     }
     setIsProgramModalOpen(false);
-    setNewProgram({ name: '', category: '', thumbnail: '', type: 'Programa', description: '', schedule: '', host: '', coverImage: '' });
+    setNewProgram({ name: '', category: '', thumbnail: '', type: 'Programa', description: '', schedule: '', host: '', coverImage: '', hostImage: '' });
   };
 
   const handleStandaloneSponsorSubmit = (e: FormEvent) => {
@@ -318,14 +328,34 @@ function Admin() {
   };
 
   const openEditProgramModal = (prog: any) => {
-    setNewProgram({ name: prog.name, category: prog.category, thumbnail: prog.thumbnail, type: prog.type, description: prog.description || '', schedule: prog.schedule || '', host: prog.host || '', coverImage: prog.coverImage || '' });
+    setNewProgram({ name: prog.name, category: prog.category, thumbnail: prog.thumbnail, type: prog.type, description: prog.description || '', schedule: prog.schedule || '', host: prog.host || '', coverImage: prog.coverImage || '', hostImage: prog.hostImage || '' });
     setEditingProgramId(prog.id);
     setIsProgramModalOpen(true);
   };
 
+  const openEditBannerModal = (banner: Banner) => {
+    setNewBanner({ title: banner.title || '', imageUrl: banner.imageUrl, url: banner.url || '' });
+    setEditingBannerId(banner.id);
+    setIsBannerModalOpen(true);
+  };
+
+  const handleBannerSubmit = async (e: FormEvent) => {
+    e.preventDefault();
+    if (editingBannerId) {
+      const existing = banners.find(b => b.id === editingBannerId);
+      await updateBanner({ ...existing!, ...newBanner });
+    } else {
+      await addBanner({ ...newBanner, id: Date.now().toString(), createdAt: new Date().toISOString() });
+    }
+    setIsBannerModalOpen(false);
+    resetBannerForm();
+  };
+
   // Métricas calculadas en tiempo real basadas en el contexto
   const globalTotalViews = videos.reduce((acc, video) => acc + (video.views || 0), 0);
-  const globalMostViewed = [...videos].sort((a, b) => b.views - a.views).slice(0, 4); // Top 4 global
+  const globalTotalLikes = videos.reduce((acc, video) => acc + (video.likes || 0), 0);
+  const globalMostViewed = [...videos].sort((a, b) => (b.views || 0) - (a.views || 0)).slice(0, 4); // Top 4 global
+  const globalMostLiked = [...videos].sort((a, b) => (b.likes || 0) - (a.likes || 0)).slice(0, 5); // Top 5 likes
 
   const now = new Date();
   const filteredVideos = videos.filter(video => {
@@ -341,7 +371,22 @@ function Admin() {
   });
 
   const analyticsTotalViews = filteredVideos.reduce((acc, video) => acc + (video.views || 0), 0);
-  const analyticsMostViewed = [...filteredVideos].sort((a, b) => b.views - a.views);
+  const analyticsTotalLikes = filteredVideos.reduce((acc, video) => acc + (video.likes || 0), 0);
+  const analyticsMostViewed = [...filteredVideos].sort((a, b) => (b.views || 0) - (a.views || 0));
+  const analyticsMostLiked = [...filteredVideos].sort((a, b) => (b.likes || 0) - (a.likes || 0));
+
+  // Métricas por Programa
+  const programAnalytics = programs.map(prog => {
+    const progEpisodes = videos.filter(v => v.programId === prog.id);
+    const progViews = progEpisodes.reduce((acc, v) => acc + (v.views || 0), 0);
+    const progLikes = progEpisodes.reduce((acc, v) => acc + (v.likes || 0), 0);
+    return {
+      ...prog,
+      episodesCount: progEpisodes.length,
+      totalViews: progViews,
+      totalLikes: progLikes
+    };
+  }).sort((a, b) => b.totalViews - a.totalViews);
 
   // Detalles del programa seleccionado
   const activeProgramData = selectedProgramDetails ? programs.find(p => p.id === selectedProgramDetails) : null;
@@ -453,6 +498,11 @@ function Admin() {
           <button onClick={() => { setActiveTab('programs'); setSelectedProgramDetails(null); setIsSidebarOpen(false); }} className={`w-full flex items-center gap-3 px-4 py-3 rounded-lg font-bold transition-all ${activeTab === 'programs' ? 'bg-[#C13535] text-[#DDDADB]' : 'text-[#DDDADB]/60 hover:text-[#DDDADB] hover:bg-[#1c1b1c]'}`}>
             <span className="material-symbols-outlined" data-icon="podcasts">podcasts</span>
             <span className="text-sm">Programas</span>
+          </button>
+
+          <button onClick={() => { setActiveTab('banners'); setSelectedProgramDetails(null); setIsSidebarOpen(false); }} className={`w-full flex items-center gap-3 px-4 py-3 rounded-lg font-bold transition-all ${activeTab === 'banners' ? 'bg-[#C13535] text-[#DDDADB]' : 'text-[#DDDADB]/60 hover:text-[#DDDADB] hover:bg-[#1c1b1c]'}`}>
+            <span className="material-symbols-outlined" data-icon="ad">ad</span>
+            <span className="text-sm">Banners App</span>
           </button>
           
           <button onClick={() => { setActiveTab('sponsors'); setSelectedProgramDetails(null); setIsSidebarOpen(false); }} className={`w-full flex items-center gap-3 px-4 py-3 rounded-lg font-bold transition-all ${activeTab === 'sponsors' ? 'bg-[#C13535] text-[#DDDADB]' : 'text-[#DDDADB]/60 hover:text-[#DDDADB] hover:bg-[#1c1b1c]'}`}>
@@ -670,7 +720,7 @@ function Admin() {
                 <h3 className="text-2xl font-bold text-[#DDDADB] mb-2">Programas y Podcasts</h3>
                 <p className="text-[#DDDADB]/50 text-sm max-w-md">Administra los programas en los que se agrupan los videos.</p>
               </div>
-              <button onClick={() => { setEditingProgramId(null); setNewProgram({ name: '', category: '', thumbnail: '', type: 'Programa', description: '', schedule: '', host: '', coverImage: '' }); setIsProgramModalOpen(true); }} className="bg-[#F07D00] text-black px-5 py-2 rounded-full text-sm font-bold hover:opacity-90 active:scale-95 transition-all">
+              <button onClick={() => { setEditingProgramId(null); setNewProgram({ name: '', category: '', thumbnail: '', type: 'Programa', description: '', schedule: '', host: '', coverImage: '', hostImage: '' }); setIsProgramModalOpen(true); }} className="bg-[#F07D00] text-black px-5 py-2 rounded-full text-sm font-bold hover:opacity-90 active:scale-95 transition-all">
                 Añadir Programa
               </button>
             </div>
@@ -834,6 +884,45 @@ function Admin() {
             );
           })()}
 
+          {/* BANNERS TAB */}
+          {activeTab === 'banners' && (
+            <section className="bg-surface-container-low rounded-3xl p-4 sm:p-8 border border-outline-variant/10">
+              <div className="flex flex-col md:flex-row justify-between items-start md:items-end gap-6 mb-10">
+                <div>
+                  <h3 className="text-2xl font-bold text-[#DDDADB] mb-2">Banners Publicitarios (App Móvil)</h3>
+                  <p className="text-[#DDDADB]/50 text-sm max-w-md">Administra los banners promocionales y comerciales que se muestran en el carrusel de la app móvil.</p>
+                </div>
+                <button onClick={() => { resetBannerForm(); setIsBannerModalOpen(true); }} className="bg-[#F07D00] text-black px-5 py-2 rounded-full text-sm font-bold hover:opacity-90 active:scale-95 transition-all flex items-center gap-2">
+                  <span className="material-symbols-outlined text-sm">add_circle</span> Añadir Banner
+                </button>
+              </div>
+
+              <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
+                {banners.length === 0 ? (
+                  <div className="col-span-full p-8 text-center text-[#DDDADB]/40 text-sm">No hay banners creados aún.</div>
+                ) : (
+                  banners.map(banner => (
+                    <div key={banner.id} className="bg-surface-container-highest p-4 rounded-2xl border border-outline-variant/10 hover:border-[#F07D00]/50 transition-colors">
+                      <div className="relative aspect-[16/9] rounded-xl overflow-hidden mb-3 bg-black">
+                        <img src={banner.imageUrl || '/logo_blanco.png'} alt={banner.title || 'Banner'} className="w-full h-full object-cover" onError={(e) => { e.currentTarget.src = '/logo_blanco.png'; }} />
+                      </div>
+                      <div className="flex justify-between items-start">
+                        <div>
+                          <h4 className="text-[#DDDADB] font-bold text-base">{banner.title || 'Sin Título'}</h4>
+                          {banner.url && <a href={banner.url} target="_blank" rel="noreferrer" className="text-xs text-[#F07D00] hover:underline truncate block max-w-[200px]">{banner.url}</a>}
+                        </div>
+                        <div className="flex gap-2">
+                          <button onClick={() => openEditBannerModal(banner)} className="text-[#DDDADB]/40 hover:text-[#F07D00] transition-colors"><span className="material-symbols-outlined text-lg">edit</span></button>
+                          <button onClick={() => deleteBanner(banner.id)} className="text-[#DDDADB]/40 hover:text-[#C13535] transition-colors"><span className="material-symbols-outlined text-lg">delete</span></button>
+                        </div>
+                      </div>
+                    </div>
+                  ))
+                )}
+              </div>
+            </section>
+          )}
+
           {/* NEWSLETTER TAB */}
           {activeTab === 'newsletter' && (
             <section className="bg-surface-container-low rounded-3xl p-4 sm:p-8 border border-outline-variant/10">
@@ -991,13 +1080,17 @@ function Admin() {
                   <section className="flex flex-col gap-4">
                     <div className="flex items-center gap-4">
                       <span className="material-symbols-outlined text-[#F07D00]" style={{ fontVariationSettings: "'FILL' 1" }}>analytics</span>
-                      <h2 className="font-['Montserrat'] text-xl font-bold uppercase tracking-widest text-[#DDDADB]">Metrics Overview</h2>
+                      <h2 className="font-['Montserrat'] text-xl font-bold uppercase tracking-widest text-[#DDDADB]">Resumen de Métricas</h2>
                       <div className="flex-1 h-[1px] bg-outline-variant/20"></div>
                     </div>
                     <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
                       <div className="p-6 bg-surface-container-low rounded-xl flex flex-col gap-3 border-l-4 border-[#C13535] shadow-lg border border-outline-variant/10">
-                        <span className="font-['Inter'] text-[10px] font-bold uppercase tracking-widest text-[#DDDADB]/60" title="Contadas desde el reproductor interno de la aplicación">Reproducciones Nativas (App)</span>
+                        <span className="font-['Inter'] text-[10px] font-bold uppercase tracking-widest text-[#DDDADB]/60" title="Contadas desde el reproductor interno de la aplicación">Reproducciones Nativas</span>
                         <div className="border-b-2 border-outline-variant/20 min-h-[2.5rem] flex items-end pb-1 text-3xl font-black text-[#DDDADB]">{analyticsTotalViews}</div>
+                      </div>
+                      <div className="p-6 bg-surface-container-low rounded-xl flex flex-col gap-3 border-l-4 border-[#E11D48] shadow-lg border border-outline-variant/10">
+                        <span className="font-['Inter'] text-[10px] font-bold uppercase tracking-widest text-[#DDDADB]/60">Me Gusta (Likes)</span>
+                        <div className="border-b-2 border-outline-variant/20 min-h-[2.5rem] flex items-end pb-1 text-3xl font-black text-[#DDDADB]">{analyticsTotalLikes}</div>
                       </div>
                       <div className="p-6 bg-surface-container-low rounded-xl flex flex-col gap-3 border-l-4 border-[#F07D00] shadow-lg border border-outline-variant/10">
                         <span className="font-['Inter'] text-[10px] font-bold uppercase tracking-widest text-[#DDDADB]/60">Engagement (Suscritos)</span>
@@ -1007,39 +1100,77 @@ function Admin() {
                         <span className="font-['Inter'] text-[10px] font-bold uppercase tracking-widest text-[#DDDADB]/60">Total Episodios</span>
                         <div className="border-b-2 border-outline-variant/20 min-h-[2.5rem] flex items-end pb-1 text-3xl font-black text-[#DDDADB]">{filteredVideos.length}</div>
                       </div>
-                      <div className="p-6 bg-surface-container-low rounded-xl flex flex-col gap-3 border-l-4 border-zinc-600 shadow-lg border border-outline-variant/10">
-                        <span className="font-['Inter'] text-[10px] font-bold uppercase tracking-widest text-[#DDDADB]/60">Vistas Externas (YT/IG)</span>
-                        <div className="border-b-2 border-outline-variant/20 min-h-[2.5rem] flex items-end pb-2 text-sm font-bold text-[#DDDADB]/50 italic">No vinculado</div>
-                      </div>
                     </div>
                   </section>
 
-                  {/* Section 2: Performance Breakdown (Tabla de Top) */}
+                  {/* Section 2: Performance Breakdown (Tabla de Top Vistos) */}
                   <section className="flex flex-col gap-4">
                     <div className="flex items-center gap-4">
                       <span className="material-symbols-outlined text-[#F07D00]" style={{ fontVariationSettings: "'FILL' 1" }}>bar_chart</span>
-                      <h2 className="font-['Montserrat'] text-xl font-bold uppercase tracking-widest text-[#DDDADB]">Performance Breakdown</h2>
+                      <h2 className="font-['Montserrat'] text-xl font-bold uppercase tracking-widest text-[#DDDADB]">Episodios Más Vistos</h2>
                       <div className="flex-1 h-[1px] bg-outline-variant/20"></div>
                     </div>
                     <div className="overflow-hidden rounded-xl bg-surface-container-low border border-outline-variant/10 shadow-lg">
                       <table className="w-full text-left border-collapse">
                         <thead>
                           <tr className="bg-surface-container-highest border-b border-outline-variant/20">
-                            <th className="px-6 py-4 font-['Inter'] text-xs uppercase font-bold text-[#F07D00]">Programa/Segmento</th>
+                            <th className="px-6 py-4 font-['Inter'] text-xs uppercase font-bold text-[#F07D00]">Episodio</th>
                             <th className="px-6 py-4 font-['Inter'] text-xs uppercase font-bold text-[#F07D00]">Formato</th>
-                            <th className="px-6 py-4 font-['Inter'] text-xs uppercase font-bold text-[#F07D00]">Vistas Nativas</th>
+                            <th className="px-6 py-4 font-['Inter'] text-xs uppercase font-bold text-[#F07D00]">Reproducciones</th>
+                            <th className="px-6 py-4 font-['Inter'] text-xs uppercase font-bold text-[#F07D00]">Likes</th>
                             <th className="px-6 py-4 font-['Inter'] text-xs uppercase font-bold text-[#F07D00] text-right">Categoría</th>
                           </tr>
                         </thead>
                         <tbody className="divide-y divide-outline-variant/10">
-                            {analyticsMostViewed.slice(0, 4).map(v => (
+                            {analyticsMostViewed.slice(0, 5).map(v => (
                             <tr key={v.id} className="hover:bg-surface-container-highest transition-colors">
                               <td className="px-6 py-4 font-bold text-[#DDDADB] text-sm">{v.title}</td>
                               <td className="px-6 py-4 text-[#DDDADB]/60 text-sm">{v.isAudio ? 'Audio/Podcast' : 'Video/Reel'}</td>
-                              <td className="px-6 py-4 font-black text-[#C13535] text-sm">{v.views}</td>
+                              <td className="px-6 py-4 font-black text-[#C13535] text-sm">{v.views || 0}</td>
+                              <td className="px-6 py-4 font-black text-[#E11D48] text-sm">{v.likes || 0}</td>
                               <td className="px-6 py-4 text-[#DDDADB]/60 text-right uppercase text-[10px] tracking-widest">{v.category}</td>
                             </tr>
                           ))}
+                        </tbody>
+                      </table>
+                    </div>
+                  </section>
+
+                  {/* Section 3: Performance by Program (Rendimiento por Programa / Podcast) */}
+                  <section className="flex flex-col gap-4">
+                    <div className="flex items-center gap-4">
+                      <span className="material-symbols-outlined text-[#FFB91F]" style={{ fontVariationSettings: "'FILL' 1" }}>podcasts</span>
+                      <h2 className="font-['Montserrat'] text-xl font-bold uppercase tracking-widest text-[#DDDADB]">Rendimiento por Programa / Podcast</h2>
+                      <div className="flex-1 h-[1px] bg-outline-variant/20"></div>
+                    </div>
+                    <div className="overflow-hidden rounded-xl bg-surface-container-low border border-outline-variant/10 shadow-lg">
+                      <table className="w-full text-left border-collapse">
+                        <thead>
+                          <tr className="bg-surface-container-highest border-b border-outline-variant/20">
+                            <th className="px-6 py-4 font-['Inter'] text-xs uppercase font-bold text-[#FFB91F]">Programa</th>
+                            <th className="px-6 py-4 font-['Inter'] text-xs uppercase font-bold text-[#FFB91F]">Tipo</th>
+                            <th className="px-6 py-4 font-['Inter'] text-xs uppercase font-bold text-[#FFB91F]">Episodios</th>
+                            <th className="px-6 py-4 font-['Inter'] text-xs uppercase font-bold text-[#FFB91F]">Total Reproducciones</th>
+                            <th className="px-6 py-4 font-['Inter'] text-xs uppercase font-bold text-[#FFB91F] text-right">Total Likes</th>
+                          </tr>
+                        </thead>
+                        <tbody className="divide-y divide-outline-variant/10">
+                          {programAnalytics.length === 0 ? (
+                            <tr><td colSpan={5} className="px-6 py-8 text-center text-[#DDDADB]/40">No hay programas registrados.</td></tr>
+                          ) : (
+                            programAnalytics.map(prog => (
+                              <tr key={prog.id} className="hover:bg-surface-container-highest transition-colors">
+                                <td className="px-6 py-4 font-bold text-[#DDDADB] text-sm flex items-center gap-3">
+                                  <img src={prog.thumbnail || '/logo_blanco.png'} alt={prog.name} className="w-8 h-8 rounded-lg object-cover" onError={(e) => { e.currentTarget.src = '/logo_blanco.png'; }} />
+                                  <span>{prog.name}</span>
+                                </td>
+                                <td className="px-6 py-4 text-[#DDDADB]/60 text-sm">{prog.type}</td>
+                                <td className="px-6 py-4 text-[#DDDADB] font-medium text-sm">{prog.episodesCount}</td>
+                                <td className="px-6 py-4 font-black text-[#C13535] text-sm">{prog.totalViews}</td>
+                                <td className="px-6 py-4 font-black text-[#E11D48] text-sm text-right">{prog.totalLikes}</td>
+                              </tr>
+                            ))
+                          )}
                         </tbody>
                       </table>
                     </div>
@@ -1456,6 +1587,16 @@ function Admin() {
                 </div>
               </div>
               <div className="md:col-span-2">
+                <label className="block text-xs font-bold text-[#DDDADB]/60 mb-1">Foto del Locutor / Presentador (Opcional - En la app móvil se muestra en Talento)</label>
+                <div className="flex gap-2">
+                  <input value={newProgram.hostImage || ''} onChange={e => setNewProgram({...newProgram, hostImage: e.target.value})} className="flex-1 bg-surface-container-lowest border-none rounded-lg p-3 text-sm text-[#DDDADB]" type="text" placeholder="URL o subir foto del locutor 👉 (Si se omite, usa la miniatura)" />
+                  <label className="bg-surface-container-high hover:bg-surface-bright cursor-pointer px-4 py-3 rounded-lg flex items-center justify-center transition-colors shadow-sm">
+                    <span className="material-symbols-outlined text-[#DDDADB]">upload_file</span>
+                    <input type="file" accept="image/*" className="hidden" onChange={(e) => handleFileUpload(e, 'program_host')} />
+                  </label>
+                </div>
+              </div>
+              <div className="md:col-span-2">
                 <label className="block text-xs font-bold text-[#DDDADB]/60 mb-1">Sinopsis / Descripción</label>
                 <textarea required value={newProgram.description || ''} onChange={e => setNewProgram({...newProgram, description: e.target.value})} className="w-full bg-surface-container-lowest border-none rounded-lg p-3 text-sm text-[#DDDADB]" placeholder="Sinopsis del programa..." rows={3}></textarea>
               </div>
@@ -1513,6 +1654,39 @@ function Admin() {
                 <button type="submit" disabled={isUploading} className="bg-[#F07D00] text-black px-8 py-2.5 rounded-lg text-sm font-bold shadow-lg hover:scale-105 active:scale-95 transition-all">
                   {isUploading ? 'Subiendo...' : 'Guardar Cuña'}
                 </button>
+              </div>
+            </form>
+          </div>
+        </div>
+      )}
+
+      {/* Modal para Añadir/Editar Banner */}
+      {isBannerModalOpen && (
+        <div className="fixed inset-0 z-[100] bg-black/80 backdrop-blur-sm flex items-center justify-center p-4">
+          <div className="bg-surface-container rounded-2xl p-4 md:p-8 w-full max-w-2xl border border-outline-variant/20 shadow-2xl max-h-[90vh] overflow-y-auto">
+            <h3 className="text-xl font-bold text-[#DDDADB] mb-6">{editingBannerId ? 'Editar Banner' : 'Añadir Banner Publicitario'}</h3>
+            <form onSubmit={handleBannerSubmit} className="space-y-5">
+              <div>
+                <label className="block text-xs font-bold text-[#DDDADB]/60 mb-1">Título o Nombre del Banner (Opcional)</label>
+                <input value={newBanner.title} onChange={e => setNewBanner({...newBanner, title: e.target.value})} className="w-full bg-surface-container-lowest border-none rounded-lg p-3 text-sm text-[#DDDADB]" type="text" placeholder="Ej: Promo Concierto 2026" />
+              </div>
+              <div>
+                <label className="block text-xs font-bold text-[#DDDADB]/60 mb-1">Imagen del Banner (Formato horizontal recomendado)</label>
+                <div className="flex gap-2">
+                  <input required value={newBanner.imageUrl} onChange={e => setNewBanner({...newBanner, imageUrl: e.target.value})} className="flex-1 bg-surface-container-lowest border-none rounded-lg p-3 text-sm text-[#DDDADB]" type="text" placeholder="URL o sube una imagen 👉" />
+                  <label className="bg-surface-container-high hover:bg-surface-bright cursor-pointer px-4 py-3 rounded-lg flex items-center justify-center transition-colors shadow-sm">
+                    <span className="material-symbols-outlined text-[#DDDADB]">upload_file</span>
+                    <input type="file" accept="image/*" className="hidden" onChange={(e) => handleFileUpload(e, 'banner_image')} />
+                  </label>
+                </div>
+              </div>
+              <div>
+                <label className="block text-xs font-bold text-[#DDDADB]/60 mb-1">Enlace / URL de Destino al hacer clic (Opcional)</label>
+                <input value={newBanner.url} onChange={e => setNewBanner({...newBanner, url: e.target.value})} className="w-full bg-surface-container-lowest border-none rounded-lg p-3 text-sm text-[#DDDADB]" type="url" placeholder="https://instagram.com/... o https://tuweb.com" />
+              </div>
+              <div className="flex justify-end gap-3 mt-8 pt-4 border-t border-outline-variant/20">
+                <button type="button" onClick={() => setIsBannerModalOpen(false)} className="px-6 py-2.5 rounded-lg text-sm font-bold text-[#DDDADB]/60 hover:text-[#DDDADB] hover:bg-surface-container-highest transition-all">Cancelar</button>
+                <button type="submit" className="bg-[#F07D00] text-black px-8 py-2.5 rounded-lg text-sm font-bold shadow-lg hover:scale-105 active:scale-95 transition-all">Guardar Banner</button>
               </div>
             </form>
           </div>
@@ -1649,8 +1823,11 @@ function Admin() {
           setIsSidebarOpen(false); // Cierra menú si está abierto
           if (activeTab === 'programs') {
             setEditingProgramId(null);
-            setNewProgram({ name: '', category: '', thumbnail: '', type: 'Programa', description: '', schedule: '', host: '', coverImage: '' });
+            setNewProgram({ name: '', category: '', thumbnail: '', type: 'Programa', description: '', schedule: '', host: '', coverImage: '', hostImage: '' });
             setIsProgramModalOpen(true);
+          } else if (activeTab === 'banners') {
+            resetBannerForm();
+            setIsBannerModalOpen(true);
           } else if (activeTab === 'sponsors') {
             setNewSponsorForm({ name: '', url: '', type: 'audio', assignedEntities: [] });
             setEditingSponsorId(null);

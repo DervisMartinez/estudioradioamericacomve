@@ -299,6 +299,20 @@
     "configFileName": "next.config.mjs",
     "turbopack": {
       "root": "C:\\Users\\Dervis Martinez\\Documents\\EDV\\RA\\estudioradioamerica\\frontend"
+    },
+    "_originalRewrites": {
+      "beforeFiles": [],
+      "afterFiles": [
+        {
+          "source": "/api/:path*",
+          "destination": "http://localhost:3005/api/:path*"
+        },
+        {
+          "source": "/uploads/:path*",
+          "destination": "http://localhost:3005/uploads/:path*"
+        }
+      ],
+      "fallback": []
     }
   },
   "appDir": "C:\\Users\\Dervis Martinez\\Documents\\EDV\\RA\\estudioradioamerica\\frontend",

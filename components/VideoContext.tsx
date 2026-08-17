@@ -16,6 +16,7 @@ export interface Video {
   url: string;
   duration: string;
   views: number;
+  likes?: number;
   createdAt: string;
   programId?: string;
   releaseDate?: string;
@@ -33,6 +34,15 @@ export interface Program {
   schedule?: string;
   host?: string;
   coverImage?: string;
+  hostImage?: string;
+}
+
+export interface Banner {
+  id: string;
+  title?: string;
+  imageUrl: string;
+  url?: string;
+  createdAt?: string;
 }
 
 export interface Sponsor {
@@ -65,6 +75,10 @@ interface VideoContextType {
   addProgram: (program: Program) => void;
   updateProgram: (program: Program) => void;
   deleteProgram: (id: string) => void;
+  banners: Banner[];
+  addBanner: (banner: Banner) => Promise<boolean>;
+  updateBanner: (banner: Banner) => Promise<boolean>;
+  deleteBanner: (id: string) => void;
   sponsors: Sponsor[];
   addSponsor: (sponsor: Sponsor) => Promise<boolean>;
   updateSponsor: (sponsor: Sponsor) => Promise<boolean>;
@@ -72,6 +86,7 @@ interface VideoContextType {
   userProfile: UserProfile;
   updateUserProfile: (profile: UserProfile) => void;
   incrementView: (id: string) => void;
+  incrementLike: (id: string) => void;
   viewHistory: Video[];
   addToHistory: (id: string) => void;
   isLoading: boolean;
@@ -87,6 +102,10 @@ export const VideoContext = createContext<VideoContextType>({
   addProgram: () => {},
   updateProgram: () => {},
   deleteProgram: () => {},
+  banners: [],
+  addBanner: async () => false,
+  updateBanner: async () => false,
+  deleteBanner: () => {},
   sponsors: [],
   addSponsor: async () => false,
   updateSponsor: async () => false,
@@ -94,6 +113,7 @@ export const VideoContext = createContext<VideoContextType>({
   userProfile: { firstName: '', lastName: '', avatar: '', bio: '', twitter: '', instagram: '', youtube: '', facebook: '' },
   updateUserProfile: () => {},
   incrementView: () => {},
+  incrementLike: () => {},
   viewHistory: [],
   addToHistory: () => {},
   isLoading: true,
@@ -142,6 +162,7 @@ export const API_URL = process.env.NEXT_PUBLIC_API_URL || (process.env.NODE_ENV 
 export const VideoProvider = ({ children }: { children: ReactNode }) => {
   const [videos, setVideos] = useState<Video[]>([]);
   const [programs, setPrograms] = useState<Program[]>([]);
+  const [banners, setBanners] = useState<Banner[]>([]);
   const [sponsors, setSponsors] = useState<Sponsor[]>([]);
   const [userProfile, setUserProfile] = useState<UserProfile>({
     firstName: 'Admin', lastName: 'User', avatar: '', bio: '', twitter: '', instagram: '', youtube: '', facebook: ''
@@ -165,16 +186,18 @@ export const VideoProvider = ({ children }: { children: ReactNode }) => {
       setIsLoading(true);
       try {
         const adminToken = (typeof window !== 'undefined' ? localStorage.getItem('admin_token') : null) || '';
-        const [videosRes, programsRes, sponsorsRes, profileRes] = await Promise.allSettled([
+        const [videosRes, programsRes, sponsorsRes, bannersRes, profileRes] = await Promise.allSettled([
           apiService.fetchVideos(),
           apiService.fetchPrograms(),
           apiService.fetchSponsors(),
+          apiService.fetchBanners(),
           adminToken ? apiService.fetchProfile(adminToken) : Promise.resolve(null)
         ]);
 
         if (videosRes.status === 'fulfilled') setVideos(videosRes.value);
         if (programsRes.status === 'fulfilled') setPrograms(programsRes.value);
         if (sponsorsRes.status === 'fulfilled') setSponsors(sponsorsRes.value);
+        if (bannersRes.status === 'fulfilled') setBanners(bannersRes.value);
         if (profileRes.status === 'fulfilled' && profileRes.value?.firstName) {
           setUserProfile(profileRes.value);
         }
@@ -245,6 +268,43 @@ export const VideoProvider = ({ children }: { children: ReactNode }) => {
     }
   };
 
+  const addBanner = async (banner: Banner) => {
+    try {
+      const success = await apiService.createBanner(banner);
+      if (handleAlerts(success, 'Banner publicitario creado con éxito')) {
+        setBanners([banner, ...banners]);
+        return true;
+      }
+      return false;
+    } catch (e) {
+      handleAlerts(false, '');
+      return false;
+    }
+  };
+
+  const updateBanner = async (banner: Banner) => {
+    try {
+      const success = await apiService.updateBanner(banner);
+      if (handleAlerts(success, 'Banner publicitario actualizado')) {
+        setBanners(banners.map(b => b.id === banner.id ? banner : b));
+        return true;
+      }
+      return false;
+    } catch (e) {
+      handleAlerts(false, '');
+      return false;
+    }
+  };
+
+  const deleteBanner = async (id: string) => {
+    if (window.confirm("¿Estás seguro de que deseas eliminar este banner publicitario?")) {
+      try {
+        const success = await apiService.deleteBanner(id);
+        if (handleAlerts(success, 'Banner eliminado')) setBanners(banners.filter(b => b.id !== id));
+      } catch (e) {}
+    }
+  };
+
   const addSponsor = async (sponsor: Sponsor) => {
     try {
       const success = await apiService.createSponsor(sponsor);
@@ -291,7 +351,17 @@ export const VideoProvider = ({ children }: { children: ReactNode }) => {
   };
 
   const incrementView = async (id: string) => {
-    try { apiService.incrementView(id); } catch (e) {}
+    try { 
+      apiService.incrementView(id);
+      setVideos(prev => prev.map(v => v.id === id ? { ...v, views: (v.views || 0) + 1 } : v));
+    } catch (e) {}
+  };
+
+  const incrementLike = async (id: string) => {
+    try { 
+      apiService.incrementLike(id);
+      setVideos(prev => prev.map(v => v.id === id ? { ...v, likes: (v.likes || 0) + 1 } : v));
+    } catch (e) {}
   };
 
   const addToHistory = (id: string) => {
@@ -306,7 +376,7 @@ export const VideoProvider = ({ children }: { children: ReactNode }) => {
   const viewHistory = viewHistoryIds.map(id => videos.find(v => v.id === id)).filter(v => v !== undefined) as Video[];
 
   return (
-    <VideoContext.Provider value={{ videos, addVideo, updateVideo, deleteVideo, programs, addProgram, updateProgram, deleteProgram, sponsors, addSponsor, updateSponsor, deleteSponsor, userProfile, updateUserProfile, incrementView, viewHistory, addToHistory, isLoading, setIsLoading }}>
+    <VideoContext.Provider value={{ videos, addVideo, updateVideo, deleteVideo, programs, addProgram, updateProgram, deleteProgram, banners, addBanner, updateBanner, deleteBanner, sponsors, addSponsor, updateSponsor, deleteSponsor, userProfile, updateUserProfile, incrementView, incrementLike, viewHistory, addToHistory, isLoading, setIsLoading }}>
       {isLoading ? <RadioAmericaLoader fullScreen={true} /> : children}
     </VideoContext.Provider>
   );
