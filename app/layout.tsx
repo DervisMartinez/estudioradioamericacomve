@@ -4,8 +4,54 @@ import './index.css';
 import './App.css';
 
 export const metadata: Metadata = {
-  title: 'Estudio Radio América',
-  description: 'Descubre las historias que nunca se contaron detrás de los micrófonos de Estudio Radio América. Podcasts, entrevistas y más.',
+  metadataBase: new URL('https://estudio.radioamerica.com.ve'),
+  title: {
+    default: 'Estudio Radio América | Transmisión en Vivo, Programas y Podcasts',
+    template: '%s | Estudio Radio América'
+  },
+  description: 'Descubre las historias que nunca se contaron detrás de los micrófonos de Estudio Radio América 90.9 FM. Podcasts, entrevistas exclusivas, programas en vivo y archivos históricos.',
+  keywords: ['Radio América', 'Estudio Radio América', 'Radio en Vivo', 'Valencia Venezuela', 'Podcasts Venezuela', 'Noticias', 'Entrevistas', '90.9 FM'],
+  authors: [{ name: 'Radio América' }],
+  creator: 'Radio América',
+  publisher: 'Radio América',
+  formatDetection: {
+    email: false,
+    address: false,
+    telephone: false,
+  },
+  openGraph: {
+    title: 'Estudio Radio América | Transmisión en Vivo, Programas y Podcasts',
+    description: 'Descubre las historias que nunca se contaron detrás de los micrófonos de Estudio Radio América 90.9 FM. Podcasts, entrevistas exclusivas y programas en vivo.',
+    url: 'https://estudio.radioamerica.com.ve',
+    siteName: 'Estudio Radio América',
+    images: [
+      {
+        url: '/logo_colors.png',
+        width: 800,
+        height: 600,
+        alt: 'Estudio Radio América',
+      },
+    ],
+    locale: 'es_VE',
+    type: 'website',
+  },
+  twitter: {
+    card: 'summary_large_image',
+    title: 'Estudio Radio América',
+    description: 'Podcasts, entrevistas exclusivas, programas en vivo y archivos históricos de Radio América.',
+    images: ['/logo_colors.png'],
+  },
+  robots: {
+    index: true,
+    follow: true,
+    googleBot: {
+      index: true,
+      follow: true,
+      'max-video-preview': -1,
+      'max-image-preview': 'large',
+      'max-snippet': -1,
+    },
+  },
 };
 
 export default function RootLayout({

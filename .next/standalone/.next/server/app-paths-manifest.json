@@ -1,10 +1,11 @@
 {
+  "/sitemap.xml/route": "app/sitemap.xml/route.js",
   "/_not-found/page": "app/_not-found/page.js",
-  "/admin/page": "app/admin/page.js",
   "/login/page": "app/login/page.js",
+  "/admin/page": "app/admin/page.js",
+  "/contacto/page": "app/contacto/page.js",
   "/page": "app/page.js",
   "/programas/page": "app/programas/page.js",
-  "/contacto/page": "app/contacto/page.js",
   "/watch/[id]/page": "app/watch/[id]/page.js",
   "/program/[id]/page": "app/program/[id]/page.js"
 }
