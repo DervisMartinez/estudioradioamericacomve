@@ -3,7 +3,7 @@ import { useContext, useState } from 'react';
 import { useRouter } from "next/navigation";
 import { VideoContext } from "@/components/VideoContext";
 import SearchResults from "@/components/SearchResults";
-;
+
 
 export default function AllPrograms() {
   const { programs } = useContext(VideoContext);

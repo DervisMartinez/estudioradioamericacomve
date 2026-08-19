@@ -3,6 +3,9 @@ import { VideoProvider } from '@/components/VideoContext';
 import './index.css';
 import './App.css';
 
+// Forzar renderizado dinámico en todas las rutas (evita que Next.js
+// cachee estáticamente el HTML sin la cortina de "Próximamente")
+export const dynamic = 'force-dynamic';
 export const metadata: Metadata = {
   metadataBase: new URL('https://estudio.radioamerica.com.ve'),
   title: {

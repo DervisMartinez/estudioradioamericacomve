@@ -388,7 +388,7 @@ export const VideoProvider = ({ children }: { children: ReactNode }) => {
       if (token || auth) {
         setIsAdminUnlocked(true);
       }
-    } catch {
+    } catch (_e) {
       // localStorage bloqueado (modo incógnito estricto) → mantener cortina
     }
   }, []);
