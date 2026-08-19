@@ -5,6 +5,7 @@ import type { FormEvent, ChangeEvent } from 'react';
 import { VideoContext, API_URL } from '@/components/VideoContext';
 import SearchResults from '@/components/SearchResults';
 import PressNoteButton from '@/components/PressNoteButton';
+import ComingSoonOverlay from '@/components/ComingSoonOverlay';
 import Hls from 'hls.js';
 
 // COMPONENTE EXTERNO PARA REPRODUCTOR HLS Y MP4 (SHORTS)
@@ -54,6 +55,17 @@ function App() {
   const [isSearchOpen, setIsSearchOpen] = useState(false);
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
   const [isHistoryOpen, setIsHistoryOpen] = useState(false);
+
+  // Admin Auth State (WordPress-like preview mode)
+  const [isAdminAuthenticated, setIsAdminAuthenticated] = useState<boolean | null>(null);
+
+  useEffect(() => {
+    if (typeof window !== 'undefined') {
+      const token = localStorage.getItem('admin_token');
+      const isAuth = localStorage.getItem('admin_auth') === 'true';
+      setIsAdminAuthenticated(Boolean(token || isAuth));
+    }
+  }, []);
 
   // Radio Player Logic
   const audioRef = useRef<HTMLAudioElement>(null);
@@ -211,7 +223,25 @@ function App() {
 
   return (
     <>
+      {/* Cortina Próximamente si NO está logueado como administrador */}
+      {isAdminAuthenticated === false && (
+        <ComingSoonOverlay />
+      )}
 
+      {/* Barra de Notificación / Modo Vista Previa Administrador (Estilo WordPress) */}
+      {isAdminAuthenticated === true && (
+        <div className="bg-[#C13535] text-white text-xs font-bold py-1.5 px-4 flex justify-between items-center z-[100] relative">
+          <div className="flex items-center gap-2">
+            <span className="material-symbols-outlined text-sm">visibility</span>
+            <span>Estudio Radio América — Modo Vista Previa (Acceso de Administrador Activo)</span>
+          </div>
+          <div className="flex items-center gap-4">
+            <a href="/admin" className="hover:underline flex items-center gap-1">
+              <span className="material-symbols-outlined text-sm">dashboard</span> Ir al Panel Admin
+            </a>
+          </div>
+        </div>
+      )}
 
       <audio ref={audioRef} id="radio" src="https://transmision.radioamerica.com.ve:8087/RA909FM" className="hidden" />
 
