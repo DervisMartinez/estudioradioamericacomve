@@ -1,0 +1,11 @@
+{
+  "/_not-found/page": "/_not-found",
+  "/sitemap.xml/route": "/sitemap.xml",
+  "/admin/page": "/admin",
+  "/contacto/page": "/contacto",
+  "/page": "/",
+  "/programas/page": "/programas",
+  "/login/page": "/login",
+  "/program/[id]/page": "/program/[id]",
+  "/watch/[id]/page": "/watch/[id]"
+}
