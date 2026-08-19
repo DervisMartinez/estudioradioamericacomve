@@ -2,7 +2,6 @@
 import { createContext, useState, useEffect } from 'react';
 import type { ReactNode } from 'react';
 import { apiService } from './services/api';
-import ComingSoonOverlay from './ComingSoonOverlay';
 
 export interface Video {
   id: string;
@@ -376,32 +375,9 @@ export const VideoProvider = ({ children }: { children: ReactNode }) => {
 
   const viewHistory = viewHistoryIds.map(id => videos.find(v => v.id === id)).filter(v => v !== undefined) as Video[];
 
-  // ─── "Próximamente" Overlay (NIVEL SUPERIOR, imposible de bypass) ───
-  // Si no se encuentra admin_token ni admin_auth en localStorage,
-  // mostramos la cortina ANTES de renderizar cualquier contenido del sitio.
-  const [isAdminUnlocked, setIsAdminUnlocked] = useState(false);
-
-  useEffect(() => {
-    try {
-      const token = localStorage.getItem('admin_token');
-      const auth = localStorage.getItem('admin_auth') === 'true';
-      if (token || auth) {
-        setIsAdminUnlocked(true);
-      }
-    } catch (_e) {
-      // localStorage bloqueado (modo incógnito estricto) → mantener cortina
-    }
-  }, []);
-
   return (
     <VideoContext.Provider value={{ videos, addVideo, updateVideo, deleteVideo, programs, addProgram, updateProgram, deleteProgram, banners, addBanner, updateBanner, deleteBanner, sponsors, addSponsor, updateSponsor, deleteSponsor, userProfile, updateUserProfile, incrementView, incrementLike, viewHistory, addToHistory, isLoading, setIsLoading }}>
-      {!isAdminUnlocked ? (
-        <ComingSoonOverlay />
-      ) : isLoading ? (
-        <RadioAmericaLoader fullScreen={true} />
-      ) : (
-        children
-      )}
+      {isLoading ? <RadioAmericaLoader fullScreen={true} /> : children}
     </VideoContext.Provider>
   );
 };
